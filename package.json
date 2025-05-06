@@ -12,6 +12,7 @@
     "tauri": "pnpm --filter native tauri"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.5",
     "prettier": "^3.5.3",
     "turbo": "^2.5.2",
     "typescript": "5.8.2"
