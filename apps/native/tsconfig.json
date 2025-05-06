@@ -1,6 +1,11 @@
 {
   "extends": "@repo/typescript-config/base.json",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@repo/ui/*": ["../../packages/ui/src/*"]
+    },
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
