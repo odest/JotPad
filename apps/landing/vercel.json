@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/app",
+      "destination": "https://jot-pad-web.vercel.app/app"
+    },
+    {
+      "source": "/app/:path*",
+      "destination": "https://jot-pad-web.vercel.app/app/:path*"
+    }
+  ]
+}
