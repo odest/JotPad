@@ -1,7 +1,8 @@
 import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import { Button } from "@repo/ui/components/button";
+import "@repo/ui/globals.css";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -41,7 +42,7 @@ function App() {
           onChange={(e) => setName(e.currentTarget.value)}
           placeholder="Enter a name..."
         />
-        <button type="submit">Greet</button>
+        <Button type="submit">Greet</Button>
       </form>
       <p>{greetMsg}</p>
     </main>
