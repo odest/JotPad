@@ -10,8 +10,10 @@ const config = {
     "app/**/*.{ts,tsx}",
     "components/**/*.{ts,tsx}",
     "views/**/*.{ts,tsx}",
+    "pages/**/*.{ts,tsx}",
     "../../packages/ui/src/components/**/*.{ts,tsx}",
     "../../packages/ui/src/views/**/*.{ts,tsx}",
+    "../../packages/ui/src/pages/**/*.{ts,tsx}",
   ],
   theme: {
     extend: {

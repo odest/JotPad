@@ -12,8 +12,9 @@
     "noEmit": true,
     "useDefineForClassFields": true,
     "allowImportingTsExtensions": true,
-    "target": "ES2020"
+    "target": "ES2020",
+    "types": ["react", "react-dom", "react-router-dom"]
   },
-  "include": ["src"],
+  "include": ["src", "../../packages/ui/src/pages"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

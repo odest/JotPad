@@ -1,7 +1,7 @@
 [package]
-name = "native"
+name = "JotPad"
 version = "0.1.0"
-description = "A Tauri App"
+description = "JotPad is an open-source, cross-platform note-taking app that lets you message yourself, just like a chat."
 authors = ["you"]
 edition = "2021"
 
