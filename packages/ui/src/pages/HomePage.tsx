@@ -15,18 +15,34 @@ export function HomePage() {
   const [open, setOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState("");
   const [notes, setNotes] = useState<Note[]>([]);
+  const [editId, setEditId] = useState<string | null>(null);
 
   const handleCreateNote = () => {
     if (noteTitle.trim()) {
-      const newNote: Note = {
-        id: Date.now().toString(),
-        title: noteTitle,
-        createdAt: new Date(),
-      };
-      setNotes([newNote, ...notes]);
+      if (editId) {
+        setNotes(notes => notes.map(note => note.id === editId ? { ...note, title: noteTitle } : note));
+        setEditId(null);
+      } else {
+        const newNote: Note = {
+          id: Date.now().toString(),
+          title: noteTitle,
+          createdAt: new Date(),
+        };
+        setNotes([newNote, ...notes]);
+      }
       setNoteTitle("");
       setOpen(false);
     }
+  };
+
+  const handleDeleteNote = (id: string) => {
+    setNotes(notes => notes.filter(note => note.id !== id));
+  };
+
+  const handleEditNote = (note: Note) => {
+    setEditId(note.id);
+    setNoteTitle(note.title);
+    setOpen(true);
   };
 
   return (
@@ -69,6 +85,8 @@ export function HomePage() {
                 title={note.title}
                 content={note.content}
                 createdAt={note.createdAt}
+                onEdit={() => handleEditNote(note)}
+                onDelete={() => handleDeleteNote(note.id)}
               />
             ))}
             <NoteDialog

@@ -16,9 +16,11 @@ interface NoteCardProps {
   title: string;
   content?: string;
   createdAt: Date;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export function NoteCard({ title, content, createdAt }: NoteCardProps) {
+export function NoteCard({ title, content, createdAt, onEdit, onDelete }: NoteCardProps) {
   const handleClick = () => {
     console.log({ title, content, createdAt });
   };
@@ -31,13 +33,13 @@ export function NoteCard({ title, content, createdAt }: NoteCardProps) {
         <h3 className="text-lg font-semibold truncate overflow-hidden whitespace-nowrap max-w-[70%]">{title}</h3>
         <DropdownMenu>
           <DropdownMenuTrigger>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={e => e.stopPropagation()}>
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+            <DropdownMenuItem onClick={e => { e.stopPropagation(); onEdit && onEdit(); }}>Edit</DropdownMenuItem>
+            <DropdownMenuItem className="text-red-600" onClick={e => { e.stopPropagation(); onDelete && onDelete(); }}>Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </CardHeader>
