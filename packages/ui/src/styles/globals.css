@@ -82,3 +82,32 @@
 .delay-400 { animation-delay: 0.4s; }
 .delay-500 { animation-delay: 0.5s; }
 .delay-700 { animation-delay: 0.7s; }
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f1f5f9;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  background: #f1f5f9;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #a3a3a3;
+}
+
+.dark .custom-scrollbar {
+  scrollbar-color: #444 #18181b;
+}
+.dark .custom-scrollbar::-webkit-scrollbar {
+  background: #18181b;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #444;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}

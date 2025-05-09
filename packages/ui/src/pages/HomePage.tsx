@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Plus, NotebookText } from "lucide-react";
-import { Button } from "@repo/ui/components/button";
-import { NoteCard } from "@repo/ui/components/NoteCard";
-import { NoteDialog } from "@repo/ui/components/NoteDialog";
+import { Notebook } from "lucide-react";
+import { NoteContent } from "@repo/ui/views/NoteContent";
+import { Sidebar } from "@repo/ui/views/Sidebar";
 
 interface Note {
   id: string;
@@ -16,11 +15,21 @@ export function HomePage() {
   const [noteTitle, setNoteTitle] = useState("");
   const [notes, setNotes] = useState<Note[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSidebar, setShowSidebar] = useState(true);
 
   const handleCreateNote = () => {
     if (noteTitle.trim()) {
       if (editId) {
-        setNotes(notes => notes.map(note => note.id === editId ? { ...note, title: noteTitle } : note));
+        setNotes(notes =>
+          notes.map(note =>
+            note.id === editId ? { ...note, title: noteTitle } : note
+          )
+        );
+        if (selectedNote && selectedNote.id === editId) {
+          setSelectedNote({ ...selectedNote, title: noteTitle });
+        }
         setEditId(null);
       } else {
         const newNote: Note = {
@@ -29,6 +38,8 @@ export function HomePage() {
           createdAt: new Date(),
         };
         setNotes([newNote, ...notes]);
+        setSelectedNote(newNote);
+        setShowSidebar(false);
       }
       setNoteTitle("");
       setOpen(false);
@@ -37,6 +48,10 @@ export function HomePage() {
 
   const handleDeleteNote = (id: string) => {
     setNotes(notes => notes.filter(note => note.id !== id));
+    if (selectedNote?.id === id) {
+      setSelectedNote(null);
+      setShowSidebar(true);
+    }
   };
 
   const handleEditNote = (note: Note) => {
@@ -45,68 +60,54 @@ export function HomePage() {
     setOpen(true);
   };
 
+  const handleNoteSelect = (note: Note) => {
+    setSelectedNote(note);
+    setShowSidebar(false);
+  };
+
+  const filteredNotes = notes.filter(note =>
+    note.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const SIDEBAR_HEADER_HEIGHT = 72;
+
   return (
-    <div className="min-h-screen w-full flex flex-col">
-      <div className="fixed top-0 left-0 right-0 backdrop-blur-md z-10 border-b">
-        <div className="w-full py-6 flex flex-col items-center">
-          <h1 className="text-4xl font-bold">Notes</h1>
-        </div>
-      </div>
-      <div className="flex-1 flex flex-col items-center pt-32">
-        {notes.length === 0 ? (
-          <div className="flex flex-1 flex-col justify-center items-center space-y-8 w-full">
-            <div className="flex flex-col items-center gap-8">
-              <div className="w-32 h-32 rounded-full bg-transparent border-2 border-gray-200 flex items-center justify-center">
-                <NotebookText className="w-20 h-20 text-gray-100" />
-              </div>
-              <div>
-                <p className="text-2xl font-semibold">You haven't created any notes yet.</p>
-                <p className="text-xl font-semibold italic mt-5 text-center">Start creating now!</p>
-              </div>
-            </div>
-            <NoteDialog
-              open={open}
-              onOpenChange={setOpen}
-              noteTitle={noteTitle}
-              setNoteTitle={setNoteTitle}
-              onCreate={handleCreateNote}
-              trigger={
-                <Button size="lg">
-                  <Plus className="w-5 h-5" /> Create Note
-                </Button>
-              }
-            />
-          </div>
+    <div className="min-h-screen w-full flex">
+      <Sidebar
+        notes={notes}
+        filteredNotes={filteredNotes}
+        selectedNote={selectedNote}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        handleNoteSelect={handleNoteSelect}
+        handleEditNote={handleEditNote}
+        handleDeleteNote={handleDeleteNote}
+        open={open}
+        setOpen={setOpen}
+        noteTitle={noteTitle}
+        setNoteTitle={setNoteTitle}
+        handleCreateNote={handleCreateNote}
+        showSidebar={showSidebar}
+      />
+      <div className={`flex-1 flex flex-col h-screen ${!showSidebar ? 'block' : 'hidden md:block'} bg-background`}>
+        {selectedNote ? (
+          <NoteContent
+            selectedNote={selectedNote}
+            handleEditNote={handleEditNote}
+            handleDeleteNote={handleDeleteNote}
+            setShowSidebar={setShowSidebar}
+            SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}
+          />
         ) : (
-          <div className="flex flex-col items-center space-y-4 w-full max-w-xl px-4 pb-20">
-            {notes.map((note) => (
-              <NoteCard
-                key={note.id}
-                title={note.title}
-                content={note.content}
-                createdAt={note.createdAt}
-                onEdit={() => handleEditNote(note)}
-                onDelete={() => handleDeleteNote(note.id)}
-              />
-            ))}
-            <NoteDialog
-              open={open}
-              onOpenChange={setOpen}
-              noteTitle={noteTitle}
-              setNoteTitle={setNoteTitle}
-              onCreate={handleCreateNote}
-              trigger={
-                <Button
-                  size="icon"
-                  className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow"
-                >
-                  <Plus className="h-10 w-10" />
-                </Button>
-              }
-            />
+          <div className="flex-1 flex justify-center items-center min-h-screen">
+            <div className="flex flex-col items-center justify-center">
+              <Notebook className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-medium text-center">Select a note</h3>
+              <p className="text-gray-500 mt-2 text-center">Choose a note from the sidebar or create a new one</p>
+            </div>
           </div>
         )}
       </div>
     </div>
   );
-} 
+}
