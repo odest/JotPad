@@ -3,6 +3,7 @@ import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { NoteDialog } from "@repo/ui/components/NoteDialog";
 import { useTheme } from "@repo/ui/components/theme-provider";
+import { NoteList } from "@repo/ui/components/NoteList";
 
 interface Note {
   id: string;
@@ -53,11 +54,11 @@ export function Sidebar({
   };
 
   return (
-    <div className={`w-full md:w-96 lg:w-[400px] border-r flex flex-col h-screen ${
+    <div className={`w-full md:w-96 lg:w-[400px] border-r flex flex-col h-[calc(100vh-2.5rem)] border ml-5 mt-5 mb-5 rounded-xl ${
       showSidebar ? 'block' : 'hidden md:block'
-    } relative bg-background`}>
+    } relative bg-background mr-5 md:mr-0`}>
       <div
-        className="border-b bg-background z-10 flex items-center justify-between px-4"
+        className="border-b bg-transparent z-10 flex items-center justify-between px-4"
         style={{ height: SIDEBAR_HEADER_HEIGHT, minHeight: SIDEBAR_HEADER_HEIGHT }}
       >
         <h1 className="text-2xl font-bold">Notes</h1>
@@ -91,38 +92,10 @@ export function Sidebar({
             </div>
           </div>
         ) : (
-          <div>
-            {filteredNotes.map((note, idx) => (
-              <div
-                key={note.id}
-                className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors border-t last:border-b ${
-                  selectedNote?.id === note.id ? "bg-slate-200 dark:bg-slate-700" : "hover:bg-slate-100 dark:hover:bg-slate-800"
-                }`}
-                onClick={() => handleNoteSelect(note)}
-              >
-                <div className="w-10 h-10 rounded-full flex items-center justify-center border border-black dark:border-white font-bold text-lg">
-                  {note.title.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-base truncate">{note.title}</span>
-                    <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
-                      {note.content ?
-                        new Date(note.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) :
-                        new Date(note.createdAt).toLocaleDateString()
-                      }
-                    </span>
-                  </div>
-                  <span className="text-sm text-gray-400 truncate">
-                    {note.content ? note.content : 'No note content yet...'}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <NoteList filteredNotes={filteredNotes} selectedNote={selectedNote} handleNoteSelect={handleNoteSelect} />
         )}
       </div>
-      <div className="absolute bottom-0 left-0 w-full p-4 bg-background border-t z-20" style={{ height: SIDEBAR_BUTTON_HEIGHT, minHeight: SIDEBAR_BUTTON_HEIGHT }}>
+      <div className="absolute bottom-0 left-0 w-full p-4 bg-transparent backdrop-blur-md border-t rounded-b-xl z-20" style={{ height: SIDEBAR_BUTTON_HEIGHT, minHeight: SIDEBAR_BUTTON_HEIGHT }}>
         <NoteDialog
           open={open}
           onOpenChange={setOpen}

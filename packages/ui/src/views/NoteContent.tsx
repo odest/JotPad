@@ -75,9 +75,9 @@ export function NoteContent({
           </div>
         </div>
       </div>
-      <div className="flex-1 p-6 overflow-y-auto">
-        <div className="max-w-3xl mx-auto">
-          <div className="prose max-w-none">
+      <div className="flex-1 p-6 overflow-y-auto flex items-center justify-center">
+        <div className="max-w-3xl mx-auto w-full">
+          <div className="prose max-w-none text-center">
             {selectedNote.content || "No note content yet..."}
           </div>
         </div>

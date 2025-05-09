@@ -89,7 +89,7 @@ export function HomePage() {
         handleCreateNote={handleCreateNote}
         showSidebar={showSidebar}
       />
-      <div className={`flex-1 flex flex-col h-screen ${!showSidebar ? 'block' : 'hidden md:block'} bg-background`}>
+      <div className={`flex-1 flex flex-col h-[calc(100vh-2.5rem)] border m-5 rounded-xl ${!showSidebar ? 'block' : 'hidden md:block'} bg-background`}>
         {selectedNote ? (
           <NoteContent
             selectedNote={selectedNote}
@@ -99,7 +99,7 @@ export function HomePage() {
             SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}
           />
         ) : (
-          <div className="flex-1 flex justify-center items-center min-h-screen">
+          <div className="flex-1 flex justify-center items-center h-[calc(100vh-2.5rem)]">
             <div className="flex flex-col items-center justify-center">
               <Notebook className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-medium text-center">Select a note</h3>
