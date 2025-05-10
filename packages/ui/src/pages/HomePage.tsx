@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Notebook } from "lucide-react";
 import { NoteContent } from "@repo/ui/views/NoteContent";
 import { Sidebar } from "@repo/ui/views/Sidebar";
+import { invoke } from '@tauri-apps/api/core';
 
 interface Note {
   id: string;
@@ -19,7 +20,7 @@ export function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSidebar, setShowSidebar] = useState(true);
 
-  const handleCreateNote = () => {
+  const handleCreateNote = async () => {
     if (noteTitle.trim()) {
       if (editId) {
         setNotes(notes =>
@@ -30,6 +31,7 @@ export function HomePage() {
         if (selectedNote && selectedNote.id === editId) {
           setSelectedNote({ ...selectedNote, title: noteTitle });
         }
+        await invoke('log_message', { level: 'info', message: `Note edited: ${noteTitle}` });
         setEditId(null);
       } else {
         const newNote: Note = {
@@ -40,17 +42,22 @@ export function HomePage() {
         setNotes([newNote, ...notes]);
         setSelectedNote(newNote);
         setShowSidebar(false);
+        await invoke('log_message', { level: 'info', message: `New note created: ${noteTitle}` });
       }
       setNoteTitle("");
       setOpen(false);
     }
   };
 
-  const handleDeleteNote = (id: string) => {
+  const handleDeleteNote = async (id: string) => {
+    const noteToDelete = notes.find(note => note.id === id);
     setNotes(notes => notes.filter(note => note.id !== id));
     if (selectedNote?.id === id) {
       setSelectedNote(null);
       setShowSidebar(true);
+    }
+    if (noteToDelete) {
+      await invoke('log_message', { level: 'info', message: `Note deleted: ${noteToDelete.title}` });
     }
   };
 
@@ -58,6 +65,7 @@ export function HomePage() {
     setEditId(note.id);
     setNoteTitle(note.title);
     setOpen(true);
+    invoke('log_message', { level: 'info', message: `Editing note: ${note.title}` });
   };
 
   const handleNoteSelect = (note: Note) => {
