@@ -8,6 +8,7 @@ import {
 import { Input } from "@repo/ui/components/input";
 import { ChevronLeft, MoreVertical, Pencil, Send, Trash } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { invoke } from '@tauri-apps/api/core';
 
 interface Note {
   id: string;
@@ -60,7 +61,7 @@ export function NoteContent({
     }
   }, [noteEntries]);
 
-  const handleAddEntry = () => {
+  const handleAddEntry = async () => {
     if (newEntryText.trim()) {
       const newEntry: NoteEntry = {
         id: crypto.randomUUID(),
@@ -69,6 +70,7 @@ export function NoteContent({
       };
 
       setNoteEntries(prevEntries => [...prevEntries, newEntry]);
+      await invoke('log_message', { level: 'info', message: `Added new entry to note: ${selectedNote.title}` });
       setNewEntryText("");
     }
   };
