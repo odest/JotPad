@@ -9,19 +9,7 @@ import { Input } from "@repo/ui/components/input";
 import { ChevronLeft, MoreVertical, Pencil, Send, Trash } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { invoke } from '@tauri-apps/api/core';
-
-interface Note {
-  id: string;
-  title: string;
-  content?: string;
-  createdAt: Date;
-}
-
-interface NoteEntry {
-  id: string;
-  text: string;
-  timestamp: Date;
-}
+import { db, Note, NoteEntry } from "@repo/ui/lib/database";
 
 interface NoteContentProps {
   selectedNote: Note;
@@ -45,33 +33,43 @@ export function NoteContent({
   const NOTE_CONTENT_INPUT_HEIGHT = 72;
 
   useEffect(() => {
-    setNoteEntries([]);
+    loadNoteEntries();
     setNewEntryText("");
   }, [selectedNote.id]);
 
+  const loadNoteEntries = async () => {
+    try {
+      const entries = await db.getNoteEntries(selectedNote.id);
+      setNoteEntries(entries);
+    } catch (error) {
+      console.error('Failed to load note entries:', error);
+      await invoke('log_message', { level: 'error', message: `Failed to load note entries: ${error}` });
+    }
+  };
+
   const scrollToBottom = () => {
     setTimeout(() => {
-        entriesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      entriesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 0);
   };
 
   useEffect(() => {
     if (noteEntries.length > 0) {
-        scrollToBottom();
+      scrollToBottom();
     }
   }, [noteEntries]);
 
   const handleAddEntry = async () => {
     if (newEntryText.trim()) {
-      const newEntry: NoteEntry = {
-        id: crypto.randomUUID(),
-        text: newEntryText.trim(),
-        timestamp: new Date(),
-      };
-
-      setNoteEntries(prevEntries => [...prevEntries, newEntry]);
-      await invoke('log_message', { level: 'info', message: `Added new entry to note: ${selectedNote.title}` });
-      setNewEntryText("");
+      try {
+        const newEntry = await db.addNoteEntry(selectedNote.id, newEntryText.trim());
+        setNoteEntries(prevEntries => [...prevEntries, newEntry]);
+        await invoke('log_message', { level: 'info', message: `Added new entry to note: ${selectedNote.title}` });
+        setNewEntryText("");
+      } catch (error) {
+        console.error('Failed to add note entry:', error);
+        await invoke('log_message', { level: 'error', message: `Failed to add note entry: ${error}` });
+      }
     }
   };
 
@@ -102,7 +100,7 @@ export function NoteContent({
               <div className="min-w-0">
                 <h2 className="text-lg font-bold truncate" title={selectedNote.title}>{selectedNote.title}</h2>
                 <div className="flex items-center text-xs italic text-muted-foreground">
-                  Created: {new Date(selectedNote.createdAt).toLocaleDateString()}
+                  Created: {new Date(selectedNote.created_at).toLocaleDateString()}
                 </div>
               </div>
             </div>
@@ -129,13 +127,13 @@ export function NoteContent({
           </div>
         </div>
       </div>
-      <div ref={entriesContainerRef} className="flex-1 p-4 md:p-6 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-4" ref={entriesContainerRef}>
         <div className="max-w-3xl mx-auto w-full space-y-4">
           {selectedNote.content && noteEntries.length === 0 && (
-             <div className="prose dark:prose-invert max-w-none text-muted-foreground p-4 rounded-md border bg-muted/50">
-                <p className="text-sm italic">Initial note content:</p>
-                {selectedNote.content}
-             </div>
+            <div className="prose dark:prose-invert max-w-none text-muted-foreground p-4 rounded-md border bg-muted/50">
+              <p className="text-sm italic">Initial note content:</p>
+              {selectedNote.content}
+            </div>
           )}
           {noteEntries.map((entry) => (
             <div key={entry.id} className="flex flex-col items-start">
@@ -155,7 +153,7 @@ export function NoteContent({
           <div ref={entriesEndRef} style={{ height: '1px' }} />
         </div>
       </div>
-      <div className="border-t p-4 bg-transparent shrink-0" style={{ height: NOTE_CONTENT_INPUT_HEIGHT, minHeight: NOTE_CONTENT_INPUT_HEIGHT }}>
+      <div className="border-t p-4 shrink-0" style={{ height: NOTE_CONTENT_INPUT_HEIGHT, minHeight: NOTE_CONTENT_INPUT_HEIGHT }}>
         <div className="max-w-3xl mx-auto flex items-center gap-2">
           <Input
             type="text"

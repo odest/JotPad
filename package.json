@@ -21,6 +21,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@tauri-apps/plugin-log": "~2.4.0"
+    "@tauri-apps/plugin-log": "~2.4.0",
+    "@tauri-apps/plugin-sql": "~2.2.0"
   }
 }
