@@ -1,15 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Notebook } from "lucide-react";
 import { NoteContent } from "@repo/ui/views/NoteContent";
 import { Sidebar } from "@repo/ui/views/Sidebar";
 import { invoke } from '@tauri-apps/api/core';
-
-interface Note {
-  id: string;
-  title: string;
-  content?: string;
-  createdAt: Date;
-}
+import { db, Note } from "@repo/ui/lib/database";
 
 export function HomePage() {
   const [open, setOpen] = useState(false);
@@ -20,44 +14,68 @@ export function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSidebar, setShowSidebar] = useState(true);
 
+  useEffect(() => {
+    loadNotes();
+  }, []);
+
+  const loadNotes = async () => {
+    try {
+      const loadedNotes = await db.getNotes();
+      const notesWithLastEntry = await Promise.all(
+        loadedNotes.map(async (note) => {
+          const lastEntryText = await db.getLastEntryText(note.id);
+          return { ...note, lastEntryText };
+        })
+      );
+      setNotes(notesWithLastEntry);
+    } catch (error) {
+      console.error('Failed to load notes:', error);
+      await invoke('log_message', { level: 'error', message: `Failed to load notes: ${error}` });
+    }
+  };
+
   const handleCreateNote = async () => {
     if (noteTitle.trim()) {
-      if (editId) {
-        setNotes(notes =>
-          notes.map(note =>
-            note.id === editId ? { ...note, title: noteTitle } : note
-          )
-        );
-        if (selectedNote && selectedNote.id === editId) {
-          setSelectedNote({ ...selectedNote, title: noteTitle });
+      try {
+        if (editId) {
+          await db.updateNote(editId, noteTitle);
+          await loadNotes();
+          if (selectedNote && selectedNote.id === editId) {
+            setSelectedNote({ ...selectedNote, title: noteTitle });
+          }
+          await invoke('log_message', { level: 'info', message: `Note edited: ${noteTitle}` });
+          setEditId(null);
+        } else {
+          const newNote = await db.createNote(noteTitle);
+          setNotes([newNote, ...notes]);
+          setSelectedNote(newNote);
+          setShowSidebar(false);
+          await invoke('log_message', { level: 'info', message: `New note created: ${noteTitle}` });
         }
-        await invoke('log_message', { level: 'info', message: `Note edited: ${noteTitle}` });
-        setEditId(null);
-      } else {
-        const newNote: Note = {
-          id: Date.now().toString(),
-          title: noteTitle,
-          createdAt: new Date(),
-        };
-        setNotes([newNote, ...notes]);
-        setSelectedNote(newNote);
-        setShowSidebar(false);
-        await invoke('log_message', { level: 'info', message: `New note created: ${noteTitle}` });
+        setNoteTitle("");
+        setOpen(false);
+      } catch (error) {
+        console.error('Failed to save note:', error);
+        await invoke('log_message', { level: 'error', message: `Failed to save note: ${error}` });
       }
-      setNoteTitle("");
-      setOpen(false);
     }
   };
 
   const handleDeleteNote = async (id: string) => {
-    const noteToDelete = notes.find(note => note.id === id);
-    setNotes(notes => notes.filter(note => note.id !== id));
-    if (selectedNote?.id === id) {
-      setSelectedNote(null);
-      setShowSidebar(true);
-    }
-    if (noteToDelete) {
-      await invoke('log_message', { level: 'info', message: `Note deleted: ${noteToDelete.title}` });
+    try {
+      const noteToDelete = notes.find(note => note.id === id);
+      await db.deleteNote(id);
+      await loadNotes();
+      if (selectedNote?.id === id) {
+        setSelectedNote(null);
+        setShowSidebar(true);
+      }
+      if (noteToDelete) {
+        await invoke('log_message', { level: 'info', message: `Note deleted: ${noteToDelete.title}` });
+      }
+    } catch (error) {
+      console.error('Failed to delete note:', error);
+      await invoke('log_message', { level: 'error', message: `Failed to delete note: ${error}` });
     }
   };
 
@@ -82,13 +100,30 @@ export function HomePage() {
   return (
     <div className="min-h-screen w-full flex">
       <Sidebar
-        notes={notes}
-        filteredNotes={filteredNotes}
-        selectedNote={selectedNote}
+        notes={notes.map(note => ({
+          ...note,
+          createdAt: new Date(note.created_at)
+        }))}
+        filteredNotes={filteredNotes.map(note => ({
+          ...note, 
+          createdAt: new Date(note.created_at)
+        }))}
+        selectedNote={selectedNote ? {
+          ...selectedNote,
+          createdAt: new Date(selectedNote.created_at)
+        } : null}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        handleNoteSelect={handleNoteSelect}
-        handleEditNote={handleEditNote}
+        handleNoteSelect={(note) => handleNoteSelect({
+          ...note,
+          created_at: note.createdAt.toISOString(),
+          updated_at: note.createdAt.toISOString()
+        })}
+        handleEditNote={(note) => handleEditNote({
+          ...note,
+          created_at: note.createdAt.toISOString(),
+          updated_at: note.createdAt.toISOString()
+        })}
         handleDeleteNote={handleDeleteNote}
         open={open}
         setOpen={setOpen}
@@ -105,6 +140,7 @@ export function HomePage() {
             handleDeleteNote={handleDeleteNote}
             setShowSidebar={setShowSidebar}
             SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}
+            onEntryAdded={loadNotes}
           />
         ) : (
           <div className="flex-1 flex justify-center items-center h-[calc(100vh-2.5rem)]">

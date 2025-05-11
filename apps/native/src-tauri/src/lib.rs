@@ -1,13 +1,41 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 mod utils;
 use tauri_plugin_log::{Target, TargetKind};
+use tauri_plugin_sql::{Migration, MigrationKind};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     log::info!("Starting JotPad application...");
+    let migrations = vec![
+        Migration {
+            version: 1,
+            description: "create notes and note_entries tables",
+            sql: "CREATE TABLE IF NOT EXISTS notes (
+                id TEXT PRIMARY KEY,
+                title TEXT NOT NULL,
+                content TEXT,
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            
+            CREATE TABLE IF NOT EXISTS note_entries (
+                id TEXT PRIMARY KEY,
+                note_id TEXT NOT NULL,
+                text TEXT NOT NULL,
+                timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
+            );",
+            kind: MigrationKind::Up,
+        }
+    ];
     
     tauri::Builder::default()
         .plugin(tauri_plugin_log::Builder::new().build())
+        .plugin(
+            tauri_plugin_sql::Builder::default()
+                .add_migrations("sqlite:notes.db", migrations)
+                .build()
+        )
         .plugin(
             tauri_plugin_log::Builder::new()
                 .targets([
