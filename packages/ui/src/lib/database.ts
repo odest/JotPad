@@ -25,6 +25,11 @@ class DatabaseService {
     return this.db;
   }
 
+  async execute(query: string, params: any[] = []): Promise<void> {
+    const db = await this.initialize();
+    await db.execute(query, params);
+  }
+
   async getNotes(): Promise<Note[]> {
     const db = await this.initialize();
     const result = await db.select<Note[]>('SELECT * FROM notes ORDER BY created_at DESC');

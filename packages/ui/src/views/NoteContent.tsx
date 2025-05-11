@@ -5,6 +5,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@repo/ui/components/dropdown-menu";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@repo/ui/components/context-menu";
 import { Input } from "@repo/ui/components/input";
 import { ChevronLeft, MoreVertical, Pencil, Send, Trash } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
@@ -30,6 +36,8 @@ export function NoteContent({
 }: NoteContentProps) {
   const [noteEntries, setNoteEntries] = useState<NoteEntry[]>([]);
   const [newEntryText, setNewEntryText] = useState("");
+  const [editingEntry, setEditingEntry] = useState<NoteEntry | null>(null);
+  const [editText, setEditText] = useState("");
   const entriesEndRef = useRef<null | HTMLDivElement>(null);
   const entriesContainerRef = useRef<null | HTMLDivElement>(null);
   const NOTE_CONTENT_INPUT_HEIGHT = 72;
@@ -82,6 +90,56 @@ export function NoteContent({
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       handleAddEntry();
+    }
+  };
+
+  const handleEditEntry = async (entry: NoteEntry) => {
+    setEditingEntry(entry);
+    setEditText(entry.text);
+  };
+
+  const handleSaveEdit = async () => {
+    if (editingEntry && editText.trim()) {
+      try {
+        await db.execute(
+          'UPDATE note_entries SET text = ? WHERE id = ?',
+          [editText.trim(), editingEntry.id]
+        );
+        setNoteEntries(prevEntries =>
+          prevEntries.map(entry =>
+            entry.id === editingEntry.id ? { ...entry, text: editText.trim() } : entry
+          )
+        );
+        setEditingEntry(null);
+        setEditText("");
+        await invoke('log_message', { level: 'info', message: `Entry edited in note: ${selectedNote.title}` });
+        
+        // Check if this was the last entry and update sidebar preview
+        const isLastEntry = noteEntries[noteEntries.length - 1]?.id === editingEntry.id;
+        if (isLastEntry && typeof onEntryAdded === 'function') {
+          onEntryAdded();
+        }
+      } catch (error) {
+        console.error('Failed to edit entry:', error);
+        await invoke('log_message', { level: 'error', message: `Failed to edit entry: ${error}` });
+      }
+    }
+  };
+
+  const handleDeleteEntry = async (entryId: string) => {
+    try {
+      await db.deleteNoteEntry(entryId);
+      setNoteEntries(prevEntries => prevEntries.filter(entry => entry.id !== entryId));
+      await invoke('log_message', { level: 'info', message: `Entry deleted from note: ${selectedNote.title}` });
+      
+      // Check if this was the last entry and update sidebar preview
+      const isLastEntry = noteEntries[noteEntries.length - 1]?.id === entryId;
+      if (isLastEntry && typeof onEntryAdded === 'function') {
+        onEntryAdded();
+      }
+    } catch (error) {
+      console.error('Failed to delete entry:', error);
+      await invoke('log_message', { level: 'error', message: `Failed to delete entry: ${error}` });
     }
   };
 
@@ -141,13 +199,68 @@ export function NoteContent({
             </div>
           )}
           {noteEntries.map((entry) => (
-            <div key={entry.id} className="flex flex-col items-start">
-              <div className="bg-muted p-3 rounded-lg shadow-sm max-w-[80%]">
-                <p className="text-sm whitespace-pre-wrap break-words">{entry.text}</p>
-                <p className="text-xs text-muted-foreground mt-1 text-right">
-                  {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
+            <div key={entry.id} className="flex flex-col items-start w-full">
+              <ContextMenu>
+                {editingEntry?.id === entry.id ? (
+                  <ContextMenuTrigger className="block w-auto max-w-full md:max-w-[70%] min-w-[180px] self-start">
+                    <div className="bg-muted p-4 rounded-2xl shadow-sm w-auto max-w-[95%] md:max-w-[70%] min-w-[180px] block self-start mb-2 md:mb-3 transition-all">
+                      <Input
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSaveEdit();
+                          }
+                        }}
+                        className="mb-4 text-lg border-2 border-primary bg-background/80 shadow focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+                        style={{ minWidth: '140px' }}
+                        autoFocus
+                      />
+                      <div className="flex justify-end gap-2 w-full">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditingEntry(null);
+                            setEditText("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button size="sm" onClick={handleSaveEdit}>
+                          Save
+                        </Button>
+                      </div>
+                    </div>
+                  </ContextMenuTrigger>
+                ) : (
+                  <ContextMenuTrigger className="block w-auto max-w-full md:max-w-[60%] min-w-[120px] self-start">
+                    <div
+                      className="bg-muted p-3 rounded-xl shadow-sm w-auto max-w-[90%] md:max-w-[60%] min-w-[120px] block self-start mb-2 md:mb-3 transition-all"
+                      style={{ wordBreak: 'break-word' }}
+                    >
+                      <p className="text-[15px] md:text-sm whitespace-pre-wrap leading-relaxed">{entry.text}</p>
+                      <p className="text-xs text-muted-foreground mt-2 text-right">
+                        {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </ContextMenuTrigger>
+                )}
+                <ContextMenuContent>
+                  <ContextMenuItem onClick={() => handleEditEntry(entry)}>
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Edit
+                  </ContextMenuItem>
+                  <ContextMenuItem
+                    className="text-red-500 focus:text-red-500 focus:bg-red-500/10"
+                    onClick={() => handleDeleteEntry(entry.id)}
+                  >
+                    <Trash className="w-4 h-4 mr-2" />
+                    Delete
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
             </div>
           ))}
           {noteEntries.length === 0 && !selectedNote.content && (
