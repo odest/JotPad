@@ -21,7 +21,13 @@ export function HomePage() {
   const loadNotes = async () => {
     try {
       const loadedNotes = await db.getNotes();
-      setNotes(loadedNotes);
+      const notesWithLastEntry = await Promise.all(
+        loadedNotes.map(async (note) => {
+          const lastEntryText = await db.getLastEntryText(note.id);
+          return { ...note, lastEntryText };
+        })
+      );
+      setNotes(notesWithLastEntry);
     } catch (error) {
       console.error('Failed to load notes:', error);
       await invoke('log_message', { level: 'error', message: `Failed to load notes: ${error}` });
@@ -134,6 +140,7 @@ export function HomePage() {
             handleDeleteNote={handleDeleteNote}
             setShowSidebar={setShowSidebar}
             SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}
+            onEntryAdded={loadNotes}
           />
         ) : (
           <div className="flex-1 flex justify-center items-center h-[calc(100vh-2.5rem)]">

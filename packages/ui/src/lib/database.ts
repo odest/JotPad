@@ -96,6 +96,30 @@ class DatabaseService {
     const db = await this.initialize();
     await db.execute('DELETE FROM note_entries WHERE id = ?', [id]);
   }
+
+  async getLastEntryText(noteId: string): Promise<string | null> {
+    const db = await this.initialize();
+    const result = await db.select<NoteEntry[]>(
+      'SELECT text FROM note_entries WHERE note_id = ? ORDER BY timestamp DESC LIMIT 1',
+      [noteId]
+    );
+    return result[0]?.text ?? null;
+  }
+
+  async addNoteEntryAndUpdateContent(noteId: string, text: string): Promise<NoteEntry> {
+    const entry = await this.addNoteEntry(noteId, text);
+    await this.updateNoteContent(noteId, text);
+    return entry;
+  }
+
+  async updateNoteContent(noteId: string, content: string): Promise<void> {
+    const db = await this.initialize();
+    const now = new Date().toISOString();
+    await db.execute(
+      'UPDATE notes SET content = ?, updated_at = ? WHERE id = ?',
+      [content, now, noteId]
+    );
+  }
 }
 
 export const db = new DatabaseService(); 

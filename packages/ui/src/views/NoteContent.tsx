@@ -17,6 +17,7 @@ interface NoteContentProps {
   handleDeleteNote: (id: string) => void;
   setShowSidebar: (v: boolean) => void;
   SIDEBAR_HEADER_HEIGHT: number;
+  onEntryAdded?: () => void;
 }
 
 export function NoteContent({
@@ -24,7 +25,8 @@ export function NoteContent({
   handleEditNote,
   handleDeleteNote,
   setShowSidebar,
-  SIDEBAR_HEADER_HEIGHT
+  SIDEBAR_HEADER_HEIGHT,
+  onEntryAdded
 }: NoteContentProps) {
   const [noteEntries, setNoteEntries] = useState<NoteEntry[]>([]);
   const [newEntryText, setNewEntryText] = useState("");
@@ -63,9 +65,12 @@ export function NoteContent({
     if (newEntryText.trim()) {
       try {
         const newEntry = await db.addNoteEntry(selectedNote.id, newEntryText.trim());
+        const preview = newEntryText.trim().length > 40 ? newEntryText.trim().slice(0, 40) + "..." : newEntryText.trim();
+        await db.updateNoteContent(selectedNote.id, preview);
         setNoteEntries(prevEntries => [...prevEntries, newEntry]);
         await invoke('log_message', { level: 'info', message: `Added new entry to note: ${selectedNote.title}` });
         setNewEntryText("");
+        if (typeof onEntryAdded === 'function') onEntryAdded();
       } catch (error) {
         console.error('Failed to add note entry:', error);
         await invoke('log_message', { level: 'error', message: `Failed to add note entry: ${error}` });
@@ -127,7 +132,7 @@ export function NoteContent({
           </div>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4" ref={entriesContainerRef}>
+      <div className="flex-1 overflow-y-auto p-4 custom-scrollbar" ref={entriesContainerRef}>
         <div className="max-w-3xl mx-auto w-full space-y-4">
           {selectedNote.content && noteEntries.length === 0 && (
             <div className="prose dark:prose-invert max-w-none text-muted-foreground p-4 rounded-md border bg-muted/50">

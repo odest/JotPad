@@ -10,6 +10,7 @@ interface Note {
   title: string;
   content?: string;
   createdAt: Date;
+  lastEntryText?: string;
 }
 
 interface SidebarProps {
@@ -36,6 +37,8 @@ export function Sidebar({
   searchQuery,
   setSearchQuery,
   handleNoteSelect,
+  handleEditNote,
+  handleDeleteNote,
   open,
   setOpen,
   noteTitle,
