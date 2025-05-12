@@ -22,7 +22,7 @@ export const NoteList: React.FC<NoteListProps> = ({ filteredNotes, selectedNote,
         return (
           <div
             key={note.id}
-            className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors border-t last:border-b ${
+            className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors border-t first:border-t-0 last:border-b ${
               selectedNote?.id === note.id ? "bg-[#f4f4f5] dark:bg-[#27272a]" : "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a]"
             }`}
             onClick={() => handleNoteSelect(note)}
