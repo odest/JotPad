@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Notebook } from "lucide-react";
 import { NoteContent } from "@repo/ui/views/NoteContent";
 import { Sidebar } from "@repo/ui/views/Sidebar";
 import { invoke } from '@tauri-apps/api/core';
@@ -100,10 +99,6 @@ export function HomePage() {
   return (
     <div className="min-h-screen w-full flex">
       <Sidebar
-        notes={notes.map(note => ({
-          ...note,
-          createdAt: new Date(note.created_at)
-        }))}
         filteredNotes={filteredNotes.map(note => ({
           ...note, 
           createdAt: new Date(note.created_at)
@@ -119,12 +114,6 @@ export function HomePage() {
           created_at: note.createdAt.toISOString(),
           updated_at: note.createdAt.toISOString()
         })}
-        handleEditNote={(note) => handleEditNote({
-          ...note,
-          created_at: note.createdAt.toISOString(),
-          updated_at: note.createdAt.toISOString()
-        })}
-        handleDeleteNote={handleDeleteNote}
         open={open}
         setOpen={setOpen}
         noteTitle={noteTitle}
@@ -132,26 +121,15 @@ export function HomePage() {
         handleCreateNote={handleCreateNote}
         showSidebar={showSidebar}
       />
-      <div className={`flex-1 flex flex-col h-[calc(100vh-2.5rem)] border m-5 rounded-xl ${!showSidebar ? 'block' : 'hidden md:block'} bg-background`}>
-        {selectedNote ? (
-          <NoteContent
-            selectedNote={selectedNote}
-            handleEditNote={handleEditNote}
-            handleDeleteNote={handleDeleteNote}
-            setShowSidebar={setShowSidebar}
-            SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}
-            onEntryAdded={loadNotes}
-          />
-        ) : (
-          <div className="flex-1 flex justify-center items-center h-[calc(100vh-2.5rem)]">
-            <div className="flex flex-col items-center justify-center">
-              <Notebook className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-medium text-center">Select a note</h3>
-              <p className="text-gray-500 mt-2 text-center">Choose a note from the sidebar or create a new one</p>
-            </div>
-          </div>
-        )}
-      </div>
+      <NoteContent
+        selectedNote={selectedNote}
+        handleEditNote={handleEditNote}
+        handleDeleteNote={handleDeleteNote}
+        setShowSidebar={setShowSidebar}
+        SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}
+        onEntryAdded={loadNotes}
+        showSidebar={showSidebar}
+      />
     </div>
   );
 }
