@@ -31,7 +31,7 @@ export function NoteDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-w-[calc(100vw-2rem)] rounded-lg sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create New Note</DialogTitle>
           <DialogDescription>
@@ -54,7 +54,7 @@ export function NoteDialog({
             />
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
@@ -69,4 +69,4 @@ export function NoteDialog({
       </DialogContent>
     </Dialog>
   );
-} 
+}
