@@ -9,6 +9,8 @@ JotPad
 
 JotPad is an open-source, cross-platform note-taking application that allows you to take notes in a unique way – by sending messages to yourself, just like a chat app.
 
+</div>
+
 <br>
 
 ## Features
