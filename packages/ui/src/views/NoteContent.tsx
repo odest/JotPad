@@ -13,7 +13,7 @@ import {
 } from "@repo/ui/components/context-menu";
 import { Input } from "@repo/ui/components/input";
 import { ChevronLeft, MoreVertical, Pencil, Send, Trash, Notebook } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { invoke } from '@tauri-apps/api/core';
 import { db, Note, NoteEntry } from "@repo/ui/lib/database";
 
@@ -26,6 +26,14 @@ interface NoteContentProps {
   onEntryAdded?: () => void;
   showSidebar: boolean;
 }
+
+const formatDateForSeparator = (timestamp: string | number | Date): string => {
+  const date = new Date(timestamp);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}.${month}.${year}`;
+};
 
 export function NoteContent({
   selectedNote,
@@ -60,24 +68,15 @@ export function NoteContent({
         entriesContainerRef.current.style.height = `${Math.max(availableHeight, 0)}px`;
       }
     };
-
     updateHeight();
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateHeight();
-    });
-
-    if (inputContainerRef.current) {
-      resizeObserver.observe(inputContainerRef.current);
-    }
-
+    const resizeObserver = new ResizeObserver(updateHeight);
+    if (inputContainerRef.current) resizeObserver.observe(inputContainerRef.current);
     window.addEventListener('resize', updateHeight);
-
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener('resize', updateHeight);
     };
-  }, [SIDEBAR_HEADER_HEIGHT]);
+  }, [SIDEBAR_HEADER_HEIGHT, NOTE_CONTENT_INPUT_HEIGHT]);
 
   const loadNoteEntries = async () => {
     if (!selectedNote) return;
@@ -112,10 +111,7 @@ export function NoteContent({
       await invoke('log_message', { level: 'info', message: `Added new entry to note: ${selectedNote.title}` });
       setNewEntryText("");
       if (typeof onEntryAdded === 'function') onEntryAdded();
-
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 0);
+      setTimeout(() => inputRef.current?.focus(), 0);
     } catch (error) {
       console.error('Failed to add note entry:', error);
       await invoke('log_message', { level: 'error', message: `Failed to add note entry: ${error}` });
@@ -149,11 +145,8 @@ export function NoteContent({
       setEditingEntry(null);
       setEditText("");
       await invoke('log_message', { level: 'info', message: `Entry edited in note: ${selectedNote.title}` });
-
       const isLastEntry = noteEntries[noteEntries.length - 1]?.id === editingEntry.id;
-      if (isLastEntry && typeof onEntryAdded === 'function') {
-        onEntryAdded();
-      }
+      if (isLastEntry && typeof onEntryAdded === 'function') onEntryAdded();
     } catch (error) {
       console.error('Failed to edit entry:', error);
       await invoke('log_message', { level: 'error', message: `Failed to edit entry: ${error}` });
@@ -166,11 +159,8 @@ export function NoteContent({
       await db.deleteNoteEntry(entryId);
       setNoteEntries(prevEntries => prevEntries.filter(entry => entry.id !== entryId));
       await invoke('log_message', { level: 'info', message: `Entry deleted from note: ${selectedNote.title}` });
-
       const isLastEntry = noteEntries[noteEntries.length - 1]?.id === entryId;
-      if (isLastEntry && typeof onEntryAdded === 'function') {
-        onEntryAdded();
-      }
+      if (isLastEntry && typeof onEntryAdded === 'function') onEntryAdded();
     } catch (error) {
       console.error('Failed to delete entry:', error);
       await invoke('log_message', { level: 'error', message: `Failed to delete entry: ${error}` });
@@ -239,83 +229,111 @@ export function NoteContent({
             </div>
           </div>
         </div>
-        <div 
-          className="flex-1 overflow-y-auto p-4 custom-scrollbar" 
+        <div
+          className="flex-1 overflow-y-auto p-4 custom-scrollbar"
           ref={entriesContainerRef}
           style={{ height: `calc(100vh - ${SIDEBAR_HEADER_HEIGHT}px - ${NOTE_CONTENT_INPUT_HEIGHT}px)` }}
         >
-          <div className="max-w-3xl mx-auto w-full space-y-4">
+          <div className="max-w-3xl mx-auto w-full">
             {selectedNote.content && noteEntries.length === 0 && (
-              <div className="prose dark:prose-invert max-w-none text-muted-foreground p-4 rounded-md border bg-muted/50">
+              <div className="prose dark:prose-invert max-w-none text-muted-foreground p-4 rounded-md border bg-muted/50 mb-4">
                 <p className="text-sm italic">Initial note content:</p>
                 {selectedNote.content}
               </div>
             )}
-            {noteEntries.map((entry) => (
-              <div key={entry.id} className="flex flex-col items-start w-full">
-                <ContextMenu>
-                  {editingEntry?.id === entry.id ? (
-                    <ContextMenuTrigger className="block w-auto max-w-full md:max-w-[70%] min-w-[180px] self-start">
-                      <div className="bg-muted p-4 rounded-2xl shadow-sm w-auto max-w-[95%] md:max-w-[70%] min-w-[180px] block self-start mb-2 md:mb-3 transition-all">
-                        <Input
-                          value={editText}
-                          onChange={(e) => setEditText(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault();
-                              handleSaveEdit();
-                            }
-                          }}
-                          className="mb-4 text-lg border-2 border-primary bg-background/80 shadow focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
-                          style={{ minWidth: '140px' }}
-                          autoFocus
-                        />
-                        <div className="flex justify-end gap-2 w-full">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setEditingEntry(null);
-                              setEditText("");
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button size="sm" onClick={handleSaveEdit}>
-                            Save
-                          </Button>
+            {(() => {
+              let lastDisplayedDate: string | null = null;
+              return noteEntries.map((entry) => {
+                const entryDateStr = formatDateForSeparator(entry.timestamp);
+                const showDateSeparator = entryDateStr !== lastDisplayedDate;
+                if (showDateSeparator) {
+                  lastDisplayedDate = entryDateStr;
+                }
+
+                return (
+                  <React.Fragment key={entry.id}>
+                    {showDateSeparator && (
+                      <div className="flex justify-center my-3">
+                        <div className="bg-primary/80 text-background text-xs font-medium px-2.5 py-1 rounded-md shadow">
+                          {entryDateStr}
                         </div>
                       </div>
-                    </ContextMenuTrigger>
-                  ) : (
-                    <ContextMenuTrigger className="block w-auto max-w-full md:max-w-[60%] min-w-[120px] self-start">
-                      <div
-                        className="bg-muted p-3 rounded-xl shadow-sm w-auto max-w-[90%] md:max-w-[60%] min-w-[120px] block self-start mb-2 md:mb-3 transition-all"
-                        style={{ wordBreak: 'break-word' }}
-                      >
-                        <p className="text-[15px] md:text-sm whitespace-pre-wrap leading-relaxed">{entry.text}</p>
-                        <p className="text-xs text-muted-foreground mt-2 text-right">
-                          {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                    </ContextMenuTrigger>
-                  )}
-                  <ContextMenuContent>
-                    <ContextMenuItem onClick={() => handleEditEntry(entry)}>
-                      <Pencil className="w-4 h-4 mr-2" />
-                      Edit
-                    </ContextMenuItem>
-                    <ContextMenuItem
-                      className="text-red-500 focus:text-red-500 focus:bg-red-500/10"
-                      onClick={() => handleDeleteEntry(entry.id)}
-                    >
-                      <Trash className="w-4 h-4 mr-2" />
-                      Delete
-                    </ContextMenuItem>
-                  </ContextMenuContent>
-                </ContextMenu>
-              </div>
-            ))}
+                    )}
+                    <div className="flex flex-col items-end w-full mb-5">
+                      <ContextMenu>
+                        {editingEntry?.id === entry.id ? (
+                          <ContextMenuTrigger asChild>
+                            <div
+                              className="bg-muted p-4 rounded-2xl shadow-sm 
+                                        block max-w-[90%] md:max-w-[70%] 
+                                        min-w-[280px] md:min-w-[320px]"
+                            >
+                              <Input
+                                value={editText}
+                                onChange={(e) => setEditText(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSaveEdit();
+                                  }
+                                }}
+                                className="mb-4 text-lg border-2 border-primary bg-background/80 shadow focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+                                style={{ minWidth: '100%' }}
+                                autoFocus
+                              />
+                              <div className="flex justify-end gap-2 w-full">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingEntry(null);
+                                    setEditText("");
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button size="sm" onClick={handleSaveEdit}>
+                                  Save
+                                </Button>
+                              </div>
+                            </div>
+                          </ContextMenuTrigger>
+                        ) : (
+                          <ContextMenuTrigger asChild>
+                            <div
+                              className="bg-muted p-3 rounded-xl shadow-sm 
+                                         inline-block /* Key: Shrinks to fit content */
+                                         max-w-[85%] md:max-w-[70%] /* Max width relative to chat area */
+                                         text-left /* Text inside bubble aligns left */
+                                        "
+                              style={{ wordBreak: 'break-word', minWidth: '70px'}}
+                            >
+                              <p className="text-[15px] md:text-sm whitespace-pre-wrap leading-relaxed">{entry.text}</p>
+                              <p className="text-xs text-muted-foreground mt-1 text-right">
+                                {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
+                          </ContextMenuTrigger>
+                        )}
+                        <ContextMenuContent>
+                          <ContextMenuItem onClick={() => handleEditEntry(entry)}>
+                            <Pencil className="w-4 h-4 mr-2" />
+                            Edit
+                          </ContextMenuItem>
+                          <ContextMenuItem
+                            className="text-red-500 focus:text-red-500 focus:bg-red-500/10"
+                            onClick={() => handleDeleteEntry(entry.id)}
+                          >
+                            <Trash className="w-4 h-4 mr-2" />
+                            Delete
+                          </ContextMenuItem>
+                        </ContextMenuContent>
+                      </ContextMenu>
+                    </div>
+                  </React.Fragment>
+                );
+              });
+            })()}
             {noteEntries.length === 0 && !selectedNote.content && (
               <div className="text-center text-muted-foreground py-10">
                 No note content yet...
@@ -324,9 +342,9 @@ export function NoteContent({
             <div ref={entriesEndRef} style={{ height: '1px' }} />
           </div>
         </div>
-        <div 
+        <div
           ref={inputContainerRef}
-          className="border-t p-4 shrink-0 sticky bottom-0 z-10" 
+          className="border-t p-4 shrink-0 sticky bottom-0 z-10 bg-transparent"
           style={{ height: NOTE_CONTENT_INPUT_HEIGHT, minHeight: NOTE_CONTENT_INPUT_HEIGHT }}
         >
           <div className="max-w-3xl mx-auto flex items-center gap-2">
