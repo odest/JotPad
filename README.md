@@ -1,6 +1,11 @@
-<h1 align="center">
-  <br>JotPad<br>
-</h1>
+<p align="center">
+<img src="https://raw.githubusercontent.com/odest/JotPad/refs/heads/master/apps/native/src-tauri/icons/icon.png" alt="logo" width="80" height="80"/>
+</p>
+
+<div align="center">
+
+JotPad
+===========================
 
 JotPad is an open-source, cross-platform note-taking application that allows you to take notes in a unique way – by sending messages to yourself, just like a chat app.
 
