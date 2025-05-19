@@ -12,7 +12,7 @@ import {
   ContextMenuTrigger,
 } from "@repo/ui/components/context-menu";
 import { Input } from "@repo/ui/components/input";
-import { ChevronLeft, MoreVertical, Pencil, Send, Trash, Notebook, Search, X } from "lucide-react";
+import { ChevronLeft, MoreVertical, Pencil, Send, Trash, Notebook, Search, X, ChevronUp, ChevronDown } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { invoke } from '@tauri-apps/api/core';
 import { db, Note, NoteEntry } from "@repo/ui/lib/database";
@@ -35,6 +35,26 @@ const formatDateForSeparator = (timestamp: string | number | Date): string => {
   return `${day}.${month}.${year}`;
 };
 
+const highlightText = (text: string, query: string): React.ReactNode => {
+  if (!query.trim()) {
+    return text;
+  }
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedQuery})`, 'gi');
+  const parts = text.split(regex);
+
+  return parts.map((part, index) =>
+    part.toLowerCase() === query.toLowerCase() ? (
+      <mark key={index} className="bg-yellow-400 text-black rounded-[3px] px-0.5 dark:bg-yellow-500 match-highlight">
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  );
+};
+
+
 export function NoteContent({
   selectedNote,
   handleEditNote,
@@ -50,8 +70,14 @@ export function NoteContent({
   const [editText, setEditText] = useState("");
   const [searchInEntriesQuery, setSearchInEntriesQuery] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
+
+  const [matches, setMatches] = useState<HTMLElement[]>([]);
+  const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
+  const [totalMatches, setTotalMatches] = useState(0);
+
   const entriesEndRef = useRef<null | HTMLDivElement>(null);
   const entriesContainerRef = useRef<null | HTMLDivElement>(null);
+  const searchResultsContainerRef = useRef<null | HTMLDivElement>(null);
   const bottomInputContainerRef = useRef<HTMLDivElement>(null);
   const newEntryInputRef = useRef<HTMLInputElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -63,6 +89,9 @@ export function NoteContent({
       setNewEntryText("");
       setSearchInEntriesQuery("");
       setIsSearchActive(false);
+      setMatches([]);
+      setCurrentMatchIndex(-1);
+      setTotalMatches(0);
     }
   }, [selectedNote?.id]);
 
@@ -111,6 +140,49 @@ export function NoteContent({
       scrollToBottom();
     }
   }, [noteEntries, searchInEntriesQuery]);
+
+  useEffect(() => {
+    if (isSearchActive && searchInEntriesQuery.trim() && searchResultsContainerRef.current) {
+      if (currentMatchIndex !== -1 && matches[currentMatchIndex]) {
+        matches[currentMatchIndex].classList.remove('active-match-highlight');
+      }
+
+      const highlightedElements = Array.from(
+        searchResultsContainerRef.current.querySelectorAll('.match-highlight')
+      ) as HTMLElement[];
+      
+      setMatches(highlightedElements);
+      setTotalMatches(highlightedElements.length);
+
+      if (highlightedElements.length > 0) {
+        setCurrentMatchIndex(0);
+      } else {
+        setCurrentMatchIndex(-1);
+      }
+    } else {
+      if (currentMatchIndex !== -1 && matches.length > 0 && matches[currentMatchIndex]) {
+        matches[currentMatchIndex].classList.remove('active-match-highlight');
+      }
+      setMatches([]);
+      setTotalMatches(0);
+      setCurrentMatchIndex(-1);
+    }
+  }, [searchInEntriesQuery, isSearchActive, noteEntries]);
+
+  useEffect(() => {
+    matches.forEach((match, index) => {
+      if (index === currentMatchIndex) {
+        match.classList.add('active-match-highlight');
+        match.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
+        });
+      } else {
+        match.classList.remove('active-match-highlight');
+      }
+    });
+  }, [currentMatchIndex, matches]);
 
   const handleAddEntry = async () => {
     if (!selectedNote || !newEntryText.trim()) return;
@@ -190,6 +262,18 @@ export function NoteContent({
     setSearchInEntriesQuery("");
   };
 
+  const handleNavigateMatch = (direction: 'next' | 'prev') => {
+    if (totalMatches === 0) return;
+
+    let nextIndex;
+    if (direction === 'next') {
+      nextIndex = (currentMatchIndex + 1) % totalMatches;
+    } else {
+      nextIndex = (currentMatchIndex - 1 + totalMatches) % totalMatches;
+    }
+    setCurrentMatchIndex(nextIndex);
+  };
+
   const filteredEntries = noteEntries.filter(entry =>
     entry.text.toLowerCase().includes(searchInEntriesQuery.toLowerCase())
   );
@@ -235,7 +319,7 @@ export function NoteContent({
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <Button variant="ghost" size="icon" onClick={toggleHeaderSearchIcon} className="shrink-0">
-                  <Search className="h-5 w-5 rotate-0 scale-100 transition-all" />
+                  <Search className="h-5 w-5" />
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger>
@@ -266,7 +350,7 @@ export function NoteContent({
           className="flex-1 overflow-y-auto p-4 custom-scrollbar"
           ref={entriesContainerRef}
         >
-          <div className="max-w-3xl mx-auto w-full">
+          <div className="max-w-3xl mx-auto w-full" ref={searchResultsContainerRef}>
             {isSearchActive && (
               <div className="sticky top-0 z-10 p-2 mb-3 bg-primary/5 backdrop-blur-md rounded-lg shadow-sm">
                 <div className="flex items-center gap-2 px-1">
@@ -278,12 +362,34 @@ export function NoteContent({
                     value={searchInEntriesQuery}
                     onChange={(e) => setSearchInEntriesQuery(e.target.value)}
                   />
+                  {totalMatches > 0 && (
+                    <span className="text-xs text-muted-foreground whitespace-nowrap tabular-nums px-1">
+                      {currentMatchIndex + 1} / {totalMatches}
+                    </span>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleNavigateMatch('prev')}
+                    disabled={totalMatches === 0}
+                    className="shrink-0 h-9 w-9"
+                  >
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleNavigateMatch('next')}
+                    disabled={totalMatches === 0}
+                    className="shrink-0 h-9 w-9"
+                  >
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={closeSearchFromBar}
                     className="shrink-0 h-9 w-9"
-                    title="Aramayı Kapat"
                   >
                     <X className="h-4 w-4 text-muted-foreground" />
                   </Button>
@@ -364,7 +470,9 @@ export function NoteContent({
                                         "
                               style={{ wordBreak: 'break-word', minWidth: '70px'}}
                             >
-                              <p className="text-[15px] md:text-sm whitespace-pre-wrap leading-relaxed">{entry.text}</p>
+                              <p className="text-[15px] md:text-sm whitespace-pre-wrap leading-relaxed">
+                                {highlightText(entry.text, searchInEntriesQuery)}
+                              </p>
                               <p className="text-xs text-muted-foreground mt-1 text-right">
                                 {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </p>
