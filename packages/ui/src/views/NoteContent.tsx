@@ -12,7 +12,7 @@ import {
   ContextMenuTrigger,
 } from "@repo/ui/components/context-menu";
 import { Input } from "@repo/ui/components/input";
-import { ChevronLeft, MoreVertical, Pencil, Send, Trash, Notebook } from "lucide-react";
+import { ChevronLeft, MoreVertical, Pencil, Send, Trash, Notebook, Search, X } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { invoke } from '@tauri-apps/api/core';
 import { db, Note, NoteEntry } from "@repo/ui/lib/database";
@@ -48,16 +48,21 @@ export function NoteContent({
   const [newEntryText, setNewEntryText] = useState("");
   const [editingEntry, setEditingEntry] = useState<NoteEntry | null>(null);
   const [editText, setEditText] = useState("");
+  const [searchInEntriesQuery, setSearchInEntriesQuery] = useState("");
+  const [isSearchActive, setIsSearchActive] = useState(false);
   const entriesEndRef = useRef<null | HTMLDivElement>(null);
   const entriesContainerRef = useRef<null | HTMLDivElement>(null);
-  const inputContainerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const bottomInputContainerRef = useRef<HTMLDivElement>(null);
+  const newEntryInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const NOTE_CONTENT_INPUT_HEIGHT = 72;
 
   useEffect(() => {
     if (selectedNote) {
       loadNoteEntries();
       setNewEntryText("");
+      setSearchInEntriesQuery("");
+      setIsSearchActive(false);
     }
   }, [selectedNote?.id]);
 
@@ -70,13 +75,19 @@ export function NoteContent({
     };
     updateHeight();
     const resizeObserver = new ResizeObserver(updateHeight);
-    if (inputContainerRef.current) resizeObserver.observe(inputContainerRef.current);
+    if (bottomInputContainerRef.current) resizeObserver.observe(bottomInputContainerRef.current);
     window.addEventListener('resize', updateHeight);
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener('resize', updateHeight);
     };
   }, [SIDEBAR_HEADER_HEIGHT, NOTE_CONTENT_INPUT_HEIGHT]);
+
+  useEffect(() => {
+    if (isSearchActive && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchActive]);
 
   const loadNoteEntries = async () => {
     if (!selectedNote) return;
@@ -96,10 +107,10 @@ export function NoteContent({
   };
 
   useEffect(() => {
-    if (noteEntries.length > 0) {
+    if (noteEntries.length > 0 && !searchInEntriesQuery) {
       scrollToBottom();
     }
-  }, [noteEntries]);
+  }, [noteEntries, searchInEntriesQuery]);
 
   const handleAddEntry = async () => {
     if (!selectedNote || !newEntryText.trim()) return;
@@ -111,7 +122,7 @@ export function NoteContent({
       await invoke('log_message', { level: 'info', message: `Added new entry to note: ${selectedNote.title}` });
       setNewEntryText("");
       if (typeof onEntryAdded === 'function') onEntryAdded();
-      setTimeout(() => inputRef.current?.focus(), 0);
+      setTimeout(() => newEntryInputRef.current?.focus(), 0);
     } catch (error) {
       console.error('Failed to add note entry:', error);
       await invoke('log_message', { level: 'error', message: `Failed to add note entry: ${error}` });
@@ -167,6 +178,22 @@ export function NoteContent({
     }
   };
 
+  const toggleHeaderSearchIcon = () => {
+    if (isSearchActive) {
+      setSearchInEntriesQuery("");
+    }
+    setIsSearchActive(!isSearchActive);
+  };
+
+  const closeSearchFromBar = () => {
+    setIsSearchActive(false);
+    setSearchInEntriesQuery("");
+  };
+
+  const filteredEntries = noteEntries.filter(entry =>
+    entry.text.toLowerCase().includes(searchInEntriesQuery.toLowerCase())
+  );
+
   if (!selectedNote) {
     return (
       <div className={`flex-1 flex flex-col h-[calc(100vh)] md:h-[calc(100vh-2.5rem)] md:border md:m-5 md:mb-5 rounded-xl ${!showSidebar ? 'block' : 'hidden md:block'} bg-background`}>
@@ -187,7 +214,7 @@ export function NoteContent({
         <div className="border-b p-4 shrink-0" style={{ height: SIDEBAR_HEADER_HEIGHT, minHeight: SIDEBAR_HEADER_HEIGHT }}>
           <div className="max-w-3xl mx-auto">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -199,43 +226,72 @@ export function NoteContent({
                 <div className="w-10 h-10 rounded-full flex items-center justify-center border border-black dark:border-white font-bold text-lg shrink-0">
                   {selectedNote.title.charAt(0).toUpperCase()}
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <h2 className="text-lg font-bold truncate" title={selectedNote.title}>{selectedNote.title}</h2>
                   <div className="flex items-center text-xs italic text-muted-foreground">
                     Created: {new Date(selectedNote.created_at).toLocaleDateString()}
                   </div>
                 </div>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <Button variant="ghost" size="icon" className="shrink-0">
-                    <MoreVertical className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuItem onClick={() => handleEditNote(selectedNote)}>
-                    <Pencil className="w-4 h-4 mr-2" />
-                    <span>Edit Title</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="text-red-500 hover:!text-red-500 focus:!text-red-500 focus:!bg-red-500/10"
-                    onClick={() => handleDeleteNote(selectedNote.id)}
-                  >
-                    <Trash className="w-4 h-4 mr-2" />
-                    <span>Delete Note</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="flex items-center gap-1 shrink-0">
+                <Button variant="ghost" size="icon" onClick={toggleHeaderSearchIcon} className="shrink-0">
+                  <Search className="h-5 w-5 rotate-0 scale-100 transition-all" />
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Button variant="ghost" size="icon" className="shrink-0">
+                      <MoreVertical className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem onClick={() => handleEditNote(selectedNote)}>
+                      <Pencil className="w-4 h-4 mr-2" />
+                      <span>Edit Title</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-red-500 hover:!text-red-500 focus:!text-red-500 focus:!bg-red-500/10"
+                      onClick={() => handleDeleteNote(selectedNote.id)}
+                    >
+                      <Trash className="w-4 h-4 mr-2" />
+                      <span>Delete Note</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
         </div>
+
         <div
           className="flex-1 overflow-y-auto p-4 custom-scrollbar"
           ref={entriesContainerRef}
-          style={{ height: `calc(100vh - ${SIDEBAR_HEADER_HEIGHT}px - ${NOTE_CONTENT_INPUT_HEIGHT}px)` }}
         >
           <div className="max-w-3xl mx-auto w-full">
-            {selectedNote.content && noteEntries.length === 0 && (
+            {isSearchActive && (
+              <div className="sticky top-0 z-10 p-2 mb-3 bg-primary/5 backdrop-blur-md rounded-lg shadow-sm">
+                <div className="flex items-center gap-2 px-1">
+                  <Input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search in entries..."
+                    className="flex-1 h-9 text-sm"
+                    value={searchInEntriesQuery}
+                    onChange={(e) => setSearchInEntriesQuery(e.target.value)}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={closeSearchFromBar}
+                    className="shrink-0 h-9 w-9"
+                    title="Aramayı Kapat"
+                  >
+                    <X className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {selectedNote.content && noteEntries.length === 0 && !searchInEntriesQuery && !isSearchActive && (
               <div className="prose dark:prose-invert max-w-none text-muted-foreground p-4 rounded-md border bg-muted/50 mb-4">
                 <p className="text-sm italic">Initial note content:</p>
                 {selectedNote.content}
@@ -243,7 +299,7 @@ export function NoteContent({
             )}
             {(() => {
               let lastDisplayedDate: string | null = null;
-              return noteEntries.map((entry) => {
+              return filteredEntries.map((entry) => {
                 const entryDateStr = formatDateForSeparator(entry.timestamp);
                 const showDateSeparator = entryDateStr !== lastDisplayedDate;
                 if (showDateSeparator) {
@@ -302,9 +358,9 @@ export function NoteContent({
                           <ContextMenuTrigger asChild>
                             <div
                               className="bg-muted p-3 rounded-xl shadow-sm 
-                                         inline-block /* Key: Shrinks to fit content */
-                                         max-w-[85%] md:max-w-[70%] /* Max width relative to chat area */
-                                         text-left /* Text inside bubble aligns left */
+                                        inline-block 
+                                        max-w-[85%] md:max-w-[70%] 
+                                        text-left 
                                         "
                               style={{ wordBreak: 'break-word', minWidth: '70px'}}
                             >
@@ -334,7 +390,14 @@ export function NoteContent({
                 );
               });
             })()}
-            {noteEntries.length === 0 && !selectedNote.content && (
+
+            {searchInEntriesQuery && filteredEntries.length === 0 && (
+              <div className="text-center text-muted-foreground py-10">
+                No entries found matching your search.
+              </div>
+            )}
+
+            {noteEntries.length === 0 && !selectedNote.content && !searchInEntriesQuery && !isSearchActive &&(
               <div className="text-center text-muted-foreground py-10">
                 No note content yet...
               </div>
@@ -342,8 +405,9 @@ export function NoteContent({
             <div ref={entriesEndRef} style={{ height: '1px' }} />
           </div>
         </div>
+
         <div
-          ref={inputContainerRef}
+          ref={bottomInputContainerRef}
           className="border-t p-4 shrink-0 sticky bottom-0 z-10 bg-transparent"
           style={{ height: NOTE_CONTENT_INPUT_HEIGHT, minHeight: NOTE_CONTENT_INPUT_HEIGHT }}
         >
@@ -355,7 +419,7 @@ export function NoteContent({
               value={newEntryText}
               onChange={(e) => setNewEntryText(e.target.value)}
               onKeyDown={handleKeyPress}
-              ref={inputRef}
+              ref={newEntryInputRef}
             />
             <Button
               type="button"

@@ -69,7 +69,7 @@ export function Sidebar({
             </Button>
           </div>
         </div>
-        <div className="border-b p-4 shrink-0" style={{ height: SIDEBAR_SEARCH_HEIGHT, minHeight: SIDEBAR_SEARCH_HEIGHT }}>
+        <div className="border-b p-3.5 shrink-0" style={{ height: SIDEBAR_SEARCH_HEIGHT, minHeight: SIDEBAR_SEARCH_HEIGHT }}>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
