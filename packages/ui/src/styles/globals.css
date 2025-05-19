@@ -111,3 +111,11 @@
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #666;
 }
+
+.active-match-highlight {
+  background-color: orange !important;
+  color: white !important;
+  border-radius: 3px; 
+  padding-left: 0.125rem;
+  padding-right: 0.125rem;
+}
