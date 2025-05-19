@@ -2,14 +2,18 @@ import { useState, useEffect } from "react";
 import { NoteContent } from "@repo/ui/views/NoteContent";
 import { Sidebar } from "@repo/ui/views/Sidebar";
 import { invoke } from '@tauri-apps/api/core';
-import { db, Note } from "@repo/ui/lib/database";
+import { db, Note as DbNote } from "@repo/ui/lib/database";
+
+interface AppNote extends DbNote {
+  lastEntryText?: string | null;
+}
 
 export function HomePage() {
   const [open, setOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState("");
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [notes, setNotes] = useState<AppNote[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
-  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [selectedNote, setSelectedNote] = useState<AppNote | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSidebar, setShowSidebar] = useState(true);
 
@@ -17,11 +21,29 @@ export function HomePage() {
     loadNotes();
   }, []);
 
+  useEffect(() => {
+    const currentSelectedId = selectedNote?.id;
+    if (currentSelectedId && notes.length > 0) {
+      const refreshedSelectedNote = notes.find(n => n.id === currentSelectedId);
+      if (refreshedSelectedNote) {
+        if (selectedNote !== refreshedSelectedNote ||
+            selectedNote.title !== refreshedSelectedNote.title ||
+            selectedNote.content !== refreshedSelectedNote.content ||
+            selectedNote.lastEntryText !== refreshedSelectedNote.lastEntryText
+            ) {
+          setSelectedNote(refreshedSelectedNote);
+        }
+      } else {
+        setSelectedNote(null);
+      }
+    }
+  }, [notes, selectedNote?.id]);
+
   const loadNotes = async () => {
     try {
-      const loadedNotes = await db.getNotes();
-      const notesWithLastEntry = await Promise.all(
-        loadedNotes.map(async (note) => {
+      const loadedDbNotes = await db.getNotes();
+      const notesWithLastEntry: AppNote[] = await Promise.all(
+        loadedDbNotes.map(async (note) => {
           const lastEntryText = await db.getLastEntryText(note.id);
           return { ...note, lastEntryText };
         })
@@ -37,17 +59,16 @@ export function HomePage() {
     if (noteTitle.trim()) {
       try {
         if (editId) {
-          await db.updateNote(editId, noteTitle);
+          const currentNoteId = editId;
+          await db.updateNote(currentNoteId, noteTitle);
           await loadNotes();
-          if (selectedNote && selectedNote.id === editId) {
-            setSelectedNote({ ...selectedNote, title: noteTitle });
-          }
           await invoke('log_message', { level: 'info', message: `Note edited: ${noteTitle}` });
           setEditId(null);
         } else {
-          const newNote = await db.createNote(noteTitle);
-          setNotes([newNote, ...notes]);
-          setSelectedNote(newNote);
+          const newDbNote = await db.createNote(noteTitle);
+          const newAppNote: AppNote = { ...newDbNote, lastEntryText: undefined };
+          setNotes(prevNotes => [newAppNote, ...prevNotes]);
+          setSelectedNote(newAppNote);
           setShowSidebar(false);
           await invoke('log_message', { level: 'info', message: `New note created: ${noteTitle}` });
         }
@@ -64,7 +85,7 @@ export function HomePage() {
     try {
       const noteToDelete = notes.find(note => note.id === id);
       await db.deleteNote(id);
-      await loadNotes();
+      setNotes(prevNotes => prevNotes.filter(note => note.id !== id));
       if (selectedNote?.id === id) {
         setSelectedNote(null);
         setShowSidebar(true);
@@ -78,14 +99,14 @@ export function HomePage() {
     }
   };
 
-  const handleEditNote = (note: Note) => {
-    setEditId(note.id);
-    setNoteTitle(note.title);
+  const handleOpenEditDialog = (noteToEdit: AppNote) => {
+    setEditId(noteToEdit.id);
+    setNoteTitle(noteToEdit.title);
     setOpen(true);
-    invoke('log_message', { level: 'info', message: `Editing note: ${note.title}` });
+    invoke('log_message', { level: 'info', message: `Editing note: ${noteToEdit.title}` });
   };
 
-  const handleNoteSelect = (note: Note) => {
+  const handleNoteSelect = (note: AppNote) => {
     setSelectedNote(note);
     setShowSidebar(false);
   };
@@ -100,30 +121,44 @@ export function HomePage() {
     <div className="min-h-screen w-full flex">
       <Sidebar
         filteredNotes={filteredNotes.map(note => ({
-          ...note, 
-          createdAt: new Date(note.created_at)
+          id: note.id,
+          title: note.title,
+          content: note.content,
+          createdAt: new Date(note.created_at),
+          lastEntryText: note.lastEntryText,
         }))}
         selectedNote={selectedNote ? {
-          ...selectedNote,
-          createdAt: new Date(selectedNote.created_at)
+          id: selectedNote.id,
+          title: selectedNote.title,
+          content: selectedNote.content,
+          createdAt: new Date(selectedNote.created_at),
+          lastEntryText: selectedNote.lastEntryText,
         } : null}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        handleNoteSelect={(note) => handleNoteSelect({
-          ...note,
-          created_at: note.createdAt.toISOString(),
-          updated_at: note.createdAt.toISOString()
-        })}
+        handleNoteSelect={(noteFromList) => {
+          const originalNote = notes.find(n => n.id === noteFromList.id);
+          if (originalNote) {
+            handleNoteSelect(originalNote);
+          }
+        }}
         open={open}
         setOpen={setOpen}
         noteTitle={noteTitle}
         setNoteTitle={setNoteTitle}
         handleCreateNote={handleCreateNote}
         showSidebar={showSidebar}
+        handleEditNote={(noteFromList) => {
+          const originalNote = notes.find(n => n.id === noteFromList.id);
+          if (originalNote) {
+            handleOpenEditDialog(originalNote);
+          }
+        }}
+        handleDeleteNote={handleDeleteNote}
       />
       <NoteContent
         selectedNote={selectedNote}
-        handleEditNote={handleEditNote}
+        handleEditNote={handleOpenEditDialog}
         handleDeleteNote={handleDeleteNote}
         setShowSidebar={setShowSidebar}
         SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}

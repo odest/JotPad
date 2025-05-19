@@ -1,53 +1,105 @@
 import React from "react";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@repo/ui/components/context-menu";
+import { Pencil, Trash2 } from "lucide-react";
 
-interface Note {
+export interface Note {
   id: string;
   title: string;
   content?: string;
   createdAt: Date;
-  lastEntryText?: string;
+  lastEntryText?: string | null;
 }
 
 interface NoteListProps {
   filteredNotes: Note[];
   selectedNote: Note | null;
   handleNoteSelect: (note: Note) => void;
+  handleEditNote?: (note: Note) => void;
+  handleDeleteNote?: (noteId: string) => void;
 }
 
-export const NoteList: React.FC<NoteListProps> = ({ filteredNotes, selectedNote, handleNoteSelect }) => {
+export const NoteList: React.FC<NoteListProps> = ({
+  filteredNotes,
+  selectedNote,
+  handleNoteSelect,
+  handleEditNote,
+  handleDeleteNote,
+}) => {
+  if (!filteredNotes || filteredNotes.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-500">
+        No notes found.
+      </div>
+    );
+  }
+
   return (
     <div>
-      {filteredNotes.map((note, idx) => {
-        const isLast = idx === filteredNotes.length - 1;
+      {filteredNotes.map((note) => {
         return (
-          <div
-            key={note.id}
-            className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors border-t first:border-t-0 last:border-b ${
-              selectedNote?.id === note.id ? "bg-[#f4f4f5] dark:bg-[#27272a]" : "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a]"
-            }`}
-            onClick={() => handleNoteSelect(note)}
-          >
-            <div className="w-10 h-10 rounded-full flex items-center justify-center border border-black dark:border-white font-bold text-lg">
-              {note.title.charAt(0).toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0 flex flex-col justify-center">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-base truncate">{note.title}</span>
-                <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
-                  {note.content
-                    ? new Date(note.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-                    : new Date(note.createdAt).toLocaleDateString()}
-                </span>
+          <ContextMenu key={note.id}>
+            <ContextMenuTrigger asChild>
+              <div
+                className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors border-t first:border-t-0 last:border-b ${
+                  selectedNote?.id === note.id
+                    ? "bg-[#f4f4f5] dark:bg-[#27272a]"
+                    : "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a]"
+                }`}
+                onClick={() => handleNoteSelect(note)}
+              >
+                <div className="w-10 h-10 rounded-full flex items-center justify-center border border-black dark:border-white font-bold text-lg">
+                  {note.title.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-base truncate">
+                      {note.title}
+                    </span>
+                    <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
+                      {note.createdAt instanceof Date
+                        ? note.content
+                          ? note.createdAt.toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : note.createdAt.toLocaleDateString()
+                        : new Date(note.createdAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                    </span>
+                  </div>
+                  <span className="text-sm text-gray-400 truncate">
+                    {note.lastEntryText
+                      ? note.lastEntryText.length > 40
+                        ? note.lastEntryText.slice(0, 40) + "..."
+                        : note.lastEntryText
+                      : "No note content yet..."}
+                  </span>
+                </div>
               </div>
-              <span className="text-sm text-gray-400 truncate">
-                {note.lastEntryText
-                  ? (note.lastEntryText.length > 40 ? note.lastEntryText.slice(0, 40) + "..." : note.lastEntryText)
-                  : "No note content yet..."}
-              </span>
-            </div>
-          </div>
+            </ContextMenuTrigger>
+            <ContextMenuContent className="w-48">
+              <ContextMenuItem onSelect={() => handleEditNote && handleEditNote(note)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                <span>Edit Note Title</span>
+              </ContextMenuItem>
+              <ContextMenuItem
+                className="text-red-500 focus:text-red-500 focus:bg-red-500/10"
+                onSelect={() => handleDeleteNote && handleDeleteNote(note.id)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span>Delete Note</span>
+              </ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
         );
       })}
     </div>
   );
-}; 
+};
