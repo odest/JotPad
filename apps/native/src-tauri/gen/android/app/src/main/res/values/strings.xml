@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">native</string>
-    <string name="main_activity_title">native</string>
+    <string name="app_name">JotPad</string>
+    <string name="main_activity_title">JotPad</string>
 </resources>
