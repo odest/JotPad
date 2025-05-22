@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { NoteContent } from "@repo/ui/views/NoteContent";
 import { Sidebar } from "@repo/ui/views/Sidebar";
+import { Settings } from "@repo/ui/views/Settings";
 import { invoke } from '@tauri-apps/api/core';
 import { db, Note as DbNote } from "@repo/ui/lib/database";
 
@@ -16,6 +17,7 @@ export function HomePage() {
   const [selectedNote, setSelectedNote] = useState<AppNote | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSidebar, setShowSidebar] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     loadNotes();
@@ -70,6 +72,7 @@ export function HomePage() {
           setNotes(prevNotes => [newAppNote, ...prevNotes]);
           setSelectedNote(newAppNote);
           setShowSidebar(false);
+          if (showSettings) setShowSettings(false);
           await invoke('log_message', { level: 'info', message: `New note created: ${noteTitle}` });
         }
         setNoteTitle("");
@@ -109,6 +112,20 @@ export function HomePage() {
   const handleNoteSelect = (note: AppNote) => {
     setSelectedNote(note);
     setShowSidebar(false);
+    if (showSettings) {
+      setShowSettings(false);
+    }
+  };
+
+  const openSettings = () => {
+    setSelectedNote(null);
+    setShowSettings(true);
+    setShowSidebar(false);
+  };
+
+  const closeSettings = () => {
+    setShowSettings(false);
+    setShowSidebar(true); 
   };
 
   const filteredNotes = notes.filter(note =>
@@ -155,16 +172,25 @@ export function HomePage() {
           }
         }}
         handleDeleteNote={handleDeleteNote}
+        onToggleSettings={openSettings}
       />
-      <NoteContent
-        selectedNote={selectedNote}
-        handleEditNote={handleOpenEditDialog}
-        handleDeleteNote={handleDeleteNote}
-        setShowSidebar={setShowSidebar}
-        SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}
-        onEntryAdded={loadNotes}
-        showSidebar={showSidebar}
-      />
+      
+      {showSettings ? (
+        <Settings
+          onClose={closeSettings}
+          SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}
+        />
+      ) : (
+        <NoteContent
+          selectedNote={selectedNote}
+          handleEditNote={handleOpenEditDialog}
+          handleDeleteNote={handleDeleteNote}
+          setShowSidebar={setShowSidebar}
+          SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}
+          onEntryAdded={loadNotes}
+          showSidebar={showSidebar}
+        />
+      )}
     </div>
   );
 }
