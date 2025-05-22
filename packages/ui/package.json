@@ -38,6 +38,7 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.2",
     "@radix-ui/react-switch": "^1.2.5",
+    "@radix-ui/react-tooltip": "^1.2.7",
     "@tauri-apps/api": "^2",
     "autoprefixer": "^10.4.21",
     "class-variance-authority": "^0.7.1",

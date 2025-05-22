@@ -38,13 +38,13 @@ export function Sidebar({
   handleDeleteNote,
   onToggleSettings,
 }: SidebarProps) {
-  const { theme, setTheme } = useTheme();
+  const { setTheme, appliedTheme } = useTheme();
   const SIDEBAR_HEADER_HEIGHT = 72;
   const SIDEBAR_SEARCH_HEIGHT = 64;
   const SIDEBAR_FOOTER_HEIGHT = 72;
 
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
+  const toggleThemeInSidebar = () => {
+    setTheme(appliedTheme === "light" ? "dark" : "light");
   };
 
   return (
@@ -59,7 +59,7 @@ export function Sidebar({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={toggleTheme}
+                onClick={toggleThemeInSidebar}
                 className="relative h-9 w-9"
                 aria-label="Toggle theme"
               >

@@ -307,7 +307,7 @@ export function NoteContent({
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
-                <div className="w-10 h-10 rounded-full flex items-center justify-center border border-black dark:border-white font-bold text-lg shrink-0">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center border border-primary text-primary font-bold text-lg shrink-0">
                   {selectedNote.title.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">

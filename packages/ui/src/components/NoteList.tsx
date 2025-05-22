@@ -47,12 +47,12 @@ export const NoteList: React.FC<NoteListProps> = ({
               <div
                 className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors border-t first:border-t-0 last:border-b ${
                   selectedNote?.id === note.id
-                    ? "bg-[#f4f4f5] dark:bg-[#27272a]"
-                    : "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a]"
+                    ? "bg-primary/10"
+                    : "hover:bg-muted"
                 }`}
                 onClick={() => handleNoteSelect(note)}
               >
-                <div className="w-10 h-10 rounded-full flex items-center justify-center border border-black dark:border-white font-bold text-lg">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center border border-primary text-primary font-bold text-lg">
                   {note.title.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
