@@ -311,7 +311,7 @@ export function NoteContent({
                   {selectedNote.title.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-lg font-bold truncate" title={selectedNote.title}>{selectedNote.title}</h2>
+                  <h2 className="text-lg font-bold truncate">{selectedNote.title}</h2>
                   <div className="flex items-center text-xs italic text-muted-foreground">
                     Created: {new Date(selectedNote.created_at).toLocaleDateString()}
                   </div>
@@ -333,7 +333,7 @@ export function NoteContent({
                       <span>Edit Title</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="text-red-500 hover:!text-red-500 focus:!text-red-500 focus:!bg-red-500/10"
+                      className="text-red-500 focus:text-red-500 focus:bg-red-500/10"
                       onClick={() => handleDeleteNote(selectedNote.id)}
                     >
                       <Trash className="w-4 h-4 mr-2" />
@@ -398,9 +398,8 @@ export function NoteContent({
             )}
 
             {selectedNote.content && noteEntries.length === 0 && !searchInEntriesQuery && !isSearchActive && (
-              <div className="prose dark:prose-invert max-w-none text-muted-foreground p-4 rounded-md border bg-muted/50 mb-4">
-                <p className="text-sm italic">Initial note content:</p>
-                {selectedNote.content}
+              <div className="text-center text-muted-foreground py-10">
+                No note content yet...
               </div>
             )}
             {(() => {

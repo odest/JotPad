@@ -3,28 +3,22 @@ import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { NoteDialog } from "@repo/ui/components/NoteDialog";
 import { useTheme } from "@repo/ui/components/theme-provider";
-import { NoteList } from "@repo/ui/components/NoteList";
-
-interface Note {
-  id: string;
-  title: string;
-  content?: string;
-  createdAt: Date;
-  lastEntryText?: string;
-}
+import { NoteList, Note as NoteListNote } from "@repo/ui/components/NoteList";
 
 interface SidebarProps {
-  filteredNotes: Note[];
-  selectedNote: Note | null;
+  filteredNotes: NoteListNote[];
+  selectedNote: NoteListNote | null;
   searchQuery: string;
   setSearchQuery: (v: string) => void;
-  handleNoteSelect: (note: Note) => void;
+  handleNoteSelect: (note: NoteListNote) => void;
   open: boolean;
   setOpen: (v: boolean) => void;
   noteTitle: string;
   setNoteTitle: (v: string) => void;
   handleCreateNote: () => void;
   showSidebar: boolean;
+  handleEditNote?: (note: NoteListNote) => void;
+  handleDeleteNote?: (noteId: string) => void;
 }
 
 export function Sidebar({
@@ -38,7 +32,9 @@ export function Sidebar({
   noteTitle,
   setNoteTitle,
   handleCreateNote,
-  showSidebar
+  showSidebar,
+  handleEditNote,
+  handleDeleteNote,
 }: SidebarProps) {
   const { theme, setTheme } = useTheme();
   const SIDEBAR_HEADER_HEIGHT = 72;
@@ -50,7 +46,7 @@ export function Sidebar({
   };
 
   return (
-    <div className={`w-full md:w-96 lg:w-[400px] md:border-r flex flex-col md:h-[calc(100vh-2.5rem) h-[calc(100vh) md:border md:ml-5 md:mt-5 md:mb-5 rounded-xl ${
+    <div className={`w-full md:w-96 lg:w-[400px] md:border-r flex flex-col md:h-[calc(100vh-2.5rem)] h-[calc(100vh)] md:border md:ml-5 md:mt-5 md:mb-5 rounded-xl ${
       showSidebar ? 'block' : 'hidden md:block'
     } relative bg-background md:mr-0`}>
       <div className="flex flex-col h-full">
@@ -90,7 +86,13 @@ export function Sidebar({
               </div>
             </div>
           ) : (
-            <NoteList filteredNotes={filteredNotes} selectedNote={selectedNote} handleNoteSelect={handleNoteSelect} />
+            <NoteList
+              filteredNotes={filteredNotes}
+              selectedNote={selectedNote}
+              handleNoteSelect={handleNoteSelect}
+              handleEditNote={handleEditNote}
+              handleDeleteNote={handleDeleteNote}
+            />
           )}
         </div>
         <div className="border-t p-4 shrink-0" style={{ height: SIDEBAR_FOOTER_HEIGHT, minHeight: SIDEBAR_FOOTER_HEIGHT }}>
@@ -110,4 +112,4 @@ export function Sidebar({
       </div>
     </div>
   );
-} 
+}
