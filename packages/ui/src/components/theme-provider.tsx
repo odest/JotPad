@@ -8,6 +8,8 @@ export type ColorThemeName = typeof availableColorThemes[number];
 
 export type BackgroundSettings = {
   showBackground: boolean;
+  useCustomImage: boolean;
+  customImageSrc: string | null;
   opacity: number;
   brightness: number;
   blur: number;
@@ -35,6 +37,8 @@ type ThemeProviderState = {
 
 const defaultInitialBackgroundSettings: BackgroundSettings = {
   showBackground: true,
+  useCustomImage: false,
+  customImageSrc: null,
   opacity: 30,
   brightness: 100,
   blur: 0,
@@ -94,6 +98,8 @@ export function ThemeProvider({
           const parsedSettings = JSON.parse(storedSettings) as Partial<BackgroundSettings>;
           return {
             showBackground: parsedSettings.showBackground !== undefined ? parsedSettings.showBackground : mergedDefaults.showBackground,
+            useCustomImage: parsedSettings.useCustomImage !== undefined ? parsedSettings.useCustomImage : mergedDefaults.useCustomImage,
+            customImageSrc: parsedSettings.customImageSrc !== undefined ? parsedSettings.customImageSrc : mergedDefaults.customImageSrc,
             opacity: parsedSettings.opacity !== undefined ? parsedSettings.opacity : mergedDefaults.opacity,
             brightness: parsedSettings.brightness !== undefined ? parsedSettings.brightness : mergedDefaults.brightness,
             blur: parsedSettings.blur !== undefined ? parsedSettings.blur : mergedDefaults.blur,

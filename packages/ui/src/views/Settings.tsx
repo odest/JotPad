@@ -1,4 +1,4 @@
-import { ArrowLeft, Sun, Moon, Laptop, Check, Image as Eye, Sparkles, Blend } from "lucide-react";
+import { ArrowLeft, Sun, Moon, Laptop, Check, Image as ImageIcon, Eye, Sparkles, Blend, UploadCloud, Trash2, Palette } from "lucide-react";
 import { Label } from "@repo/ui/components/label";
 import { Button } from "@repo/ui/components/button";
 import { Separator } from "@repo/ui/components/separator";
@@ -21,10 +21,12 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@repo/ui/components/tooltip"; 
+} from "@repo/ui/components/tooltip";
 import { cn } from "@repo/ui/lib/utils";
 import { Switch } from "@repo/ui/components/switch";
 import { Slider } from "@repo/ui/components/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/tabs";
+import React, { useRef } from "react";
 
 interface SettingsProps {
   onClose: () => void;
@@ -42,16 +44,40 @@ const availableColorThemes: Array<{ name: "zinc" | "red" | "rose" | "orange" | "
   { name: "violet", label: "Violet", previewColor: "hsl(263, 70%, 50%)" },
 ];
 
-
 export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
-  const { 
-    themeSetting, 
+  const {
+    themeSetting,
     setTheme,
     colorTheme,
     setColorTheme,
     backgroundSettings,
     setBackgroundSettings
   } = useTheme();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCustomImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBackgroundSettings({
+          customImageSrc: reader.result as string,
+          useCustomImage: true,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveCustomImage = () => {
+    setBackgroundSettings({
+      customImageSrc: null,
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const getCurrentThemeDisplay = () => {
     switch (themeSetting) {
@@ -159,8 +185,8 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Note Background</CardTitle>
-            <CardDescription>Customize the chat background doodle.</CardDescription>
+            <CardTitle>Note Content Background</CardTitle>
+            <CardDescription>Customize the note content background appearance.</CardDescription>
           </CardHeader>
           <Separator className="my-2" />
           <CardContent className="space-y-6">
@@ -168,7 +194,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
               <Label htmlFor="show-background-switch" className="flex flex-col space-y-1">
                 <span>Show Background Image</span>
                 <span className="font-normal leading-snug text-muted-foreground">
-                  Toggle the visibility of the background doodle.
+                  Toggle the visibility of the background image.
                 </span>
               </Label>
               <Switch
@@ -182,6 +208,94 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
             {backgroundSettings.showBackground && (
               <>
                 <Separator />
+
+                <Tabs
+                  value={backgroundSettings.useCustomImage ? "custom" : "doodle"}
+                  onValueChange={(value) => {
+                    const isCustom = value === "custom";
+                    setBackgroundSettings({ useCustomImage: isCustom });
+                    if (isCustom && !backgroundSettings.customImageSrc) {
+                      fileInputRef.current?.click();
+                    }
+                  }}
+                  className="w-full pt-2"
+                >
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="doodle">
+                      <Palette className="mr-2 h-4 w-4" /> Default Doodle
+                    </TabsTrigger>
+                    <TabsTrigger value="custom">
+                      <ImageIcon className="mr-2 h-4 w-4" /> Custom Image
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="custom" className="mt-4 space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex-1 justify-start text-left"
+                        >
+                          <UploadCloud className="mr-2 h-4 w-4 shrink-0" />
+                          {backgroundSettings.customImageSrc ? "Change Image" : "Select Image..."}
+                        </Button>
+                        {backgroundSettings.customImageSrc && (
+                          <TooltipProvider delayDuration={100}>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={handleRemoveCustomImage}
+                                  aria-label="Remove custom image"
+                                  className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent side="bottom" sideOffset={5}>
+                                Remove Custom Image
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {backgroundSettings.customImageSrc ? (
+                      <div className="p-1 border rounded-md bg-muted/20 overflow-hidden flex justify-center items-center aspect-video max-h-48">
+                        <img
+                          src={backgroundSettings.customImageSrc}
+                          alt="Custom background preview"
+                          className="max-w-full max-h-full object-contain rounded-sm"
+                        />
+                      </div>
+                    ) : (
+                        <div className="text-sm text-muted-foreground text-center py-6 px-4 border border-dashed rounded-md">
+                          No custom image selected.
+                          <br/>
+                          <span className="text-xs">(PNG, JPG, GIF, WEBP supported)</span>
+                        </div>
+                    )}
+                    <input
+                      type="file"
+                      id="custom-background-input"
+                      ref={fileInputRef}
+                      accept="image/png, image/jpeg, image/gif, image/webp"
+                      onChange={handleCustomImageChange}
+                      className="hidden"
+                    />
+                  </TabsContent>
+                </Tabs>
+
+                <Separator />
+                <div className="space-y-1 pt-4">
+                    <Label className="text-sm font-medium">Background Effects</Label>
+                    <span className="block text-xs font-normal leading-snug text-muted-foreground pb-2">
+                        Adjust the opacity, brightness, and blur of the background.
+                    </span>
+                </div>
+
                 <div className="space-y-4">
                   <Label htmlFor="background-opacity-slider" className="flex items-center text-sm">
                     <Eye className="mr-2 h-4 w-4 text-muted-foreground" /> Opacity
@@ -195,6 +309,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                     value={[backgroundSettings.opacity]}
                     onValueChange={([value]) => setBackgroundSettings({ opacity: value })}
                     aria-label="Background opacity"
+                    disabled={!backgroundSettings.showBackground}
                   />
                 </div>
 
@@ -211,6 +326,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                     value={[backgroundSettings.brightness]}
                     onValueChange={([value]) => setBackgroundSettings({ brightness: value })}
                     aria-label="Background brightness"
+                    disabled={!backgroundSettings.showBackground}
                   />
                 </div>
 
@@ -227,6 +343,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                     value={[backgroundSettings.blur]}
                     onValueChange={([value]) => setBackgroundSettings({ blur: value })}
                     aria-label="Background blur"
+                    disabled={!backgroundSettings.showBackground}
                   />
                 </div>
 
@@ -237,7 +354,9 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                     <div
                       className="absolute inset-0 bg-center bg-no-repeat"
                       style={{
-                        backgroundImage: 'url(/background.png)',
+                        backgroundImage: backgroundSettings.useCustomImage && backgroundSettings.customImageSrc
+                          ? `url(${backgroundSettings.customImageSrc})`
+                          : 'url(/background.png)',
                         opacity: backgroundSettings.opacity / 100,
                         filter: `brightness(${backgroundSettings.brightness / 100}) blur(${backgroundSettings.blur}px)`,
                       }}

@@ -83,7 +83,7 @@ export function NoteContent({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const NOTE_CONTENT_INPUT_HEIGHT = 72;
 
-  const { backgroundSettings } = useTheme();
+  const { backgroundSettings, appliedTheme } = useTheme()
 
   useEffect(() => {
     if (selectedNote) {
@@ -280,11 +280,23 @@ export function NoteContent({
     entry.text.toLowerCase().includes(searchInEntriesQuery.toLowerCase())
   );
 
-  const backgroundStyle = backgroundSettings.showBackground ? {
-    backgroundImage: 'url(/background.png)',
-    opacity: backgroundSettings.opacity / 100,
-    filter: `brightness(${backgroundSettings.brightness / 100}) blur(${backgroundSettings.blur}px)`,
-  } : {};
+  const getBackgroundStyle = () => {
+    if (!backgroundSettings.showBackground) {
+      return {};
+    }
+
+    const imageUrl = backgroundSettings.useCustomImage && backgroundSettings.customImageSrc
+      ? `url(${backgroundSettings.customImageSrc})`
+      : 'url(/background.png)';
+
+    return {
+      backgroundImage: imageUrl,
+      opacity: backgroundSettings.opacity / 100,
+      filter: `brightness(${backgroundSettings.brightness / 100}) blur(${backgroundSettings.blur}px)`,
+    };
+  };
+
+  const backgroundDynamicStyle = getBackgroundStyle();
 
   if (!selectedNote) {
     return (
@@ -305,7 +317,7 @@ export function NoteContent({
       {backgroundSettings.showBackground && (
         <div
           className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat pointer-events-none"
-          style={backgroundStyle}
+          style={backgroundDynamicStyle}
         />
       )}
 
