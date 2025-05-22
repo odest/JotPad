@@ -1,4 +1,4 @@
-import { Plus, Search, NotebookText, Moon, Sun } from "lucide-react";
+import { Plus, Search, NotebookText, Moon, Sun, Settings } from "lucide-react";
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { NoteDialog } from "@repo/ui/components/NoteDialog";
@@ -19,6 +19,7 @@ interface SidebarProps {
   showSidebar: boolean;
   handleEditNote?: (note: NoteListNote) => void;
   handleDeleteNote?: (noteId: string) => void;
+  onToggleSettings: () => void;
 }
 
 export function Sidebar({
@@ -35,14 +36,15 @@ export function Sidebar({
   showSidebar,
   handleEditNote,
   handleDeleteNote,
+  onToggleSettings,
 }: SidebarProps) {
-  const { theme, setTheme } = useTheme();
+  const { setTheme, appliedTheme } = useTheme();
   const SIDEBAR_HEADER_HEIGHT = 72;
   const SIDEBAR_SEARCH_HEIGHT = 64;
   const SIDEBAR_FOOTER_HEIGHT = 72;
 
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
+  const toggleThemeInSidebar = () => {
+    setTheme(appliedTheme === "light" ? "dark" : "light");
   };
 
   return (
@@ -53,16 +55,29 @@ export function Sidebar({
         <div className="border-b p-4 shrink-0" style={{ height: SIDEBAR_HEADER_HEIGHT, minHeight: SIDEBAR_HEADER_HEIGHT }}>
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">Notes</h1>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={toggleTheme}
-              className="relative h-9 w-9"
-            >
-              <Moon className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Sun className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">Toggle theme</span>
-            </Button>
+            <div className="flex items-center space-x-1">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleThemeInSidebar}
+                className="relative h-9 w-9"
+                aria-label="Toggle theme"
+              >
+                <Moon className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Sun className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <span className="sr-only">Toggle theme</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggleSettings}
+                className="h-9 w-9"
+                aria-label="Open settings"
+              >
+                <Settings className="h-5 w-5" />
+                <span className="sr-only">Settings</span>
+              </Button>
+            </div>
           </div>
         </div>
         <div className="border-b p-3.5 shrink-0" style={{ height: SIDEBAR_SEARCH_HEIGHT, minHeight: SIDEBAR_SEARCH_HEIGHT }}>
