@@ -4,7 +4,7 @@ import "@repo/ui/globals.css";
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="jotpad-theme">
+    <ThemeProvider defaultTheme="system">
       <HomePage />
     </ThemeProvider>
   );

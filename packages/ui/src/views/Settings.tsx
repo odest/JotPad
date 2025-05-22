@@ -1,4 +1,4 @@
-import { ArrowLeft, Sun, Moon, Laptop, Check } from "lucide-react";
+import { ArrowLeft, Sun, Moon, Laptop, Check, Image as Eye, Sparkles, Blend } from "lucide-react";
 import { Label } from "@repo/ui/components/label";
 import { Button } from "@repo/ui/components/button";
 import { Separator } from "@repo/ui/components/separator";
@@ -23,6 +23,8 @@ import {
   TooltipTrigger,
 } from "@repo/ui/components/tooltip"; 
 import { cn } from "@repo/ui/lib/utils";
+import { Switch } from "@repo/ui/components/switch";
+import { Slider } from "@repo/ui/components/slider";
 
 interface SettingsProps {
   onClose: () => void;
@@ -42,7 +44,14 @@ const availableColorThemes: Array<{ name: "zinc" | "red" | "rose" | "orange" | "
 
 
 export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
-  const { themeSetting, setTheme, appliedTheme, colorTheme, setColorTheme } = useTheme();
+  const { 
+    themeSetting, 
+    setTheme,
+    colorTheme,
+    setColorTheme,
+    backgroundSettings,
+    setBackgroundSettings
+  } = useTheme();
 
   const getCurrentThemeDisplay = () => {
     switch (themeSetting) {
@@ -55,7 +64,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
   const currentThemeDisplay = getCurrentThemeDisplay();
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh)] md:h-[calc(100vh-2.5rem)] md:border md:m-5 md:mb-5 rounded-xl ${!showSidebar ? 'block' : 'hidden md:block'} bg-background">
+    <div className={`relative flex-1 flex flex-col h-[calc(100vh)] md:h-[calc(100vh-2.5rem)] md:border md:m-5 md:mb-5 rounded-xl overflow-hidden bg-background`}>
       <div
         className="flex items-center p-4 border-b shrink-0"
         style={{ height: SIDEBAR_HEADER_HEIGHT, minHeight: SIDEBAR_HEADER_HEIGHT }}
@@ -145,6 +154,102 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                 ))}
               </TooltipProvider>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Note Background</CardTitle>
+            <CardDescription>Customize the chat background doodle.</CardDescription>
+          </CardHeader>
+          <Separator className="my-2" />
+          <CardContent className="space-y-6">
+            <div className="flex items-center justify-between space-x-2">
+              <Label htmlFor="show-background-switch" className="flex flex-col space-y-1">
+                <span>Show Background Image</span>
+                <span className="font-normal leading-snug text-muted-foreground">
+                  Toggle the visibility of the background doodle.
+                </span>
+              </Label>
+              <Switch
+                id="show-background-switch"
+                checked={backgroundSettings.showBackground}
+                onCheckedChange={(checked) => setBackgroundSettings({ showBackground: checked })}
+                aria-label="Toggle background image"
+              />
+            </div>
+
+            {backgroundSettings.showBackground && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <Label htmlFor="background-opacity-slider" className="flex items-center text-sm">
+                    <Eye className="mr-2 h-4 w-4 text-muted-foreground" /> Opacity
+                    <span className="ml-auto text-muted-foreground">{backgroundSettings.opacity}%</span>
+                  </Label>
+                  <Slider
+                    id="background-opacity-slider"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={[backgroundSettings.opacity]}
+                    onValueChange={([value]) => setBackgroundSettings({ opacity: value })}
+                    aria-label="Background opacity"
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <Label htmlFor="background-brightness-slider" className="flex items-center text-sm">
+                    <Sparkles className="mr-2 h-4 w-4 text-muted-foreground" /> Brightness
+                    <span className="ml-auto text-muted-foreground">{backgroundSettings.brightness}%</span>
+                  </Label>
+                  <Slider
+                    id="background-brightness-slider"
+                    min={0}
+                    max={200}
+                    step={1}
+                    value={[backgroundSettings.brightness]}
+                    onValueChange={([value]) => setBackgroundSettings({ brightness: value })}
+                    aria-label="Background brightness"
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <Label htmlFor="background-blur-slider" className="flex items-center text-sm">
+                    <Blend className="mr-2 h-4 w-4 text-muted-foreground" /> Blur
+                    <span className="ml-auto text-muted-foreground">{backgroundSettings.blur}px</span>
+                  </Label>
+                  <Slider
+                    id="background-blur-slider"
+                    min={0}
+                    max={10} 
+                    step={0.1}
+                    value={[backgroundSettings.blur]}
+                    onValueChange={([value]) => setBackgroundSettings({ blur: value })}
+                    aria-label="Background blur"
+                  />
+                </div>
+
+                <Separator />
+                <div className="space-y-4 pt-2">
+                  <Label className="text-sm font-medium">Preview</Label>
+                  <div className="relative rounded-lg border bg-background p-4 h-48 overflow-hidden flex items-center justify-center">
+                    <div
+                      className="absolute inset-0 bg-center bg-no-repeat"
+                      style={{
+                        backgroundImage: 'url(/background.png)',
+                        opacity: backgroundSettings.opacity / 100,
+                        filter: `brightness(${backgroundSettings.brightness / 100}) blur(${backgroundSettings.blur}px)`,
+                      }}
+                    />
+                    <div className="relative z-[1] bg-muted p-3 rounded-xl shadow-md max-w-[70%]">
+                      <p className="text-sm">This is a sample note entry to preview the background.</p>
+                      <p className="text-xs text-muted-foreground/80 mt-1 text-right">10:30</p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

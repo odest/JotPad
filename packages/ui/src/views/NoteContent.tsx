@@ -16,6 +16,7 @@ import { ChevronLeft, MoreVertical, Pencil, Send, Trash, Notebook, Search, X, Ch
 import React, { useState, useEffect, useRef } from "react";
 import { invoke } from '@tauri-apps/api/core';
 import { db, Note, NoteEntry } from "@repo/ui/lib/database";
+import { useTheme } from "@repo/ui/components/theme-provider";
 
 interface NoteContentProps {
   selectedNote: Note | null;
@@ -54,7 +55,6 @@ const highlightText = (text: string, query: string): React.ReactNode => {
   );
 };
 
-
 export function NoteContent({
   selectedNote,
   handleEditNote,
@@ -82,6 +82,8 @@ export function NoteContent({
   const newEntryInputRef = useRef<HTMLInputElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const NOTE_CONTENT_INPUT_HEIGHT = 72;
+
+  const { backgroundSettings } = useTheme();
 
   useEffect(() => {
     if (selectedNote) {
@@ -278,10 +280,16 @@ export function NoteContent({
     entry.text.toLowerCase().includes(searchInEntriesQuery.toLowerCase())
   );
 
+  const backgroundStyle = backgroundSettings.showBackground ? {
+    backgroundImage: 'url(/background.png)',
+    opacity: backgroundSettings.opacity / 100,
+    filter: `brightness(${backgroundSettings.brightness / 100}) blur(${backgroundSettings.blur}px)`,
+  } : {};
+
   if (!selectedNote) {
     return (
-      <div className={`flex-1 flex flex-col h-[calc(100vh)] md:h-[calc(100vh-2.5rem)] md:border md:m-5 md:mb-5 rounded-xl ${!showSidebar ? 'block' : 'hidden md:block'} bg-background`}>
-        <div className="flex-1 flex justify-center items-center h-[calc(100vh-2.5rem)]">
+      <div className={`relative flex-1 flex flex-col h-[calc(100vh)] md:h-[calc(100vh-2.5rem)] md:border md:m-5 md:mb-5 rounded-xl overflow-hidden ${!showSidebar ? 'block' : 'hidden md:block'} bg-background`}>
+        <div className="flex-1 flex justify-center items-center h-full">
           <div className="flex flex-col items-center justify-center">
             <Notebook className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-medium text-center">Select a note</h3>
@@ -293,9 +301,16 @@ export function NoteContent({
   }
 
   return (
-    <div className={`flex-1 flex flex-col h-[calc(100vh)] md:h-[calc(100vh-2.5rem)] md:border md:m-5 md:mb-5 rounded-xl ${!showSidebar ? 'block' : 'hidden md:block'} bg-background`}>
-      <div className="flex flex-col h-full">
-        <div className="border-b p-4 shrink-0" style={{ height: SIDEBAR_HEADER_HEIGHT, minHeight: SIDEBAR_HEADER_HEIGHT }}>
+    <div className={`relative flex-1 flex flex-col h-[calc(100vh)] md:h-[calc(100vh-2.5rem)] md:border md:m-5 md:mb-5 rounded-xl overflow-hidden ${!showSidebar ? 'block' : 'hidden md:block'} bg-background`}>
+      {backgroundSettings.showBackground && (
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat pointer-events-none"
+          style={backgroundStyle}
+        />
+      )}
+
+      <div className="relative z-[1] flex flex-col h-full">
+        <div className="border-b p-4 shrink-0 z-10 bg-background" style={{ height: SIDEBAR_HEADER_HEIGHT, minHeight: SIDEBAR_HEADER_HEIGHT }}>
           <div className="max-w-3xl mx-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -515,7 +530,7 @@ export function NoteContent({
 
         <div
           ref={bottomInputContainerRef}
-          className="border-t p-4 shrink-0 sticky bottom-0 z-10 bg-transparent"
+          className="border-t p-4 shrink-0 sticky bottom-0 z-10 bg-background"
           style={{ height: NOTE_CONTENT_INPUT_HEIGHT, minHeight: NOTE_CONTENT_INPUT_HEIGHT }}
         >
           <div className="max-w-3xl mx-auto flex items-center gap-2">

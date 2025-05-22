@@ -6,12 +6,21 @@ type AppliedTheme = "light" | "dark";
 const availableColorThemes = ["zinc", "red", "rose", "orange", "green", "blue", "yellow", "violet"] as const;
 export type ColorThemeName = typeof availableColorThemes[number];
 
+export type BackgroundSettings = {
+  showBackground: boolean;
+  opacity: number;
+  brightness: number;
+  blur: number;
+};
+
 type ThemeProviderProps = {
   children: React.ReactNode;
   defaultTheme?: ThemeSetting;
   defaultColorTheme?: ColorThemeName;
+  defaultBackgroundSettings?: Partial<BackgroundSettings>;
   storageKeyTheme?: string;
   storageKeyColor?: string;
+  storageKeyBackground?: string;
 };
 
 type ThemeProviderState = {
@@ -20,6 +29,15 @@ type ThemeProviderState = {
   setTheme: (theme: ThemeSetting) => void;
   colorTheme: ColorThemeName;
   setColorTheme: (colorTheme: ColorThemeName) => void;
+  backgroundSettings: BackgroundSettings;
+  setBackgroundSettings: (settings: Partial<BackgroundSettings>) => void;
+};
+
+const defaultInitialBackgroundSettings: BackgroundSettings = {
+  showBackground: true,
+  opacity: 30,
+  brightness: 100,
+  blur: 0,
 };
 
 const initialState: ThemeProviderState = {
@@ -28,6 +46,8 @@ const initialState: ThemeProviderState = {
   setTheme: () => null,
   colorTheme: "zinc",
   setColorTheme: () => null,
+  backgroundSettings: defaultInitialBackgroundSettings,
+  setBackgroundSettings: () => null,
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
@@ -36,8 +56,10 @@ export function ThemeProvider({
   children,
   defaultTheme = "system",
   defaultColorTheme = "zinc",
+  defaultBackgroundSettings: propDefaultBackgroundSettings = {},
   storageKeyTheme = "vite-ui-theme-setting",
   storageKeyColor = "vite-ui-color-theme",
+  storageKeyBackground = "vite-chat-background-settings",
   ...props
 }: ThemeProviderProps) {
   const [themeSetting, setThemeSetting] = useState<ThemeSetting>(() => {
@@ -61,6 +83,28 @@ export function ThemeProvider({
       return availableColorThemes.includes(storedColor) ? storedColor : defaultColorTheme;
     }
     return defaultColorTheme;
+  });
+
+  const [backgroundSettings, setBackgroundSettingsState] = useState<BackgroundSettings>(() => {
+    const mergedDefaults = { ...defaultInitialBackgroundSettings, ...propDefaultBackgroundSettings };
+    if (typeof window !== "undefined") {
+      const storedSettings = localStorage.getItem(storageKeyBackground);
+      if (storedSettings) {
+        try {
+          const parsedSettings = JSON.parse(storedSettings) as Partial<BackgroundSettings>;
+          return {
+            showBackground: parsedSettings.showBackground !== undefined ? parsedSettings.showBackground : mergedDefaults.showBackground,
+            opacity: parsedSettings.opacity !== undefined ? parsedSettings.opacity : mergedDefaults.opacity,
+            brightness: parsedSettings.brightness !== undefined ? parsedSettings.brightness : mergedDefaults.brightness,
+            blur: parsedSettings.blur !== undefined ? parsedSettings.blur : mergedDefaults.blur,
+          };
+        } catch (e) {
+          console.error("Failed to parse background settings from localStorage", e);
+          return mergedDefaults;
+        }
+      }
+    }
+    return mergedDefaults;
   });
 
   useEffect(() => {
@@ -110,6 +154,12 @@ export function ThemeProvider({
     localStorage.setItem(storageKeyColor, colorTheme);
   }, [colorTheme, storageKeyColor]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(storageKeyBackground, JSON.stringify(backgroundSettings));
+    }
+  }, [backgroundSettings, storageKeyBackground]);
+
   const value = {
     themeSetting,
     appliedTheme,
@@ -119,6 +169,10 @@ export function ThemeProvider({
     colorTheme,
     setColorTheme: (newColorTheme: ColorThemeName) => {
       setColorThemeState(newColorTheme);
+    },
+    backgroundSettings,
+    setBackgroundSettings: (newSettings: Partial<BackgroundSettings>) => {
+      setBackgroundSettingsState(prev => ({ ...prev, ...newSettings }));
     },
   };
 
