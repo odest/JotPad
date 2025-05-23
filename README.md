@@ -11,6 +11,14 @@ JotPad is an open-source, cross-platform note-taking application that allows you
 
 </div>
 
+<div align="center">
+  <picture>
+    <source srcset="https://raw.githubusercontent.com/odest/JotPad/refs/heads/master/apps/native/public/screenshot_light.png" media="(prefers-color-scheme: light)">
+    <source srcset="https://raw.githubusercontent.com/odest/JotPad/refs/heads/master/apps/native/public/screenshot_dark.png" media="(prefers-color-scheme: dark)">
+    <img src="https://raw.githubusercontent.com/odest/JotPad/refs/heads/master/apps/native/public/screenshot_dark.png" alt="screenshot">
+  </picture>
+</div>
+
 <br>
 
 ## Features
