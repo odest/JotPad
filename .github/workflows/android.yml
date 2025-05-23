@@ -46,7 +46,7 @@ jobs:
 
       - name: Build Android APK
         run: |
-          pnpm --filter=apps/native tauri android build --release
+          pnpm tauri android build --release
 
       - name: Create GitHub Release
         id: create_release
