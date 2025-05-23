@@ -35,6 +35,11 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
 
+      - name: Set NDK_HOME environment variable
+        run: |
+          NDK_DIR=$(ls -d /usr/local/lib/android/sdk/ndk/* | sort -V | tail -n 1)
+          echo "NDK_HOME=$NDK_DIR" >> $GITHUB_ENV
+
       - name: Set up Android signing
         run: |
           cd apps/native/src-tauri/gen/android
