@@ -1,6 +1,6 @@
 [package]
 name = "JotPad"
-version = "0.1.0"
+version = "0.1.1"
 description = "JotPad is an open-source, cross-platform note-taking app that lets you message yourself, just like a chat."
 authors = ["you"]
 edition = "2021"
