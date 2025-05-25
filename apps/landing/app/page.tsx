@@ -6,6 +6,7 @@ import { ArrowRight, Globe, Menu, X, Star, Feather, Code, Shield, Smartphone, Me
 import { GlowingEffect } from "@repo/ui/components/glowing-effect";
 import { AnimatedGroup } from '@repo/ui/components/animated-group'
 import DownloadButton from '@repo/ui/components/DownloadButton'
+import { Footer } from '@repo/ui/components/footer-section';
 import { TextEffect } from '@repo/ui/components/text-effect'
 import { Button } from '@repo/ui/components/button'
 import { cn } from '@repo/ui/lib/utils'
@@ -179,6 +180,7 @@ export default function Home() {
           </div>
         </section>
         <FeaturesSection />
+        <Footer />
       </main>
     </>
   )
