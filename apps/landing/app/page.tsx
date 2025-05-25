@@ -2,8 +2,9 @@
 import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Globe, Menu, X, Star, Download } from 'lucide-react'
+import { ArrowRight, Globe, Menu, X, Star } from 'lucide-react'
 import { AnimatedGroup } from '@repo/ui/components/animated-group'
+import DownloadButton from '@repo/ui/components/DownloadButton'
 import { TextEffect } from '@repo/ui/components/text-effect'
 import { Button } from '@repo/ui/components/button'
 import { cn } from '@repo/ui/lib/utils'
@@ -70,7 +71,7 @@ export default function Home() {
               />
             </AnimatedGroup>
             <div aria-hidden className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--background)_75%)]" />
-            <div className="mx-auto max-w-7xl px-6">
+            <div className="mx-auto max-w-7xl px-6 relative z-[1]">
               <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
                 <AnimatedGroup variants={transitionVariants}>
                   <Link
@@ -127,13 +128,7 @@ export default function Home() {
                       ...transitionVariants,
                   }}
                   className="mt-12 flex flex-col items-center justify-center gap-4 md:flex-row">
-                  <Link href="https://github.com/odest/JotPad/releases/tag/v0.1.0" target="_blank" rel="noopener noreferrer">
-                    <Button
-                      size="lg"
-                      className="gap-2 px-6 py-5 text-lg shadow-xl border-2 border-black dark:border-white hover:text-black hover:bg-transparent hover:dark:text-white hover:scale-105 hover:shadow-2xl transition-transform duration-200">
-                        <Download className="w-5 h-5" /> Download MVP
-                    </Button>
-                  </Link>
+                  <DownloadButton />
                   <Link href="https://github.com/odest/JotPad" target="_blank" rel="noopener noreferrer">
                     <Button
                       size="lg"
