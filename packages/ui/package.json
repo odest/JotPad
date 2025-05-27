@@ -10,6 +10,7 @@
     "./types/*": "./src/types/*.ts",
     "./views/*": "./src/views/*.tsx",
     "./pages/*": "./src/pages/*.tsx",
+    "./utils/*": "./src/utils/*.tsx",
     "./globals.css": "./src/styles/globals.css",
     "./postcss.config": "./postcss.config.mjs",
     "./tailwind.config": "./tailwind.config.ts"
