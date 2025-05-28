@@ -27,6 +27,7 @@ export function HomePage() {
   const [showSidebar, setShowSidebar] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [noteIdToDelete, setNoteIdToDelete] = useState<string | null>(null);
+  const [duplicateTitleDialogOpen, setDuplicateTitleDialogOpen] = useState(false);
 
   useEffect(() => {
     loadNotes();
@@ -68,6 +69,11 @@ export function HomePage() {
 
   const handleCreateNote = async () => {
     if (noteTitle.trim()) {
+      const duplicate = notes.some(note => note.title.trim().toLowerCase() === noteTitle.trim().toLowerCase());
+      if (duplicate && !editId) {
+        setDuplicateTitleDialogOpen(true);
+        return;
+      }
       try {
         if (editId) {
           const currentNoteId = editId;
@@ -229,6 +235,19 @@ export function HomePage() {
               }}
             >
               Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={duplicateTitleDialogOpen} onOpenChange={setDuplicateTitleDialogOpen}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] rounded-lg sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Duplicate Note Title</DialogTitle>
+          </DialogHeader>
+          <div>A note with the same title already exists. Please enter a different title.</div>
+          <DialogFooter className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+            <Button onClick={() => setDuplicateTitleDialogOpen(false)} autoFocus>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
