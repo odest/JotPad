@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { invoke } from '@tauri-apps/api/core';
 import {
   Card,
   CardTitle,
@@ -45,6 +46,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
+import { exportAllNotes } from "@repo/ui/lib/exportNotes";
 import { useTheme } from "@repo/ui/components/theme-provider";
 import { exportFormats, ExportFormat } from "@repo/ui/components/ExportNoteDialog";
 
@@ -123,10 +125,15 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
     }
   };
 
-  const handleExportNotes = () => {
-    console.log(
-      `User wants to export all notes as ${selectedExportFormat.toUpperCase()}.`
-    );
+  const handleExportNotes = async () => {
+    await invoke('log_message', { level: 'info', message: `Attempting to export notes. Format: ${selectedExportFormat}` });
+    try {
+      await exportAllNotes(selectedExportFormat);
+      await invoke('log_message', { level: 'info', message: `Notes successfully exported. Format: ${selectedExportFormat}`});
+    } catch (error) {
+      await invoke('log_message', { level: 'error', message: `Export failed for notes with format ${selectedExportFormat}:`, error });
+      alert("Export failed. Please try again.");
+    }
   };
 
   return (

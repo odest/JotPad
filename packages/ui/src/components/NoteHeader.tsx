@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { invoke } from '@tauri-apps/api/core';
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@repo/ui/components/button";
 import { Note } from "@repo/ui/lib/database";
+import { exportSingleNote } from "@repo/ui/lib/exportNotes";
 import { ExportNoteDialog, ExportFormat } from "@repo/ui/components/ExportNoteDialog";
 
 interface NoteHeaderProps {
@@ -53,9 +55,14 @@ export function NoteHeader({
   };
 
   const handleConfirmNoteExport = (format: ExportFormat, note: Note) => {
-    console.log(
-      `User wants to export note titled "${note.title}" (ID: ${note.id}) as ${format.toUpperCase()}.`
-    );
+    invoke('log_message', { level: 'info', message: `Attempting to export notes. Format: ${format}`});
+    try {
+      exportSingleNote(note, format);
+      invoke('log_message', { level: 'info', message: `Notes successfully exported. Format: ${format}`});
+    } catch (error) {
+      invoke('log_message', { level: 'error', message: `Export failed for notes with format ${format}:`, error});
+      alert("Export failed. Please try again.");
+    }
   };
 
   return (
