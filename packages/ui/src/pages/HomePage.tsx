@@ -1,8 +1,16 @@
 import { useState, useEffect } from "react";
-import { NoteContent } from "@repo/ui/views/NoteContent";
+import { invoke } from '@tauri-apps/api/core';
+import {
+  Dialog,
+  DialogTitle,
+  DialogHeader,
+  DialogFooter,
+  DialogContent,
+} from "@repo/ui/components/dialog";
+import { Button } from "@repo/ui/components/button";
 import { Sidebar } from "@repo/ui/views/Sidebar";
 import { Settings } from "@repo/ui/views/Settings";
-import { invoke } from '@tauri-apps/api/core';
+import { NoteContent } from "@repo/ui/views/NoteContent";
 import { db, Note as DbNote } from "@repo/ui/lib/database";
 
 interface AppNote extends DbNote {
@@ -18,6 +26,7 @@ export function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSidebar, setShowSidebar] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [noteIdToDelete, setNoteIdToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     loadNotes();
@@ -179,7 +188,7 @@ export function HomePage() {
             handleOpenEditDialog(originalNote);
           }
         }}
-        handleDeleteNote={handleDeleteNote}
+        handleDeleteNote={(id) => setNoteIdToDelete(id)}
         onToggleSettings={openSettings}
         isEdit={!!editId}
       />
@@ -193,13 +202,37 @@ export function HomePage() {
         <NoteContent
           selectedNote={selectedNote}
           handleEditNote={handleOpenEditDialog}
-          handleDeleteNote={handleDeleteNote}
+          handleDeleteNote={(id) => setNoteIdToDelete(id)}
           setShowSidebar={setShowSidebar}
           SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}
           onEntryAdded={loadNotes}
           showSidebar={showSidebar}
         />
       )}
+      <Dialog open={!!noteIdToDelete} onOpenChange={open => { if (!open) setNoteIdToDelete(null); }}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] rounded-lg sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Note</DialogTitle>
+          </DialogHeader>
+          <div>Are you sure you want to delete this note? This action cannot be undone.</div>
+          <DialogFooter className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+            <Button variant="outline" onClick={() => setNoteIdToDelete(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (noteIdToDelete) {
+                  await handleDeleteNote(noteIdToDelete);
+                  setNoteIdToDelete(null);
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
