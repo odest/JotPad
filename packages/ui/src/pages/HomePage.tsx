@@ -134,6 +134,14 @@ export function HomePage() {
 
   const SIDEBAR_HEADER_HEIGHT = 72;
 
+  const handleDialogOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      setEditId(null);
+      setNoteTitle("");
+    }
+  };
+
   return (
     <div className="min-h-screen w-full flex">
       <Sidebar
@@ -160,7 +168,7 @@ export function HomePage() {
           }
         }}
         open={open}
-        setOpen={setOpen}
+        setOpen={handleDialogOpenChange}
         noteTitle={noteTitle}
         setNoteTitle={setNoteTitle}
         handleCreateNote={handleCreateNote}
@@ -173,6 +181,7 @@ export function HomePage() {
         }}
         handleDeleteNote={handleDeleteNote}
         onToggleSettings={openSettings}
+        isEdit={!!editId}
       />
       
       {showSettings ? (

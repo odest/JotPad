@@ -20,6 +20,7 @@ interface SidebarProps {
   handleEditNote?: (note: NoteListNote) => void;
   handleDeleteNote?: (noteId: string) => void;
   onToggleSettings: () => void;
+  isEdit: boolean;
 }
 
 export function Sidebar({
@@ -37,6 +38,7 @@ export function Sidebar({
   handleEditNote,
   handleDeleteNote,
   onToggleSettings,
+  isEdit,
 }: SidebarProps) {
   const { setTheme, appliedTheme } = useTheme();
   const SIDEBAR_HEADER_HEIGHT = 72;
@@ -117,8 +119,12 @@ export function Sidebar({
             noteTitle={noteTitle}
             setNoteTitle={setNoteTitle}
             onCreate={handleCreateNote}
+            isEdit={isEdit}
             trigger={
-              <Button className="w-full">
+              <Button className="w-full" onClick={() => {
+                setNoteTitle("");
+                setOpen(true);
+              }}>
                 <Plus className="w-4 h-4 mr-2" /> New Note
               </Button>
             }

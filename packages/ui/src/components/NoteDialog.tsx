@@ -18,6 +18,7 @@ interface NoteDialogProps {
   setNoteTitle: (title: string) => void;
   onCreate: () => void;
   trigger?: ReactNode;
+  isEdit?: boolean;
 }
 
 export function NoteDialog({
@@ -27,15 +28,16 @@ export function NoteDialog({
   setNoteTitle,
   onCreate,
   trigger,
+  isEdit = false,
 }: NoteDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="max-w-[calc(100vw-2rem)] rounded-lg sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Note</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Note" : "Create New Note"}</DialogTitle>
           <DialogDescription>
-            Enter a title for your note and click create to get started.
+            {isEdit ? "Edit the title of your note and click save." : "Enter a title for your note and click create to get started."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -63,7 +65,7 @@ export function NoteDialog({
             onClick={onCreate}
             disabled={!noteTitle.trim()}
           >
-            Create
+            {isEdit ? "Save" : "Create"}
           </Button>
         </DialogFooter>
       </DialogContent>
