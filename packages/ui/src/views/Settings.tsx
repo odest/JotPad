@@ -1,4 +1,4 @@
-import React, { useRef, useState, ComponentType } from "react";
+import React, { useRef, useState } from "react";
 import {
   Card,
   CardTitle,
@@ -38,9 +38,6 @@ import {
   Trash2,
   Laptop,
   Download,
-  FileJson,
-  FileType,
-  FileCode,
   Sparkles,
   ArrowLeft,
   ChevronDown,
@@ -49,6 +46,7 @@ import {
 } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 import { useTheme } from "@repo/ui/components/theme-provider";
+import { exportFormats, ExportFormat } from "@repo/ui/components/ExportNoteDialog";
 
 interface SettingsProps {
   onClose: () => void;
@@ -64,22 +62,6 @@ const availableColorThemes: Array<{ name: "zinc" | "red" | "rose" | "orange" | "
   { name: "blue", label: "Blue", previewColor: "hsl(217, 91%, 60%)" },
   { name: "yellow", label: "Yellow", previewColor: "hsl(48, 96%, 53%)" },
   { name: "violet", label: "Violet", previewColor: "hsl(263, 70%, 50%)" },
-];
-
-type ExportFormat = "json" | "txt" | "md";
-
-interface ExportFormatOption {
-  value: ExportFormat;
-  label: string;
-  Icon: ComponentType<{ className?: string }>;
-  mimeType: string;
-  extension: string;
-}
-
-const exportFormats: ExportFormatOption[] = [
-  { value: "json", label: "JSON", Icon: FileJson, mimeType: "application/json", extension: "json" },
-  { value: "txt", label: "Plain Text", Icon: FileType, mimeType: "text/plain", extension: "txt" },
-  { value: "md", label: "Markdown", Icon: FileCode, mimeType: "text/markdown", extension: "md" },
 ];
 
 export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
