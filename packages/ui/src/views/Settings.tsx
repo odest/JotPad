@@ -1,8 +1,5 @@
-import { ArrowLeft, Sun, Moon, Laptop, Check, Image as ImageIcon, Eye, Sparkles, Blend, UploadCloud, Trash2, Palette } from "lucide-react";
-import { Label } from "@repo/ui/components/label";
-import { Button } from "@repo/ui/components/button";
-import { Separator } from "@repo/ui/components/separator";
-import { useTheme } from "@repo/ui/components/theme-provider";
+import React, { useRef, useState } from "react";
+import { invoke } from '@tauri-apps/api/core';
 import {
   Card,
   CardTitle,
@@ -11,22 +8,47 @@ import {
   CardDescription,
 } from "@repo/ui/components/card";
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@repo/ui/components/dropdown-menu";
+  Tabs,
+  TabsList,
+  TabsContent,
+  TabsTrigger,
+} from "@repo/ui/components/tabs";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
+  TooltipProvider,
 } from "@repo/ui/components/tooltip";
-import { cn } from "@repo/ui/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+} from "@repo/ui/components/dropdown-menu";
+import { Label } from "@repo/ui/components/label";
+import { Button } from "@repo/ui/components/button";
 import { Switch } from "@repo/ui/components/switch";
 import { Slider } from "@repo/ui/components/slider";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/tabs";
-import React, { useRef } from "react";
+import { Separator } from "@repo/ui/components/separator";
+import {
+  Sun,
+  Eye,
+  Moon,
+  Blend,
+  Check,
+  Trash2,
+  Laptop,
+  Download,
+  Sparkles,
+  ArrowLeft,
+  ChevronDown,
+  UploadCloud,
+  ChevronRight,
+} from "lucide-react";
+import { cn } from "@repo/ui/lib/utils";
+import { exportAllNotes } from "@repo/ui/lib/exportNotes";
+import { useTheme } from "@repo/ui/components/theme-provider";
+import { exportFormats, ExportFormat } from "@repo/ui/components/ExportNoteDialog";
 
 interface SettingsProps {
   onClose: () => void;
@@ -55,6 +77,13 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
   } = useTheme();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [isAppearanceExpanded, setIsAppearanceExpanded] = useState(false);
+  const [isBackgroundExpanded, setIsBackgroundExpanded] = useState(false);
+  const [isExportExpanded, setIsExportExpanded] = useState(false);
+
+  const [selectedExportFormat, setSelectedExportFormat] = useState<ExportFormat>("json");
+  const currentExportFormatDisplay = exportFormats.find(f => f.value === selectedExportFormat)!;
 
   const handleCustomImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -89,288 +118,400 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
   };
   const currentThemeDisplay = getCurrentThemeDisplay();
 
+  const handleKeyDown = (event: React.KeyboardEvent, action: () => void) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      action();
+    }
+  };
+
+  const handleExportNotes = async () => {
+    await invoke('log_message', { level: 'info', message: `Attempting to export notes. Format: ${selectedExportFormat}` });
+    try {
+      await exportAllNotes(selectedExportFormat);
+      await invoke('log_message', { level: 'info', message: `Notes successfully exported. Format: ${selectedExportFormat}`});
+    } catch (error) {
+      await invoke('log_message', { level: 'error', message: `Export failed for notes with format ${selectedExportFormat}:`, error });
+      alert("Export failed. Please try again.");
+    }
+  };
+
   return (
     <div className={`relative flex-1 flex flex-col h-[calc(100vh)] md:h-[calc(100vh-2.5rem)] md:border md:m-5 md:mb-5 rounded-xl overflow-hidden bg-background`}>
       <div
-        className="flex items-center p-4 border-b shrink-0"
+        className="flex items-center px-4 py-3 border-b shrink-0"
         style={{ height: SIDEBAR_HEADER_HEIGHT, minHeight: SIDEBAR_HEADER_HEIGHT }}
       >
-        <Button variant="ghost" size="icon" onClick={onClose} className="mr-2 h-9 w-9 md:hidden">
-          <ArrowLeft className="h-5 w-5" /> <span className="sr-only">Back</span>
+        <Button variant="ghost" size="icon" onClick={onClose} className="mr-2 h-8 w-8 md:hidden">
+          <ArrowLeft className="h-4 w-4" /> <span className="sr-only">Back</span>
         </Button>
-        <h2 className="text-xl font-semibold">Settings</h2>
+        <h2 className="text-lg font-semibold">Settings</h2>
       </div>
 
-      <div className="flex-1 p-4 md:p-6 overflow-y-auto custom-scrollbar">
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-            <CardDescription>Customize the look and feel of the application.</CardDescription>
-          </CardHeader>
-          <Separator className="my-2" />
-          <CardContent>
-            <div className="flex items-center justify-between space-x-2 py-2">
-              <Label htmlFor="theme-dropdown" className="flex flex-col space-y-1">
-                <span>Mode</span>
-                <span className="font-normal leading-snug text-muted-foreground">
-                  Select light, dark, or system default mode.
-                </span>
-              </Label>
-              <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <Button variant="outline" id="theme-dropdown" className="w-[160px] justify-start">
-                    <currentThemeDisplay.Icon className="mr-2 h-4 w-4" />
-                    {currentThemeDisplay.name}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[160px]">
-                  <DropdownMenuItem onClick={() => setTheme("light")}>
-                    <Sun className="mr-2 h-4 w-4" /> <span>Light</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme("dark")}>
-                    <Moon className="mr-2 h-4 w-4" /> <span>Dark</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme("system")}>
-                    <Laptop className="mr-2 h-4 w-4" /> <span>System</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+      <div className="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-4">
+
+        <Card>
+          <CardHeader
+            className="pb-3 flex items-center justify-between cursor-pointer"
+            onClick={() => setIsAppearanceExpanded(!isAppearanceExpanded)}
+            onKeyDown={(e) => handleKeyDown(e, () => setIsAppearanceExpanded(!isAppearanceExpanded))}
+            role="button"
+            aria-expanded={isAppearanceExpanded}
+            aria-controls="appearance-content"
+            tabIndex={0}
+          >
+            <div>
+              <CardTitle className="text-base">Appearance</CardTitle>
+              <CardDescription className="text-sm">Customize the look and feel.</CardDescription>
             </div>
-          </CardContent>
+            {isAppearanceExpanded ? (
+              <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
+            ) : (
+              <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+            )}
+          </CardHeader>
+          {isAppearanceExpanded && (
+            <CardContent id="appearance-content" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Theme Mode</Label>
+                  <p className="text-xs text-muted-foreground">Light, dark, or system default</p>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Button variant="outline" size="sm" className="w-[130px] justify-start">
+                      <currentThemeDisplay.Icon className="mr-2 h-3 w-3" />
+                      <span className="text-sm">{currentThemeDisplay.name}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[130px]">
+                    <DropdownMenuItem
+                      onClick={() => setTheme("light")}
+                      className={cn(currentThemeDisplay.name === "Light" && "bg-accent")}
+                    >
+                      <Sun className="mr-2 h-3 w-3" />
+                      <span className="text-sm">Light</span>
+                      {currentThemeDisplay.name === "Light" && <Check className="ml-auto h-3 w-3" />}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setTheme("dark")}
+                      className={cn(currentThemeDisplay.name === "Dark" && "bg-accent")}
+                    >
+                      <Moon className="mr-2 h-3 w-3" />
+                      <span className="text-sm">Dark</span>
+                      {currentThemeDisplay.name === "Dark" && <Check className="ml-auto h-3 w-3" />}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setTheme("system")}
+                      className={cn(currentThemeDisplay.name === "System" && "bg-accent")}
+                    >
+                      <Laptop className="mr-2 h-3 w-3" />
+                      <span className="text-sm">System</span>
+                      {currentThemeDisplay.name === "System" && <Check className="ml-auto h-3 w-3" />}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Accent Color</Label>
+                <div className="grid grid-cols-8 gap-2">
+                  <TooltipProvider delayDuration={100}>
+                    {availableColorThemes.map((themeOpt) => (
+                      <Tooltip key={themeOpt.name}>
+                        <TooltipTrigger>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className={cn(
+                              "h-8 w-8 rounded-md p-0",
+                              colorTheme === themeOpt.name && "border-2 border-primary"
+                            )}
+                            onClick={() => setColorTheme(themeOpt.name)}
+                          >
+                            <span
+                              className={cn(
+                                "flex h-5 w-5 items-center justify-center rounded-sm",
+                                colorTheme === themeOpt.name && "border border-primary-foreground/50"
+                              )}
+                              style={{ backgroundColor: themeOpt.previewColor }}
+                            >
+                              {colorTheme === themeOpt.name && <Check className="h-3 w-3 text-primary-foreground" />}
+                            </span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" sideOffset={5}>
+                          <span className="text-xs">{themeOpt.label}</span>
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </TooltipProvider>
+                </div>
+              </div>
+            </CardContent>
+          )}
         </Card>
 
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Accent Color</CardTitle>
-            <CardDescription>Choose an accent color for the application.</CardDescription>
+        <Card>
+          <CardHeader
+            className="pb-3 flex items-center justify-between cursor-pointer"
+            onClick={() => setIsBackgroundExpanded(!isBackgroundExpanded)}
+            onKeyDown={(e) => handleKeyDown(e, () => setIsBackgroundExpanded(!isBackgroundExpanded))}
+            role="button"
+            aria-expanded={isBackgroundExpanded}
+            aria-controls="background-content"
+            tabIndex={0}
+          >
+            <div>
+              <CardTitle className="text-base">Background</CardTitle>
+              <CardDescription className="text-sm">Customize note content background.</CardDescription>
+            </div>
+            {isBackgroundExpanded ? (
+              <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
+            ) : (
+              <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+            )}
           </CardHeader>
-          <Separator className="my-2" />
-          <CardContent>
-            <div className="grid grid-cols-4 gap-3 sm:grid-cols-5 md:grid-cols-8">
-              <TooltipProvider delayDuration={100}>
-                {availableColorThemes.map((themeOpt) => (
-                  <Tooltip key={themeOpt.name}>
-                    <TooltipTrigger>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className={cn(
-                          "h-12 w-12 rounded-lg p-0 md:h-10 md:w-10",
-                          colorTheme === themeOpt.name && "border-2 border-primary"
-                        )}
-                        onClick={() => setColorTheme(themeOpt.name)}
-                        aria-label={`Set theme to ${themeOpt.label}`}
-                      >
-                        <span
+          {isBackgroundExpanded && (
+            <CardContent id="background-content" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Show Background</Label>
+                  <p className="text-xs text-muted-foreground">Toggle background visibility</p>
+                </div>
+                <Switch
+                  checked={backgroundSettings.showBackground}
+                  onCheckedChange={(checked) => setBackgroundSettings({ showBackground: checked })}
+                />
+              </div>
+
+              {backgroundSettings.showBackground && (
+                <>
+                  <Separator />
+                  <div className="space-y-3">
+                    <Tabs
+                      value={backgroundSettings.useCustomImage ? "custom" : "doodle"}
+                      onValueChange={(value) => {
+                        const isCustom = value === "custom";
+                        setBackgroundSettings({ useCustomImage: isCustom });
+                        if (isCustom && !backgroundSettings.customImageSrc) {
+                          fileInputRef.current?.click();
+                        }
+                      }}
+                      className="w-full"
+                    >
+                      <TabsList className="grid w-full grid-cols-2 h-10 bg-muted/50">
+                        <TabsTrigger value="doodle" className="text-xs h-8 font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                          Default
+                        </TabsTrigger>
+                        <TabsTrigger value="custom" className="text-xs h-8 font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                          Custom
+                        </TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="custom" className="mt-4 space-y-4">
+                        <div
                           className={cn(
-                            "flex h-8 w-8 items-center justify-center rounded-md md:h-6 md:w-6",
-                            colorTheme === themeOpt.name && "border border-primary-foreground/50"
+                            "relative border-2 border-dashed rounded-lg transition-colors cursor-pointer",
+                            "hover:border-primary/50 hover:bg-primary/5",
+                            backgroundSettings.customImageSrc
+                              ? "border-primary/30 bg-primary/10"
+                              : "border-muted-foreground/25"
                           )}
-                          style={{ backgroundColor: themeOpt.previewColor }}
-                        >
-                          {colorTheme === themeOpt.name && <Check className="h-5 w-5 text-primary-foreground" />}
-                        </span>
-                        <span className="sr-only">{themeOpt.label}</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" sideOffset={5}>
-                      {themeOpt.label}
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
-              </TooltipProvider>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Note Content Background</CardTitle>
-            <CardDescription>Customize the note content background appearance.</CardDescription>
-          </CardHeader>
-          <Separator className="my-2" />
-          <CardContent className="space-y-6">
-            <div className="flex items-center justify-between space-x-2">
-              <Label htmlFor="show-background-switch" className="flex flex-col space-y-1">
-                <span>Show Background Image</span>
-                <span className="font-normal leading-snug text-muted-foreground">
-                  Toggle the visibility of the background image.
-                </span>
-              </Label>
-              <Switch
-                id="show-background-switch"
-                checked={backgroundSettings.showBackground}
-                onCheckedChange={(checked) => setBackgroundSettings({ showBackground: checked })}
-                aria-label="Toggle background image"
-              />
-            </div>
-
-            {backgroundSettings.showBackground && (
-              <>
-                <Separator />
-
-                <Tabs
-                  value={backgroundSettings.useCustomImage ? "custom" : "doodle"}
-                  onValueChange={(value) => {
-                    const isCustom = value === "custom";
-                    setBackgroundSettings({ useCustomImage: isCustom });
-                    if (isCustom && !backgroundSettings.customImageSrc) {
-                      fileInputRef.current?.click();
-                    }
-                  }}
-                  className="w-full pt-2"
-                >
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="doodle">
-                      <Palette className="mr-2 h-4 w-4" /> Default Doodle
-                    </TabsTrigger>
-                    <TabsTrigger value="custom">
-                      <ImageIcon className="mr-2 h-4 w-4" /> Custom Image
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="custom" className="mt-4 space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="outline"
                           onClick={() => fileInputRef.current?.click()}
-                          className="flex-1 justify-start text-left"
                         >
-                          <UploadCloud className="mr-2 h-4 w-4 shrink-0" />
-                          {backgroundSettings.customImageSrc ? "Change Image" : "Select Image..."}
-                        </Button>
-                        {backgroundSettings.customImageSrc && (
-                          <TooltipProvider delayDuration={100}>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={handleRemoveCustomImage}
-                                  aria-label="Remove custom image"
-                                  className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent side="bottom" sideOffset={5}>
-                                Remove Custom Image
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {backgroundSettings.customImageSrc ? (
-                      <div className="p-1 border rounded-md bg-muted/20 overflow-hidden flex justify-center items-center aspect-video max-h-48">
-                        <img
-                          src={backgroundSettings.customImageSrc}
-                          alt="Custom background preview"
-                          className="max-w-full max-h-full object-contain rounded-sm"
+                          {backgroundSettings.customImageSrc ? (
+                            <div className="relative group">
+                              <div className="flex justify-center items-center p-2 min-h-[120px] rounded-lg overflow-hidden">
+                                <img
+                                  src={backgroundSettings.customImageSrc}
+                                  alt="Selected background"
+                                  className="max-w-full max-h-[120px] object-contain rounded-md shadow-sm"
+                                />
+                              </div>
+                              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                                <div className="text-white text-center">
+                                  <UploadCloud className="h-6 w-6 mx-auto mb-1" />
+                                  <p className="text-xs font-medium">Click to change</p>
+                                </div>
+                              </div>
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveCustomImage();
+                                }}
+                                className="absolute top-2 right-2 h-7 w-7 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center py-8 px-4">
+                              <div className="rounded-full bg-muted p-3 mb-3">
+                                <UploadCloud className="h-6 w-6 text-muted-foreground" />
+                              </div>
+                              <p className="text-sm font-medium text-foreground mb-1">
+                                Select Custom Image
+                              </p>
+                              <p className="text-xs text-muted-foreground text-center">
+                                Click to browse
+                                <br />
+                                PNG, JPG, GIF, WEBP supported
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          accept="image/png, image/jpeg, image/gif, image/webp"
+                          onChange={handleCustomImageChange}
+                          className="hidden"
+                        />
+                      </TabsContent>
+                    </Tabs>
+                    <Separator />
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">Effects</Label>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="flex items-center text-xs">
+                            <Eye className="mr-1 h-3 w-3" /> Opacity
+                          </Label>
+                          <span className="text-xs text-muted-foreground">{backgroundSettings.opacity}%</span>
+                        </div>
+                        <Slider
+                          min={0}
+                          max={100}
+                          step={1}
+                          value={[backgroundSettings.opacity]}
+                          onValueChange={([value]) => setBackgroundSettings({ opacity: value })}
+                          className="h-1"
                         />
                       </div>
-                    ) : (
-                        <div className="text-sm text-muted-foreground text-center py-6 px-4 border border-dashed rounded-md">
-                          No custom image selected.
-                          <br/>
-                          <span className="text-xs">(PNG, JPG, GIF, WEBP supported)</span>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="flex items-center text-xs">
+                            <Sparkles className="mr-1 h-3 w-3" /> Brightness
+                          </Label>
+                          <span className="text-xs text-muted-foreground">{backgroundSettings.brightness}%</span>
                         </div>
-                    )}
-                    <input
-                      type="file"
-                      id="custom-background-input"
-                      ref={fileInputRef}
-                      accept="image/png, image/jpeg, image/gif, image/webp"
-                      onChange={handleCustomImageChange}
-                      className="hidden"
-                    />
-                  </TabsContent>
-                </Tabs>
-
-                <Separator />
-                <div className="space-y-1 pt-4">
-                    <Label className="text-sm font-medium">Background Effects</Label>
-                    <span className="block text-xs font-normal leading-snug text-muted-foreground pb-2">
-                        Adjust the opacity, brightness, and blur of the background.
-                    </span>
-                </div>
-
-                <div className="space-y-4">
-                  <Label htmlFor="background-opacity-slider" className="flex items-center text-sm">
-                    <Eye className="mr-2 h-4 w-4 text-muted-foreground" /> Opacity
-                    <span className="ml-auto text-muted-foreground">{backgroundSettings.opacity}%</span>
-                  </Label>
-                  <Slider
-                    id="background-opacity-slider"
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={[backgroundSettings.opacity]}
-                    onValueChange={([value]) => setBackgroundSettings({ opacity: value })}
-                    aria-label="Background opacity"
-                    disabled={!backgroundSettings.showBackground}
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <Label htmlFor="background-brightness-slider" className="flex items-center text-sm">
-                    <Sparkles className="mr-2 h-4 w-4 text-muted-foreground" /> Brightness
-                    <span className="ml-auto text-muted-foreground">{backgroundSettings.brightness}%</span>
-                  </Label>
-                  <Slider
-                    id="background-brightness-slider"
-                    min={0}
-                    max={200}
-                    step={1}
-                    value={[backgroundSettings.brightness]}
-                    onValueChange={([value]) => setBackgroundSettings({ brightness: value })}
-                    aria-label="Background brightness"
-                    disabled={!backgroundSettings.showBackground}
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <Label htmlFor="background-blur-slider" className="flex items-center text-sm">
-                    <Blend className="mr-2 h-4 w-4 text-muted-foreground" /> Blur
-                    <span className="ml-auto text-muted-foreground">{backgroundSettings.blur}px</span>
-                  </Label>
-                  <Slider
-                    id="background-blur-slider"
-                    min={0}
-                    max={10} 
-                    step={0.1}
-                    value={[backgroundSettings.blur]}
-                    onValueChange={([value]) => setBackgroundSettings({ blur: value })}
-                    aria-label="Background blur"
-                    disabled={!backgroundSettings.showBackground}
-                  />
-                </div>
-
-                <Separator />
-                <div className="space-y-4 pt-2">
-                  <Label className="text-sm font-medium">Preview</Label>
-                  <div className="relative rounded-lg border bg-background p-4 h-48 overflow-hidden flex items-center justify-center">
-                    <div
-                      className="absolute inset-0 bg-center bg-no-repeat"
-                      style={{
-                        backgroundImage: backgroundSettings.useCustomImage && backgroundSettings.customImageSrc
-                          ? `url(${backgroundSettings.customImageSrc})`
-                          : 'url(/background.png)',
-                        opacity: backgroundSettings.opacity / 100,
-                        filter: `brightness(${backgroundSettings.brightness / 100}) blur(${backgroundSettings.blur}px)`,
-                      }}
-                    />
-                    <div className="relative z-[1] bg-muted p-3 rounded-xl shadow-md max-w-[70%]">
-                      <p className="text-sm">This is a sample note entry to preview the background.</p>
-                      <p className="text-xs text-muted-foreground/80 mt-1 text-right">10:30</p>
+                        <Slider
+                          min={0}
+                          max={200}
+                          step={1}
+                          value={[backgroundSettings.brightness]}
+                          onValueChange={([value]) => setBackgroundSettings({ brightness: value })}
+                          className="h-1"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="flex items-center text-xs">
+                            <Blend className="mr-1 h-3 w-3" /> Blur
+                          </Label>
+                          <span className="text-xs text-muted-foreground">{backgroundSettings.blur}px</span>
+                        </div>
+                        <Slider
+                          min={0}
+                          max={10}
+                          step={0.1}
+                          value={[backgroundSettings.blur]}
+                          onValueChange={([value]) => setBackgroundSettings({ blur: value })}
+                          className="h-1"
+                        />
+                      </div>
+                    </div>
+                    <Separator />
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Preview</Label>
+                      <div className="relative rounded-md border bg-background p-3 h-32 overflow-hidden flex items-center justify-center">
+                        <div
+                          className="absolute inset-0 bg-center bg-no-repeat"
+                          style={{
+                            backgroundImage: backgroundSettings.useCustomImage && backgroundSettings.customImageSrc
+                              ? `url(${backgroundSettings.customImageSrc})`
+                              : 'url(/background.png)',
+                            opacity: backgroundSettings.opacity / 100,
+                            filter: `brightness(${backgroundSettings.brightness / 100}) blur(${backgroundSettings.blur}px)`,
+                          }}
+                        />
+                        <div className="relative z-[1] bg-muted p-2 rounded-lg shadow-sm max-w-[80%]">
+                          <p className="text-xs">Sample note entry</p>
+                          <p className="text-[10px] text-muted-foreground/80 mt-1 text-right">10:30</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </>
-            )}
-          </CardContent>
+                </>
+              )}
+            </CardContent>
+          )}
         </Card>
+
+        <Card>
+          <CardHeader
+            className="pb-3 flex items-center justify-between cursor-pointer"
+            onClick={() => setIsExportExpanded(!isExportExpanded)}
+            onKeyDown={(e) => handleKeyDown(e, () => setIsExportExpanded(!isExportExpanded))}
+            role="button"
+            aria-expanded={isExportExpanded}
+            aria-controls="export-content"
+            tabIndex={0}
+          >
+            <div>
+              <CardTitle className="text-base">Export Notes</CardTitle>
+              <CardDescription className="text-sm">Save your notes in various formats.</CardDescription>
+            </div>
+            {isExportExpanded ? (
+              <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
+            ) : (
+              <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+            )}
+          </CardHeader>
+          {isExportExpanded && (
+            <CardContent id="export-content" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Export Format</Label>
+                  <p className="text-xs text-muted-foreground">Choose the format for your notes.</p>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Button variant="outline" size="sm" className="w-[150px] justify-start">
+                      <currentExportFormatDisplay.Icon className="mr-2 h-3 w-3" />
+                      <span className="text-sm">{currentExportFormatDisplay.label}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[150px]">
+                    {exportFormats.map((format) => (
+                      <DropdownMenuItem
+                        key={format.value}
+                        onClick={() => setSelectedExportFormat(format.value)}
+                        className={cn(selectedExportFormat === format.value && "bg-accent")}
+                      >
+                        <format.Icon className="mr-2 h-3 w-3" />
+                        <span className="text-sm">{format.label}</span>
+                        {selectedExportFormat === format.value && <Check className="ml-auto h-3 w-3" />}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <Separator />
+
+              <Button onClick={handleExportNotes} className="w-full">
+                <Download className="mr-2 h-4 w-4" />
+                Export All Notes as {currentExportFormatDisplay.label}
+              </Button>
+            </CardContent>
+          )}
+        </Card>
+
       </div>
     </div>
   );

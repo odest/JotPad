@@ -153,7 +153,6 @@ export function NoteContent({
           setShowSidebar={setShowSidebar}
           isSearchActive={isSearchActive}
           setIsSearchActive={setIsSearchActive}
-          searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}
         />
