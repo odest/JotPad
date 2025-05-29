@@ -1,6 +1,26 @@
-import { Plus, Search, NotebookText, Moon, Sun, Settings } from "lucide-react";
-import { Button } from "@repo/ui/components/button";
+import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+} from "@repo/ui/components/dropdown-menu";
+import {
+  X,
+  Sun,
+  Moon,
+  Plus,
+  Clock,
+  Check,
+  Search,
+  Settings,
+  ArrowUpAZ,
+  ArrowDownAZ,
+  ArrowDownUp,
+  NotebookText,
+} from "lucide-react";
 import { Input } from "@repo/ui/components/input";
+import { Button } from "@repo/ui/components/button";
 import { NoteDialog } from "@repo/ui/components/NoteDialog";
 import { useTheme } from "@repo/ui/components/theme-provider";
 import { NoteList, Note as NoteListNote } from "@repo/ui/components/NoteList";
@@ -41,9 +61,30 @@ export function Sidebar({
   isEdit,
 }: SidebarProps) {
   const { setTheme, appliedTheme } = useTheme();
+  const [sortType, setSortType] = useState<'az' | 'za' | 'newest' | 'oldest'>('newest');
   const SIDEBAR_HEADER_HEIGHT = 72;
   const SIDEBAR_SEARCH_HEIGHT = 64;
   const SIDEBAR_FOOTER_HEIGHT = 72;
+
+  const sortedNotes = [...filteredNotes].sort((a, b) => {
+    if (sortType === 'az') {
+      return a.title.localeCompare(b.title);
+    } else if (sortType === 'za') {
+      return b.title.localeCompare(a.title);
+    } else if (sortType === 'newest') {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    } else if (sortType === 'oldest') {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    }
+    return 0;
+  });
+
+  const sortLabels = {
+    az: 'A-Z',
+    za: 'Z-A',
+    newest: 'Newest',
+    oldest: 'Oldest',
+  };
 
   const toggleThemeInSidebar = () => {
     setTheme(appliedTheme === "light" ? "dark" : "light");
@@ -83,18 +124,56 @@ export function Sidebar({
           </div>
         </div>
         <div className="border-b p-3.5 shrink-0" style={{ height: SIDEBAR_SEARCH_HEIGHT, minHeight: SIDEBAR_SEARCH_HEIGHT }}>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search notes..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <div className="relative flex items-center gap-2">
+            <span className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search notes..."
+                className="pl-10 pr-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-400 hover:bg-transparent focus:bg-transparent"
+                  onClick={() => setSearchQuery("")}
+                  tabIndex={-1}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
+            </span>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button variant="outline" size="icon" className="ml-1 border" aria-label="Filtrele">
+                  <ArrowDownUp className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem onClick={() => setSortType('az')} className={sortType === 'az' ? 'bg-accent' : ''}>
+                  <ArrowDownAZ className="w-4 h-4 mr-2" />{sortLabels.az}
+                  {sortType === 'az' && <Check className="w-4 h-4 ml-auto" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortType('za')} className={sortType === 'za' ? 'bg-accent' : ''}>
+                  <ArrowUpAZ className="w-4 h-4 mr-2" />{sortLabels.za}
+                  {sortType === 'za' && <Check className="w-4 h-4 ml-auto" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortType('newest')} className={sortType === 'newest' ? 'bg-accent' : ''}>
+                  <Clock className="w-4 h-4 mr-2" />{sortLabels.newest}
+                  {sortType === 'newest' && <Check className="w-4 h-4 ml-auto" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortType('oldest')} className={sortType === 'oldest' ? 'bg-accent' : ''}>
+                  <Clock className="w-4 h-4 mr-2 rotate-180" />{sortLabels.oldest}
+                  {sortType === 'oldest' && <Check className="w-4 h-4 ml-auto" />}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto custom-scrollbar">
-          {filteredNotes.length === 0 ? (
+          {sortedNotes.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full p-4 text-center">
               <div className="flex-1 flex flex-col items-center justify-center">
                 <NotebookText className="w-16 h-16 text-gray-300 mb-4" />
@@ -104,7 +183,7 @@ export function Sidebar({
             </div>
           ) : (
             <NoteList
-              filteredNotes={filteredNotes}
+              filteredNotes={sortedNotes}
               selectedNote={selectedNote}
               handleNoteSelect={handleNoteSelect}
               handleEditNote={handleEditNote}
