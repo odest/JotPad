@@ -1,13 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Note, NoteEntry } from "@repo/ui/lib/database";
-import { useTheme } from "@repo/ui/components/theme-provider";
-import { NoteHeader } from "@repo/ui/components/NoteHeader";
-import { SearchBar } from "@repo/ui/components/SearchBar";
-import { NoteEntriesList } from "@repo/ui/components/NoteEntriesList";
-import { AddEntryInput } from "@repo/ui/components/AddEntryInput";
-import { EmptyState } from "@repo/ui/components/EmptyState";
-import { useNoteEntries } from "@repo/ui/hooks/useNoteEntries";
+import {
+  Dialog,
+  DialogTitle,
+  DialogFooter,
+  DialogHeader,
+  DialogContent,
+} from "@repo/ui/components/dialog";
+import { Button } from "@repo/ui/components/button";
 import { useSearch } from "@repo/ui/hooks/useSearch";
+import { Note, NoteEntry } from "@repo/ui/lib/database";
+import { SearchBar } from "@repo/ui/components/SearchBar";
+import { NoteHeader } from "@repo/ui/components/NoteHeader";
+import { EmptyState } from "@repo/ui/components/EmptyState";
+import { useTheme } from "@repo/ui/components/theme-provider";
+import { useNoteEntries } from "@repo/ui/hooks/useNoteEntries";
+import { AddEntryInput } from "@repo/ui/components/AddEntryInput";
+import { NoteEntriesList } from "@repo/ui/components/NoteEntriesList";
 
 interface NoteContentProps {
   selectedNote: Note | null;
@@ -31,6 +39,7 @@ export function NoteContent({
   const [newEntryText, setNewEntryText] = useState("");
   const [editingEntry, setEditingEntry] = useState<NoteEntry | null>(null);
   const [editText, setEditText] = useState("");
+  const [entryIdToDelete, setEntryIdToDelete] = useState<string | null>(null);
 
   const entriesEndRef = useRef<null | HTMLDivElement>(null);
   const entriesContainerRef = useRef<null | HTMLDivElement>(null);
@@ -107,8 +116,8 @@ export function NoteContent({
     }
   };
 
-  const handleDeleteEntry = async (entryId: string) => {
-    await deleteEntry(entryId);
+  const handleDeleteEntry = (entryId: string) => {
+    setEntryIdToDelete(entryId);
   };
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -202,6 +211,31 @@ export function NoteContent({
           NOTE_CONTENT_INPUT_HEIGHT={NOTE_CONTENT_INPUT_HEIGHT}
         />
       </div>
+
+      <Dialog open={!!entryIdToDelete} onOpenChange={open => { if (!open) setEntryIdToDelete(null); }}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] rounded-lg sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Entry</DialogTitle>
+          </DialogHeader>
+          <div>Are you sure you want to delete this entry? This action cannot be undone.</div>
+          <DialogFooter className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+            <Button variant="outline" onClick={() => setEntryIdToDelete(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (entryIdToDelete) {
+                  await deleteEntry(entryIdToDelete);
+                  setEntryIdToDelete(null);
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
