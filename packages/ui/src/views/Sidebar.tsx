@@ -24,6 +24,7 @@ import { Button } from "@repo/ui/components/button";
 import { NoteDialog } from "@repo/ui/components/note/NoteDialog";
 import { useTheme } from "@repo/ui/providers/theme-provider";
 import { NoteList, Note as NoteListNote } from "@repo/ui/components/note/NoteList";
+import { useSettings } from "@repo/ui/hooks/useSettings";
 
 interface SidebarProps {
   filteredNotes: NoteListNote[];
@@ -60,8 +61,8 @@ export function Sidebar({
   onToggleSettings,
   isEdit,
 }: SidebarProps) {
-  const { setTheme, appliedTheme } = useTheme();
-  const [sortType, setSortType] = useState<'az' | 'za' | 'newest' | 'oldest'>('newest');
+  const { appliedTheme } = useTheme();
+  const { setThemeAndPersist, sortType, setSortType } = useSettings();
   const SIDEBAR_HEADER_HEIGHT = 72;
   const SIDEBAR_SEARCH_HEIGHT = 64;
   const SIDEBAR_FOOTER_HEIGHT = 72;
@@ -87,7 +88,7 @@ export function Sidebar({
   };
 
   const toggleThemeInSidebar = () => {
-    setTheme(appliedTheme === "light" ? "dark" : "light");
+    setThemeAndPersist(appliedTheme === "light" ? "dark" : "light");
   };
 
   return (

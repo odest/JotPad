@@ -1,4 +1,4 @@
-import { useState, ComponentType } from 'react';
+import { useState, ComponentType, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -40,6 +40,7 @@ interface ExportNoteDialogProps {
   onOpenChange: (open: boolean) => void;
   note: Note;
   onConfirmExport: (format: ExportFormat, note: Note) => void;
+  defaultFormat?: ExportFormat;
 }
 
 export function ExportNoteDialog({
@@ -47,10 +48,15 @@ export function ExportNoteDialog({
   onOpenChange,
   note,
   onConfirmExport,
+  defaultFormat = "json",
 }: ExportNoteDialogProps) {
-  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>("json");
+  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>(defaultFormat);
   const currentFormatDetails =
     exportFormats.find((f) => f.value === selectedFormat)!;
+
+  useEffect(() => {
+    if (isOpen) setSelectedFormat(defaultFormat);
+  }, [isOpen, defaultFormat]);
 
   const handleExportClick = () => {
     onConfirmExport(selectedFormat, note);
