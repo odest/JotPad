@@ -64,6 +64,7 @@ const availableColorThemes: Array<{ name: "zinc" | "red" | "rose" | "orange" | "
 
 export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
   const {
+    resetSettings,
     themeSetting,
     setTheme,
     colorTheme,
@@ -109,7 +110,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
 
         <Card>
           <CardHeader
-            className="pb-3 flex items-center justify-between cursor-pointer"
+            className="flex items-center justify-between cursor-pointer"
             onClick={() => setIsAppearanceExpanded(!isAppearanceExpanded)}
             onKeyDown={(e) => handleKeyDown(e, () => setIsAppearanceExpanded(!isAppearanceExpanded))}
             role="button"
@@ -213,7 +214,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
 
         <Card>
           <CardHeader
-            className="pb-3 flex items-center justify-between cursor-pointer"
+            className="flex items-center justify-between cursor-pointer"
             onClick={() => setIsBackgroundExpanded(!isBackgroundExpanded)}
             onKeyDown={(e) => handleKeyDown(e, () => setIsBackgroundExpanded(!isBackgroundExpanded))}
             role="button"
@@ -411,7 +412,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
 
         <Card>
           <CardHeader
-            className="pb-3 flex items-center justify-between cursor-pointer"
+            className="flex items-center justify-between cursor-pointer"
             onClick={() => setIsExportExpanded(!isExportExpanded)}
             onKeyDown={(e) => handleKeyDown(e, () => setIsExportExpanded(!isExportExpanded))}
             role="button"
@@ -467,6 +468,22 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
               </Button>
             </CardContent>
           )}
+        </Card>
+
+        <Card>
+          <CardHeader
+            className="flex items-center justify-between"
+          >
+            <div>
+              <CardTitle className="text-base">Reset Preferences</CardTitle>
+              <CardDescription className="text-sm">
+                This will reset all your user preferences to their defaults.
+              </CardDescription>
+            </div>
+            <Button variant="destructive" onClick={resetSettings}>
+              Reset to Defaults
+            </Button>
+          </CardHeader>
         </Card>
 
       </div>

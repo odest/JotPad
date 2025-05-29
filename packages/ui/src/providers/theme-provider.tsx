@@ -1,7 +1,6 @@
 'use client';
 import { createContext, useContext, useEffect, useState } from "react";
 import { invoke } from '@tauri-apps/api/core';
-import { useSettings } from "@repo/ui/hooks/useSettings";
 
 type ThemeSetting = "light" | "dark" | "system";
 type AppliedTheme = "light" | "dark";
@@ -77,7 +76,6 @@ export function ThemeProvider({
     ...propDefaultBackgroundSettings,
   });
   const [loaded, setLoaded] = useState(false);
-  const { sortType } = useSettings();
 
   useEffect(() => {
     (async () => {

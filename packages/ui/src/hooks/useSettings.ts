@@ -27,6 +27,29 @@ export function useSettings() {
   const [loaded, setLoaded] = useState(false);
   const currentExportFormatDisplay = exportFormats.find(f => f.value === selectedExportFormat)!;
 
+  const defaultSettings = {
+    theme: "system",
+    color_theme: "zinc",
+    background: {
+      showBackground: true,
+      useCustomImage: false,
+      customImageSrc: null,
+      opacity: 30,
+      brightness: 100,
+      blur: 0,
+    },
+    export_format: "json",
+    sort_type: "newest",
+  };
+
+  const resetSettings = async () => {
+    try {
+      await invoke('write_settings', { settings: defaultSettings });
+      window.location.reload();
+    } catch (e) {
+    }
+  };
+
   useEffect(() => {
     (async () => {
       try {
@@ -131,6 +154,7 @@ export function useSettings() {
   };
 
   return {
+    resetSettings,
     themeSetting,
     setTheme,
     setThemeAndPersist,
