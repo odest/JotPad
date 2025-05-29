@@ -44,51 +44,45 @@ export function useSettings() {
     })();
   }, []);
 
-  useEffect(() => {
-    if (!loaded) return;
+  const setSelectedExportFormatAndPersist = (format: ExportFormat) => {
+    setSelectedExportFormat(format);
     (async () => {
       try {
+        const settings = await invoke<any>('read_settings');
         await invoke('write_settings', {
           settings: {
-            theme: themeSetting,
-            color_theme: colorTheme,
-            background: backgroundSettings,
-            export_format: selectedExportFormat,
-            sort_type: sortType,
-          }
-        });
-      } catch (e) {}
-    })();
-  }, [selectedExportFormat, sortType, themeSetting, colorTheme, backgroundSettings, loaded]);
-
-  const setThemeAndPersist = (newTheme: string) => {
-    setTheme(newTheme as any);
-    (async () => {
-      try {
-        await invoke('write_settings', {
-          settings: {
-            theme: newTheme,
-            color_theme: colorTheme,
-            background: backgroundSettings,
-            export_format: selectedExportFormat,
-            sort_type: sortType,
+            ...settings,
+            export_format: format,
           }
         });
       } catch (e) {}
     })();
   };
 
-  const setSortType = (newSort: SortType) => {
+  const setSortTypeAndPersist = (newSort: SortType) => {
     setSortTypeState(newSort);
     (async () => {
       try {
+        const settings = await invoke<any>('read_settings');
         await invoke('write_settings', {
           settings: {
-            theme: themeSetting,
-            color_theme: colorTheme,
-            background: backgroundSettings,
-            export_format: selectedExportFormat,
+            ...settings,
             sort_type: newSort,
+          }
+        });
+      } catch (e) {}
+    })();
+  };
+
+  const setThemeAndPersist = (newTheme: string) => {
+    setTheme(newTheme as any);
+    (async () => {
+      try {
+        const settings = await invoke<any>('read_settings');
+        await invoke('write_settings', {
+          settings: {
+            ...settings,
+            theme: newTheme,
           }
         });
       } catch (e) {}
@@ -148,9 +142,9 @@ export function useSettings() {
     isAppearanceExpanded, setIsAppearanceExpanded,
     isBackgroundExpanded, setIsBackgroundExpanded,
     isExportExpanded, setIsExportExpanded,
-    selectedExportFormat, setSelectedExportFormat,
+    selectedExportFormat, setSelectedExportFormat: setSelectedExportFormatAndPersist,
     currentExportFormatDisplay,
-    sortType, setSortType,
+    sortType, setSortType: setSortTypeAndPersist,
     setSortTypeState,
     handleCustomImageChange,
     handleRemoveCustomImage,

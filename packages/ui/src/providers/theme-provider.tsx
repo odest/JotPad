@@ -100,19 +100,19 @@ export function ThemeProvider({
     if (!loaded) return;
     (async () => {
       try {
+        const settings = await invoke<any>('read_settings');
         await invoke('write_settings', {
           settings: {
+            ...settings,
             theme: themeSetting,
             color_theme: colorTheme,
             background: backgroundSettings,
-            export_format: undefined,
-            sort_type: sortType,
           }
         });
       } catch (e) {
       }
     })();
-  }, [themeSetting, colorTheme, backgroundSettings, loaded, sortType]);
+  }, [themeSetting, colorTheme, backgroundSettings, loaded]);
 
   useEffect(() => {
     if (!loaded) return;
