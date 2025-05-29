@@ -15,7 +15,7 @@ export default function Home() {
       </div>
 
       <p className="text-base md:text-lg text-white text-center max-w-2xl mb-10 animate-fade-in-up delay-400">
-        This page belongs to the JotPad web application. The project is currently under development and not available for use yet. Very soon, you'll be able to take notes right here! Stay tuned for updates.
+        This page belongs to the JotPad web application. The project is currently under development and not available for use yet. Very soon, you&apos;ll be able to take notes right here! Stay tuned for updates.
       </p>
 
       <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 animate-fade-in-up delay-500">
@@ -33,7 +33,7 @@ export default function Home() {
 
       <div className="absolute bottom-6 -translate-x-1/2 text-xs text-white bg-black px-4 py-2 rounded-full border border-white shadow backdrop-blur-md animate-fade-in-up delay-700 flex items-center gap-2">
         <Construction className="w-4 h-4" />
-        Our web app is under development. We'll be here very soon!
+        Our web app is under development. We&apos;ll be here very soon!
         <Construction className="w-4 h-4" />
       </div>
     </main>

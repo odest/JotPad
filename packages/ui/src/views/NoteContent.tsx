@@ -9,13 +9,13 @@ import {
 import { Button } from "@repo/ui/components/button";
 import { useSearch } from "@repo/ui/hooks/useSearch";
 import { Note, NoteEntry } from "@repo/ui/lib/database";
-import { SearchBar } from "@repo/ui/components/SearchBar";
-import { NoteHeader } from "@repo/ui/components/NoteHeader";
-import { EmptyState } from "@repo/ui/components/EmptyState";
-import { useTheme } from "@repo/ui/components/theme-provider";
+import { SearchBar } from "@repo/ui/components/note/SearchBar";
+import { NoteHeader } from "@repo/ui/components/note/NoteHeader";
+import { EmptyState } from "@repo/ui/components/note/EmptyState";
+import { AddEntryInput } from "@repo/ui/components/note/AddEntryInput";
+import { NoteEntriesList } from "@repo/ui/components/note/NoteEntriesList";
+import { useTheme } from "@repo/ui/providers/theme-provider";
 import { useNoteEntries } from "@repo/ui/hooks/useNoteEntries";
-import { AddEntryInput } from "@repo/ui/components/AddEntryInput";
-import { NoteEntriesList } from "@repo/ui/components/NoteEntriesList";
 
 interface NoteContentProps {
   selectedNote: Note | null;

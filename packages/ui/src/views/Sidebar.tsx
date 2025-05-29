@@ -21,9 +21,9 @@ import {
 } from "lucide-react";
 import { Input } from "@repo/ui/components/input";
 import { Button } from "@repo/ui/components/button";
-import { NoteDialog } from "@repo/ui/components/NoteDialog";
-import { useTheme } from "@repo/ui/components/theme-provider";
-import { NoteList, Note as NoteListNote } from "@repo/ui/components/NoteList";
+import { NoteDialog } from "@repo/ui/components/note/NoteDialog";
+import { useTheme } from "@repo/ui/providers/theme-provider";
+import { NoteList, Note as NoteListNote } from "@repo/ui/components/note/NoteList";
 
 interface SidebarProps {
   filteredNotes: NoteListNote[];

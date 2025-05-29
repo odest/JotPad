@@ -18,7 +18,7 @@ import {
 import { Button } from "@repo/ui/components/button";
 import { Note } from "@repo/ui/lib/database";
 import { exportSingleNote } from "@repo/ui/lib/exportNotes";
-import { ExportNoteDialog, ExportFormat } from "@repo/ui/components/ExportNoteDialog";
+import { ExportNoteDialog, ExportFormat } from "@repo/ui/components/note/ExportNoteDialog";
 
 interface NoteHeaderProps {
   selectedNote: Note;

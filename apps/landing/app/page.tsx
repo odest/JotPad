@@ -3,11 +3,11 @@ import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Globe, Menu, X, Star, Feather, Code, Shield, Smartphone, MessageCircle } from 'lucide-react'
-import { GlowingEffect } from "@repo/ui/components/glowing-effect";
-import { AnimatedGroup } from '@repo/ui/components/animated-group'
-import DownloadButton from '@repo/ui/components/DownloadButton'
-import { Footer } from '@repo/ui/components/footer-section';
-import { TextEffect } from '@repo/ui/components/text-effect'
+import { GlowingEffect } from "@repo/ui/components/effects/glowing-effect";
+import { AnimatedGroup } from '@repo/ui/components/effects/animated-group'
+import DownloadButton from '@repo/ui/components/common/DownloadButton'
+import { TextEffect } from '@repo/ui/components/effects/text-effect'
+import { Footer } from '@repo/ui/components/common/footer-section'
 import { Button } from '@repo/ui/components/button'
 import { cn } from '@repo/ui/lib/utils'
 

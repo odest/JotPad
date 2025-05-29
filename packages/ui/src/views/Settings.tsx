@@ -47,8 +47,8 @@ import {
 } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 import { exportAllNotes } from "@repo/ui/lib/exportNotes";
-import { useTheme } from "@repo/ui/components/theme-provider";
-import { exportFormats, ExportFormat } from "@repo/ui/components/ExportNoteDialog";
+import { useTheme } from "@repo/ui/providers/theme-provider";
+import { exportFormats, ExportFormat } from "@repo/ui/components/note/ExportNoteDialog";
 
 interface SettingsProps {
   onClose: () => void;

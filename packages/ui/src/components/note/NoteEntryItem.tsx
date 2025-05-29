@@ -1,11 +1,11 @@
-import { Input } from "@repo/ui/components/input";
-import { Button } from "@repo/ui/components/button";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@repo/ui/components/context-menu";
+import { Input } from "@repo/ui/components/input";
+import { Button } from "@repo/ui/components/button";
 import { Pencil, Trash } from "lucide-react";
 import { NoteEntry } from "@repo/ui/lib/database";
 import { highlightText } from "@repo/ui/utils/textUtils";
