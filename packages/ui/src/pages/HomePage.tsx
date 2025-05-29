@@ -13,16 +13,17 @@ import { useNotes } from "@repo/ui/hooks/useNotes";
 
 export function HomePage() {
   const {
-    open, setOpen,
+    open,
     noteTitle, setNoteTitle,
     notes,
     editId,
     selectedNote,
     searchQuery, setSearchQuery,
-    showSidebar,
+    showSidebar, setShowSidebar,
     showSettings,
     noteIdToDelete, setNoteIdToDelete,
     duplicateTitleDialogOpen, setDuplicateTitleDialogOpen,
+    loadNotes,
     handleCreateNote,
     handleDeleteNote,
     handleOpenEditDialog,
@@ -85,9 +86,9 @@ export function HomePage() {
           selectedNote={selectedNote}
           handleEditNote={handleOpenEditDialog}
           handleDeleteNote={(id) => setNoteIdToDelete(id)}
-          setShowSidebar={v => {}}
+          setShowSidebar={setShowSidebar}
           SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}
-          onEntryAdded={() => {}}
+          onEntryAdded={loadNotes}
           showSidebar={showSidebar}
         />
       )}

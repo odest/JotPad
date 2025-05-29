@@ -19,6 +19,7 @@ import { Button } from "@repo/ui/components/button";
 import { Note } from "@repo/ui/lib/database";
 import { exportSingleNote } from "@repo/ui/lib/exportNotes";
 import { ExportNoteDialog, ExportFormat } from "@repo/ui/components/note/ExportNoteDialog";
+import { useSettings } from "@repo/ui/hooks/useSettings";
 
 interface NoteHeaderProps {
   selectedNote: Note;
@@ -42,6 +43,7 @@ export function NoteHeader({
   SIDEBAR_HEADER_HEIGHT
 }: NoteHeaderProps) {
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const { selectedExportFormat } = useSettings();
 
   const toggleHeaderSearchIcon = () => {
     if (isSearchActive) {
@@ -132,6 +134,7 @@ export function NoteHeader({
           onOpenChange={setIsExportDialogOpen}
           note={selectedNote}
           onConfirmExport={handleConfirmNoteExport}
+          defaultFormat={selectedExportFormat}
         />
       )}
     </>

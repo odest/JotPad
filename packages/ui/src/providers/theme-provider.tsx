@@ -1,5 +1,6 @@
 'use client';
 import { createContext, useContext, useEffect, useState } from "react";
+import { invoke } from '@tauri-apps/api/core';
 
 type ThemeSetting = "light" | "dark" | "system";
 type AppliedTheme = "light" | "dark";
@@ -67,58 +68,54 @@ export function ThemeProvider({
   storageKeyBackground = "vite-chat-background-settings",
   ...props
 }: ThemeProviderProps) {
-  const [themeSetting, setThemeSetting] = useState<ThemeSetting>(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem(storageKeyTheme) as ThemeSetting) || defaultTheme;
-    }
-    return defaultTheme;
+  const [themeSetting, setThemeSetting] = useState<ThemeSetting>(defaultTheme);
+  const [appliedTheme, setAppliedTheme] = useState<AppliedTheme>("light");
+  const [colorTheme, setColorThemeState] = useState<ColorThemeName>(defaultColorTheme);
+  const [backgroundSettings, setBackgroundSettingsState] = useState<BackgroundSettings>({
+    ...defaultInitialBackgroundSettings,
+    ...propDefaultBackgroundSettings,
   });
-
-  const [appliedTheme, setAppliedTheme] = useState<AppliedTheme>(() => {
-    if (typeof window === "undefined") return themeSetting === "dark" ? "dark" : "light";
-    if (themeSetting === "system") {
-      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    }
-    return themeSetting;
-  });
-
-  const [colorTheme, setColorThemeState] = useState<ColorThemeName>(() => {
-    if (typeof window !== "undefined") {
-      const storedColor = localStorage.getItem(storageKeyColor) as ColorThemeName;
-      return availableColorThemes.includes(storedColor) ? storedColor : defaultColorTheme;
-    }
-    return defaultColorTheme;
-  });
-
-  const [backgroundSettings, setBackgroundSettingsState] = useState<BackgroundSettings>(() => {
-    const mergedDefaults = { ...defaultInitialBackgroundSettings, ...propDefaultBackgroundSettings };
-    if (typeof window !== "undefined") {
-      const storedSettings = localStorage.getItem(storageKeyBackground);
-      if (storedSettings) {
-        try {
-          const parsedSettings = JSON.parse(storedSettings) as Partial<BackgroundSettings>;
-          return {
-            showBackground: parsedSettings.showBackground !== undefined ? parsedSettings.showBackground : mergedDefaults.showBackground,
-            useCustomImage: parsedSettings.useCustomImage !== undefined ? parsedSettings.useCustomImage : mergedDefaults.useCustomImage,
-            customImageSrc: parsedSettings.customImageSrc !== undefined ? parsedSettings.customImageSrc : mergedDefaults.customImageSrc,
-            opacity: parsedSettings.opacity !== undefined ? parsedSettings.opacity : mergedDefaults.opacity,
-            brightness: parsedSettings.brightness !== undefined ? parsedSettings.brightness : mergedDefaults.brightness,
-            blur: parsedSettings.blur !== undefined ? parsedSettings.blur : mergedDefaults.blur,
-          };
-        } catch (e) {
-          console.error("Failed to parse background settings from localStorage", e);
-          return mergedDefaults;
-        }
-      }
-    }
-    return mergedDefaults;
-  });
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    (async () => {
+      try {
+        const settings = await invoke<any>('read_settings');
+        setThemeSetting(settings.theme || defaultTheme);
+        setColorThemeState(settings.color_theme || defaultColorTheme);
+        setBackgroundSettingsState({
+          ...defaultInitialBackgroundSettings,
+          ...settings.background,
+        });
+        setLoaded(true);
+      } catch (e) {
+        setLoaded(true);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    (async () => {
+      try {
+        const settings = await invoke<any>('read_settings');
+        await invoke('write_settings', {
+          settings: {
+            ...settings,
+            theme: themeSetting,
+            color_theme: colorTheme,
+            background: backgroundSettings,
+          }
+        });
+      } catch (e) {
+      }
+    })();
+  }, [themeSetting, colorTheme, backgroundSettings, loaded]);
+
+  useEffect(() => {
+    if (!loaded) return;
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
-
     let currentAppliedTheme: AppliedTheme;
     if (themeSetting === "system") {
       currentAppliedTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -129,14 +126,13 @@ export function ThemeProvider({
         root.classList.add("dark");
     }
     setAppliedTheme(currentAppliedTheme);
-    localStorage.setItem(storageKeyTheme, themeSetting);
-  }, [themeSetting, storageKeyTheme]);
+  }, [themeSetting, loaded]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || themeSetting !== "system") return;
+    if (!loaded) return;
+    if (themeSetting !== "system") return;
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const root = window.document.documentElement;
-    
     const handleChange = () => {
       const newAppliedTheme = mediaQuery.matches ? "dark" : "light";
       setAppliedTheme(newAppliedTheme);
@@ -147,25 +143,17 @@ export function ThemeProvider({
     };
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [themeSetting]);
+  }, [themeSetting, loaded]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!loaded) return;
     const root = window.document.documentElement;
-
     if (colorTheme === "zinc" || !colorTheme) {
       root.removeAttribute("data-theme");
     } else {
       root.setAttribute("data-theme", colorTheme);
     }
-    localStorage.setItem(storageKeyColor, colorTheme);
-  }, [colorTheme, storageKeyColor]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(storageKeyBackground, JSON.stringify(backgroundSettings));
-    }
-  }, [backgroundSettings, storageKeyBackground]);
+  }, [colorTheme, loaded]);
 
   const value = {
     themeSetting,
@@ -182,6 +170,8 @@ export function ThemeProvider({
       setBackgroundSettingsState(prev => ({ ...prev, ...newSettings }));
     },
   };
+
+  if (!loaded) return null;
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>

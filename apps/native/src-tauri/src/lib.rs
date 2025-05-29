@@ -51,7 +51,7 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![utils::log_message])
+        .invoke_handler(tauri::generate_handler![utils::log_message, utils::read_settings, utils::write_settings])
         .setup(|_app| {
             log::info!("JotPad application started successfully!");
             Ok(())
