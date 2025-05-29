@@ -1,6 +1,6 @@
 import React from "react";
 import { Note, NoteEntry } from "@repo/ui/lib/database";
-import { NoteEntryItem } from "@repo/ui/components/NoteEntryItem";
+import { NoteEntryItem } from "@repo/ui/components/note/NoteEntryItem";
 import { formatDateForSeparator } from "@repo/ui/lib/utils";
 
 interface NoteEntriesListProps {

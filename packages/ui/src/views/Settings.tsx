@@ -1,5 +1,3 @@
-import React, { useRef, useState } from "react";
-import { invoke } from '@tauri-apps/api/core';
 import {
   Card,
   CardTitle,
@@ -46,9 +44,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
-import { exportAllNotes } from "@repo/ui/lib/exportNotes";
-import { useTheme } from "@repo/ui/components/theme-provider";
-import { exportFormats, ExportFormat } from "@repo/ui/components/ExportNoteDialog";
+import { useSettings } from "@repo/ui/hooks/useSettings";
 
 interface SettingsProps {
   onClose: () => void;
@@ -73,40 +69,19 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
     colorTheme,
     setColorTheme,
     backgroundSettings,
-    setBackgroundSettings
-  } = useTheme();
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [isAppearanceExpanded, setIsAppearanceExpanded] = useState(false);
-  const [isBackgroundExpanded, setIsBackgroundExpanded] = useState(false);
-  const [isExportExpanded, setIsExportExpanded] = useState(false);
-
-  const [selectedExportFormat, setSelectedExportFormat] = useState<ExportFormat>("json");
-  const currentExportFormatDisplay = exportFormats.find(f => f.value === selectedExportFormat)!;
-
-  const handleCustomImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setBackgroundSettings({
-          customImageSrc: reader.result as string,
-          useCustomImage: true,
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleRemoveCustomImage = () => {
-    setBackgroundSettings({
-      customImageSrc: null,
-    });
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
+    setBackgroundSettings,
+    fileInputRef,
+    isAppearanceExpanded, setIsAppearanceExpanded,
+    isBackgroundExpanded, setIsBackgroundExpanded,
+    isExportExpanded, setIsExportExpanded,
+    selectedExportFormat, setSelectedExportFormat,
+    currentExportFormatDisplay,
+    handleCustomImageChange,
+    handleRemoveCustomImage,
+    handleKeyDown,
+    handleExportNotes,
+    exportFormats
+  } = useSettings();
 
   const getCurrentThemeDisplay = () => {
     switch (themeSetting) {
@@ -117,24 +92,6 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
     }
   };
   const currentThemeDisplay = getCurrentThemeDisplay();
-
-  const handleKeyDown = (event: React.KeyboardEvent, action: () => void) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      action();
-    }
-  };
-
-  const handleExportNotes = async () => {
-    await invoke('log_message', { level: 'info', message: `Attempting to export notes. Format: ${selectedExportFormat}` });
-    try {
-      await exportAllNotes(selectedExportFormat);
-      await invoke('log_message', { level: 'info', message: `Notes successfully exported. Format: ${selectedExportFormat}`});
-    } catch (error) {
-      await invoke('log_message', { level: 'error', message: `Export failed for notes with format ${selectedExportFormat}:`, error });
-      alert("Export failed. Please try again.");
-    }
-  };
 
   return (
     <div className={`relative flex-1 flex flex-col h-[calc(100vh)] md:h-[calc(100vh-2.5rem)] md:border md:m-5 md:mb-5 rounded-xl overflow-hidden bg-background`}>
