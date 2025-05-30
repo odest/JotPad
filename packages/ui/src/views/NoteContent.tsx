@@ -128,10 +128,10 @@ export function NoteContent({
   };
 
   const getBackgroundStyle = () => {
-    if (!backgroundSettings.showBackground) return {};
+    if (!backgroundSettings.show_background) return {};
 
-    const imageUrl = backgroundSettings.useCustomImage && backgroundSettings.customImageSrc
-      ? `url(${backgroundSettings.customImageSrc})`
+    const imageUrl = backgroundSettings.use_custom_image && backgroundSettings.custom_image_src
+      ? `url(${backgroundSettings.custom_image_src})`
       : 'url(/background.png)';
 
     return {
@@ -147,7 +147,7 @@ export function NoteContent({
 
   return (
     <div className={`relative flex-1 flex flex-col h-[calc(100vh)] md:h-[calc(100vh-2.5rem)] md:border md:m-5 md:mb-5 rounded-xl overflow-hidden ${!showSidebar ? 'block' : 'hidden md:block'} bg-background`}>
-      {backgroundSettings.showBackground && (
+      {backgroundSettings.show_background && (
         <div
           className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat pointer-events-none"
           style={getBackgroundStyle()}

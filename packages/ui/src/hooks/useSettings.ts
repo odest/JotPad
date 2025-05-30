@@ -1,8 +1,11 @@
 import { useRef, useState, useEffect } from "react";
 import { invoke } from '@tauri-apps/api/core';
+import { getVersion } from '@tauri-apps/api/app';
+import { toast } from "sonner"
 import { exportAllNotes } from "@repo/ui/lib/exportNotes";
 import { useTheme } from "@repo/ui/providers/theme-provider";
 import { exportFormats, ExportFormat } from "@repo/ui/components/note/ExportNoteDialog";
+import { compareVersions, checkOnline, fetchLatestGithubVersion } from '@repo/ui/lib/utils';
 
 type SortType = 'az' | 'za' | 'newest' | 'oldest';
 
@@ -21,6 +24,8 @@ export function useSettings() {
   const [isAppearanceExpanded, setIsAppearanceExpanded] = useState(false);
   const [isBackgroundExpanded, setIsBackgroundExpanded] = useState(false);
   const [isExportExpanded, setIsExportExpanded] = useState(false);
+  const [isAboutExpanded, setIsAboutExpanded] = useState(false);
+  const [autoCheckUpdates, setAutoCheckUpdatesState] = useState(false);
 
   const [selectedExportFormat, setSelectedExportFormat] = useState<ExportFormat>("json");
   const [sortType, setSortTypeState] = useState<SortType>("newest");
@@ -31,15 +36,16 @@ export function useSettings() {
     theme: "system",
     color_theme: "zinc",
     background: {
-      showBackground: true,
-      useCustomImage: false,
-      customImageSrc: null,
+      show_background: true,
+      use_custom_image: false,
+      custom_image_src: null,
       opacity: 30,
       brightness: 100,
       blur: 0,
     },
     export_format: "json",
     sort_type: "newest",
+    auto_check_updates: false
   };
 
   const resetSettings = async () => {
@@ -59,6 +65,9 @@ export function useSettings() {
         }
         if (settings.sort_type) {
           setSortTypeState(settings.sort_type);
+        }
+        if (settings.auto_check_updates) {
+          setAutoCheckUpdatesState(settings.auto_check_updates);
         }
         setLoaded(true);
       } catch (e) {
@@ -118,8 +127,8 @@ export function useSettings() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setBackgroundSettings({
-          customImageSrc: reader.result as string,
-          useCustomImage: true,
+          custom_image_src: reader.result as string,
+          use_custom_image: true,
         });
       };
       reader.readAsDataURL(file);
@@ -128,7 +137,7 @@ export function useSettings() {
 
   const handleRemoveCustomImage = () => {
     setBackgroundSettings({
-      customImageSrc: null,
+      custom_image_src: null,
     });
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -153,6 +162,53 @@ export function useSettings() {
     }
   };
 
+  const setAutoCheckUpdates = (checked: boolean) => {
+    setAutoCheckUpdatesState(checked);
+    (async () => {
+      try {
+        const settings = await invoke<any>('read_settings');
+        await invoke('write_settings', {
+          settings: {
+            ...settings,
+            auto_check_updates: checked,
+          }
+        });
+      } catch (e) {}
+    })();
+  };
+
+  const handleCheckForUpdates = async () => {
+    if (!checkOnline()) {
+      toast.error('No internet connection. Please check your network and try again.');
+      return;
+    }
+    let currentVersion = '';
+    try {
+      currentVersion = await getVersion();
+    } catch {
+      toast.error('Could not determine current app version.');
+      return;
+    }
+    try {
+      const latestTag = await fetchLatestGithubVersion();
+      const current = currentVersion.replace(/^v/, '');
+      if (!latestTag) {
+        toast.error('Could not determine latest version.');
+        return;
+      }
+      const cmp = compareVersions(current, latestTag);
+      if (cmp === 0) {
+        toast.success('You are using the latest version.');
+      } else if (cmp < 0) {
+        toast.info(`A new version is available: v${latestTag}\nYou are using: v${current}`);
+      } else {
+        toast.success(`You are using a newer version (v${current}) than the latest release (v${latestTag}).`);
+      }
+    } catch (e) {
+      toast.error('Failed to check for updates. Please try again later.');
+    }
+  };
+
   return {
     resetSettings,
     themeSetting,
@@ -166,6 +222,8 @@ export function useSettings() {
     isAppearanceExpanded, setIsAppearanceExpanded,
     isBackgroundExpanded, setIsBackgroundExpanded,
     isExportExpanded, setIsExportExpanded,
+    isAboutExpanded, setIsAboutExpanded,
+    autoCheckUpdates, setAutoCheckUpdates,
     selectedExportFormat, setSelectedExportFormat: setSelectedExportFormatAndPersist,
     currentExportFormatDisplay,
     sortType, setSortType: setSortTypeAndPersist,
@@ -174,6 +232,7 @@ export function useSettings() {
     handleRemoveCustomImage,
     handleKeyDown,
     handleExportNotes,
-    exportFormats
+    exportFormats,
+    handleCheckForUpdates
   };
 } 

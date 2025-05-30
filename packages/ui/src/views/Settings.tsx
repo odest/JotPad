@@ -39,12 +39,15 @@ import {
   Download,
   Sparkles,
   ArrowLeft,
+  RefreshCw,
   ChevronDown,
   UploadCloud,
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 import { useSettings } from "@repo/ui/hooks/useSettings";
+import { useState, useEffect } from "react";
+import { getVersion } from "@tauri-apps/api/app";
 
 interface SettingsProps {
   onClose: () => void;
@@ -75,14 +78,24 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
     isAppearanceExpanded, setIsAppearanceExpanded,
     isBackgroundExpanded, setIsBackgroundExpanded,
     isExportExpanded, setIsExportExpanded,
+    isAboutExpanded, setIsAboutExpanded,
     selectedExportFormat, setSelectedExportFormat,
     currentExportFormatDisplay,
     handleCustomImageChange,
     handleRemoveCustomImage,
     handleKeyDown,
     handleExportNotes,
-    exportFormats
+    exportFormats,
+    autoCheckUpdates, setAutoCheckUpdates,
+    handleCheckForUpdates
   } = useSettings();
+
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [appVersion, setAppVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    getVersion().then(setAppVersion).catch(() => setAppVersion("-"));
+  }, []);
 
   const getCurrentThemeDisplay = () => {
     switch (themeSetting) {
@@ -240,21 +253,21 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                   <p className="text-xs text-muted-foreground">Toggle background visibility</p>
                 </div>
                 <Switch
-                  checked={backgroundSettings.showBackground}
-                  onCheckedChange={(checked) => setBackgroundSettings({ showBackground: checked })}
+                  checked={backgroundSettings.show_background}
+                  onCheckedChange={(checked) => setBackgroundSettings({ show_background: checked })}
                 />
               </div>
 
-              {backgroundSettings.showBackground && (
+              {backgroundSettings.show_background && (
                 <>
                   <Separator />
                   <div className="space-y-3">
                     <Tabs
-                      value={backgroundSettings.useCustomImage ? "custom" : "doodle"}
+                      value={backgroundSettings.use_custom_image ? "custom" : "doodle"}
                       onValueChange={(value) => {
                         const isCustom = value === "custom";
-                        setBackgroundSettings({ useCustomImage: isCustom });
-                        if (isCustom && !backgroundSettings.customImageSrc) {
+                        setBackgroundSettings({ use_custom_image: isCustom });
+                        if (isCustom && !backgroundSettings.use_custom_image) {
                           fileInputRef.current?.click();
                         }
                       }}
@@ -273,17 +286,17 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                           className={cn(
                             "relative border-2 border-dashed rounded-lg transition-colors cursor-pointer",
                             "hover:border-primary/50 hover:bg-primary/5",
-                            backgroundSettings.customImageSrc
+                            backgroundSettings.custom_image_src
                               ? "border-primary/30 bg-primary/10"
                               : "border-muted-foreground/25"
                           )}
                           onClick={() => fileInputRef.current?.click()}
                         >
-                          {backgroundSettings.customImageSrc ? (
+                          {backgroundSettings.custom_image_src ? (
                             <div className="relative group">
                               <div className="flex justify-center items-center p-2 min-h-[120px] rounded-lg overflow-hidden">
                                 <img
-                                  src={backgroundSettings.customImageSrc}
+                                  src={backgroundSettings.custom_image_src}
                                   alt="Selected background"
                                   className="max-w-full max-h-[120px] object-contain rounded-md shadow-sm"
                                 />
@@ -390,8 +403,8 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                         <div
                           className="absolute inset-0 bg-center bg-no-repeat"
                           style={{
-                            backgroundImage: backgroundSettings.useCustomImage && backgroundSettings.customImageSrc
-                              ? `url(${backgroundSettings.customImageSrc})`
+                            backgroundImage: backgroundSettings.use_custom_image && backgroundSettings.custom_image_src
+                              ? `url(${backgroundSettings.custom_image_src})`
                               : 'url(/background.png)',
                             opacity: backgroundSettings.opacity / 100,
                             filter: `brightness(${backgroundSettings.brightness / 100}) blur(${backgroundSettings.blur}px)`,
@@ -465,6 +478,59 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
               <Button onClick={handleExportNotes} className="w-full">
                 <Download className="mr-2 h-4 w-4" />
                 Export All Notes as {currentExportFormatDisplay.label}
+              </Button>
+            </CardContent>
+          )}
+        </Card>
+
+        <Card>
+          <CardHeader
+            className="flex items-center justify-between cursor-pointer"
+            onClick={() => setIsAboutExpanded(!isAboutExpanded)}
+            onKeyDown={(e) => handleKeyDown(e, () => setIsAboutExpanded(!isAboutExpanded))}
+            role="button"
+            aria-expanded={isAboutExpanded}
+            aria-controls="about-content"
+            tabIndex={0}
+          >
+            <div>
+              <CardTitle className="text-base">About</CardTitle>
+              <CardDescription className="text-sm">App information and updates.</CardDescription>
+            </div>
+            {isAboutExpanded ? (
+              <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
+            ) : (
+              <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+            )}
+          </CardHeader>
+          {isAboutExpanded && (
+            <CardContent id="about-content" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Version</span>
+                <span className="text-sm text-muted-foreground">v{appVersion ?? "..."}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Check for updates on startup</span>
+                <Switch
+                  checked={autoCheckUpdates}
+                  onCheckedChange={(checked) => setAutoCheckUpdates(checked)}
+                />
+              </div>
+              <Separator />
+              <Button
+                className="w-full flex items-center justify-center gap-2"
+                onClick={async () => {
+                  setCheckingUpdate(true);
+                  await handleCheckForUpdates();
+                  setCheckingUpdate(false);
+                }}
+              >
+                {checkingUpdate ? (
+                  <RefreshCw className="animate-spin h-4 w-4" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                Check for Updates
               </Button>
             </CardContent>
           )}
