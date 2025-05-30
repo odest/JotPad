@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { GITHUB_REPO_API_LATEST_RELEASE } from "@repo/ui/lib/projectLinks";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -34,7 +35,7 @@ export function checkOnline(): boolean {
 
 export async function fetchLatestGithubVersion(): Promise<string | null> {
   try {
-    const res = await fetch('https://api.github.com/repos/odest/JotPad/releases/latest');
+    const res = await fetch(GITHUB_REPO_API_LATEST_RELEASE);
     if (!res.ok) return null;
     const data = await res.json();
     return data.tag_name?.replace(/^v/, '') || null;

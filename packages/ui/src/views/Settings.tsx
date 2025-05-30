@@ -48,6 +48,7 @@ import { cn } from "@repo/ui/lib/utils";
 import { useSettings } from "@repo/ui/hooks/useSettings";
 import { useState, useEffect } from "react";
 import { getVersion } from "@tauri-apps/api/app";
+import { projectLinks } from "@repo/ui/lib/projectLinks";
 
 interface SettingsProps {
   onClose: () => void;
@@ -505,12 +506,41 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
           </CardHeader>
           {isAboutExpanded && (
             <CardContent id="about-content" className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Version</span>
-                <span className="text-sm text-muted-foreground">v{appVersion ?? "..."}</span>
+              <div className="flex flex-col gap-2">
+                {projectLinks.map((item) => (
+                  <div key={item.label} className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-sm font-medium">
+                      <item.icon className="w-4 h-4" /> {item.label}
+                    </span>
+                    {item.value === "version" ? (
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm hover:underline text-primary"
+                      >
+                        v{appVersion ?? "..."}
+                      </a>
+                    ) : item.href ? (
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm hover:underline text-primary"
+                      >
+                        {item.value}
+                      </a>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">{item.value}</span>
+                    )}
+                  </div>
+                ))}
               </div>
+              <Separator />
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Check for updates on startup</span>
+                <span className="flex items-center gap-2 text-sm font-medium">
+                  Check for updates on startup
+                </span>
                 <Switch
                   checked={autoCheckUpdates}
                   onCheckedChange={(checked) => setAutoCheckUpdates(checked)}
