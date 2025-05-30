@@ -23,13 +23,14 @@ pub struct Settings {
     pub background: BackgroundSettings,
     pub export_format: String,
     pub sort_type: String,
+    pub auto_check_updates: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BackgroundSettings {
-    pub showBackground: bool,
-    pub useCustomImage: bool,
-    pub customImageSrc: Option<String>,
+    pub show_background: bool,
+    pub use_custom_image: bool,
+    pub custom_image_src: Option<String>,
     pub opacity: u8,
     pub brightness: u8,
     pub blur: f32,
@@ -41,15 +42,16 @@ impl Default for Settings {
             theme: "system".to_string(),
             color_theme: "zinc".to_string(),
             background: BackgroundSettings {
-                showBackground: true,
-                useCustomImage: false,
-                customImageSrc: None,
+                show_background: true,
+                use_custom_image: false,
+                custom_image_src: None,
                 opacity: 30,
                 brightness: 100,
                 blur: 0.0,
             },
             export_format: "json".to_string(),
             sort_type: "newest".to_string(),
+            auto_check_updates: false,
         }
     }
 }

@@ -1,3 +1,6 @@
+import { useState, useEffect } from "react";
+import { getVersion } from "@tauri-apps/api/app";
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogTitle,
@@ -10,6 +13,8 @@ import { Sidebar } from "@repo/ui/views/Sidebar";
 import { Settings } from "@repo/ui/views/Settings";
 import { NoteContent } from "@repo/ui/views/NoteContent";
 import { useNotes } from "@repo/ui/hooks/useNotes";
+import { useSettings } from "@repo/ui/hooks/useSettings";
+import { compareVersions, checkOnline, fetchLatestGithubVersion } from '@repo/ui/lib/utils';
 
 export function HomePage() {
   const {
@@ -34,6 +39,40 @@ export function HomePage() {
     SIDEBAR_HEADER_HEIGHT,
     handleDialogOpenChange,
   } = useNotes();
+
+  const [appVersion, setAppVersion] = useState<string | null>(null);
+  const { autoCheckUpdates } = useSettings();
+
+  useEffect(() => {
+    getVersion().then(setAppVersion).catch(() => setAppVersion("-"));
+  }, []);
+
+  useEffect(() => {
+    if (
+      autoCheckUpdates && checkOnline()
+    ) {
+      (async () => {
+        let currentVersion = appVersion;
+        if (!currentVersion) {
+          try {
+            currentVersion = await getVersion();
+          } catch {
+            return;
+          }
+        }
+        try {
+          const latestTag = await fetchLatestGithubVersion();
+          const current = currentVersion.replace(/^v/, '');
+          if (!latestTag) return;
+          const cmp = compareVersions(current, latestTag);
+          if (cmp < 0) {
+            toast.info(`A new version is available: v${latestTag}\nYou are using: v${current}`);
+          }
+        } catch (e) {
+        }
+      })();
+    }
+  }, [autoCheckUpdates, appVersion]);
 
   return (
     <div className="min-h-screen w-full flex">

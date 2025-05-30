@@ -9,9 +9,9 @@ const availableColorThemes = ["zinc", "red", "rose", "orange", "green", "blue", 
 export type ColorThemeName = typeof availableColorThemes[number];
 
 export type BackgroundSettings = {
-  showBackground: boolean;
-  useCustomImage: boolean;
-  customImageSrc: string | null;
+  show_background: boolean;
+  use_custom_image: boolean;
+  custom_image_src: string | null;
   opacity: number;
   brightness: number;
   blur: number;
@@ -38,9 +38,9 @@ type ThemeProviderState = {
 };
 
 const defaultInitialBackgroundSettings: BackgroundSettings = {
-  showBackground: true,
-  useCustomImage: false,
-  customImageSrc: null,
+  show_background: true,
+  use_custom_image: false,
+  custom_image_src: null,
   opacity: 30,
   brightness: 100,
   blur: 0,
