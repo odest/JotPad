@@ -1,8 +1,8 @@
+use log::{debug, error, info, trace, warn};
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
-use serde::{Deserialize, Serialize};
-use log::{debug, error, info, trace, warn};
 
 #[tauri::command]
 pub fn log_message(level: &str, message: &str) {
@@ -69,13 +69,17 @@ pub fn read_settings(app_handle: AppHandle) -> Result<Settings, String> {
         if let Err(e) = fs::create_dir_all(path.parent().unwrap()) {
             return Err(format!("Failed to create config dir: {}", e));
         }
-        if let Err(e) = fs::write(&path, serde_json::to_string_pretty(&default_settings).unwrap()) {
+        if let Err(e) = fs::write(
+            &path,
+            serde_json::to_string_pretty(&default_settings).unwrap(),
+        ) {
             return Err(format!("Failed to write default settings: {}", e));
         }
         return Ok(default_settings);
     }
     let data = fs::read_to_string(&path).map_err(|e| format!("Failed to read settings: {}", e))?;
-    let settings: Settings = serde_json::from_str(&data).map_err(|e| format!("Failed to parse settings: {}", e))?;
+    let settings: Settings =
+        serde_json::from_str(&data).map_err(|e| format!("Failed to parse settings: {}", e))?;
     Ok(settings)
 }
 

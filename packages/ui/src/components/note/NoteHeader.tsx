@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { invoke } from '@tauri-apps/api/core';
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -7,6 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuSeparator,
 } from "@repo/ui/components/dropdown-menu";
+import { Button } from "@repo/ui/components/button";
 import {
   Trash,
   Search,
@@ -15,11 +17,10 @@ import {
   ChevronLeft,
   MoreVertical,
 } from "lucide-react";
-import { Button } from "@repo/ui/components/button";
 import { Note } from "@repo/ui/lib/database";
+import { useSettings } from "@repo/ui/hooks/useSettings";
 import { exportSingleNote } from "@repo/ui/lib/exportNotes";
 import { ExportNoteDialog, ExportFormat } from "@repo/ui/components/note/ExportNoteDialog";
-import { useSettings } from "@repo/ui/hooks/useSettings";
 
 interface NoteHeaderProps {
   selectedNote: Note;
@@ -56,14 +57,19 @@ export function NoteHeader({
     setIsExportDialogOpen(true);
   };
 
-  const handleConfirmNoteExport = (format: ExportFormat, note: Note) => {
+  const handleConfirmNoteExport = async (format: ExportFormat, note: Note) => {
     invoke('log_message', { level: 'info', message: `Attempting to export notes. Format: ${format}`});
     try {
-      exportSingleNote(note, format);
-      invoke('log_message', { level: 'info', message: `Notes successfully exported. Format: ${format}`});
-    } catch (error) {
+      const result = await exportSingleNote(note, format);
+      if (result === "success") {
+        invoke('log_message', { level: 'info', message: `Notes successfully exported. Format: ${format}`});
+        toast.success("Note exported successfully.");
+      } else if (result === "error") {
+        toast.error("Export failed. Please try again.");
+      }
+    } catch (error: any) {
       invoke('log_message', { level: 'error', message: `Export failed for notes with format ${format}:`, error});
-      alert("Export failed. Please try again.");
+      toast.error("Export failed. Please try again.");
     }
   };
 

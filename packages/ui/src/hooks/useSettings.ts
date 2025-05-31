@@ -154,11 +154,16 @@ export function useSettings() {
   const handleExportNotes = async () => {
     await invoke('log_message', { level: 'info', message: `Attempting to export notes. Format: ${selectedExportFormat}` });
     try {
-      await exportAllNotes(selectedExportFormat);
-      await invoke('log_message', { level: 'info', message: `Notes successfully exported. Format: ${selectedExportFormat}`});
-    } catch (error) {
+      const result = await exportAllNotes(selectedExportFormat);
+      if (result === "success") {
+        await invoke('log_message', { level: 'info', message: `Notes successfully exported. Format: ${selectedExportFormat}`});
+        toast.success("Notes exported successfully.");
+      } else if (result === "error") {
+        toast.error("Export failed. Please try again.");
+      }
+    } catch (error: any) {
       await invoke('log_message', { level: 'error', message: `Export failed for notes with format ${selectedExportFormat}:`, error });
-      alert("Export failed. Please try again.");
+      toast.error("Export failed. Please try again.");
     }
   };
 
