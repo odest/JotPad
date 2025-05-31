@@ -6,11 +6,10 @@ use tauri_plugin_sql::{Migration, MigrationKind};
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     log::info!("Starting JotPad application...");
-    let migrations = vec![
-        Migration {
-            version: 1,
-            description: "create notes and note_entries tables",
-            sql: "CREATE TABLE IF NOT EXISTS notes (
+    let migrations = vec![Migration {
+        version: 1,
+        description: "create notes and note_entries tables",
+        sql: "CREATE TABLE IF NOT EXISTS notes (
                 id TEXT PRIMARY KEY,
                 title TEXT NOT NULL,
                 content TEXT,
@@ -25,15 +24,16 @@ pub fn run() {
                 timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
             );",
-            kind: MigrationKind::Up,
-        }
-    ];
-    
+        kind: MigrationKind::Up,
+    }];
+
     tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(
             tauri_plugin_sql::Builder::default()
                 .add_migrations("sqlite:notes.db", migrations)
-                .build()
+                .build(),
         )
         .plugin(
             tauri_plugin_log::Builder::new()
@@ -51,7 +51,11 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![utils::log_message, utils::read_settings, utils::write_settings])
+        .invoke_handler(tauri::generate_handler![
+            utils::log_message,
+            utils::read_settings,
+            utils::write_settings
+        ])
         .setup(|_app| {
             log::info!("JotPad application started successfully!");
             Ok(())

@@ -1,3 +1,5 @@
+import { save } from '@tauri-apps/plugin-dialog';
+import { writeTextFile } from '@tauri-apps/plugin-fs';
 import { db, Note, NoteEntry } from "@repo/ui/lib/database";
 
 export type ExportFormat = "json" | "txt" | "md";
@@ -22,7 +24,23 @@ function getMimeTypeAndExtension(format: ExportFormat) {
   return { mimeType: "application/octet-stream", ext: "txt" };
 }
 
-export async function exportAllNotes(format: ExportFormat) {
+async function triggerDownload(data: string, filename: string, mimeType: string): Promise<"success" | "cancel" | "error"> {
+  try {
+    const filePath = await save({
+      defaultPath: filename,
+      filters: [
+        { name: mimeType, extensions: [filename.split('.').pop() || 'txt'] }
+      ]
+    });
+    if (!filePath) return "cancel";
+    await writeTextFile(filePath, data);
+    return "success";
+  } catch (e) {
+    return "error";
+  }
+}
+
+export async function exportAllNotes(format: ExportFormat): Promise<"success" | "cancel" | "error"> {
   const notes: Note[] = await db.getNotes();
   const notesWithEntries = await Promise.all(
     notes.map(async (note) => {
@@ -47,27 +65,13 @@ export async function exportAllNotes(format: ExportFormat) {
   }
 
   const { mimeType, ext } = getMimeTypeAndExtension(format);
-  triggerDownload(dataStr, `notes_export.${ext}`, mimeType);
+  return await triggerDownload(dataStr, `notes_export.${ext}`, mimeType);
 }
 
-export async function exportSingleNote(note: Note, format: ExportFormat) {
+export async function exportSingleNote(note: Note, format: ExportFormat): Promise<"success" | "cancel" | "error"> {
   const entries = await db.getNoteEntries(note.id);
   const noteWithEntries = { ...note, entries };
   const dataStr = formatNoteWithEntries(noteWithEntries, format);
   const { mimeType, ext } = getMimeTypeAndExtension(format);
-  triggerDownload(dataStr, `${note.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_export.${ext}`, mimeType);
-}
-
-function triggerDownload(data: string, filename: string, mimeType: string) {
-  const blob = new Blob([data], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => {
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, 100);
+  return await triggerDownload(dataStr, `${note.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_export.${ext}`, mimeType);
 } 

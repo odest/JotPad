@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { invoke } from '@tauri-apps/api/core';
+import { open } from '@tauri-apps/plugin-dialog';
 import { getVersion } from '@tauri-apps/api/app';
 import { toast } from "sonner"
 import { exportAllNotes } from "@repo/ui/lib/exportNotes";
@@ -121,17 +122,22 @@ export function useSettings() {
     })();
   };
 
-  const handleCustomImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
+  const handleCustomImageChange = async () => {
+    try {
+      const selected = await open({
+        multiple: false,
+        filters: [
+          { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'] }
+        ]
+      });
+      if (typeof selected === 'string') {
         setBackgroundSettings({
-          custom_image_src: reader.result as string,
+          custom_image_src: selected,
           use_custom_image: true,
         });
-      };
-      reader.readAsDataURL(file);
+      }
+    } catch (e) {
+      toast.error('Failed to select image.');
     }
   };
 
@@ -154,11 +160,16 @@ export function useSettings() {
   const handleExportNotes = async () => {
     await invoke('log_message', { level: 'info', message: `Attempting to export notes. Format: ${selectedExportFormat}` });
     try {
-      await exportAllNotes(selectedExportFormat);
-      await invoke('log_message', { level: 'info', message: `Notes successfully exported. Format: ${selectedExportFormat}`});
-    } catch (error) {
+      const result = await exportAllNotes(selectedExportFormat);
+      if (result === "success") {
+        await invoke('log_message', { level: 'info', message: `Notes successfully exported. Format: ${selectedExportFormat}`});
+        toast.success("Notes exported successfully.");
+      } else if (result === "error") {
+        toast.error("Export failed. Please try again.");
+      }
+    } catch (error: any) {
       await invoke('log_message', { level: 'error', message: `Export failed for notes with format ${selectedExportFormat}:`, error });
-      alert("Export failed. Please try again.");
+      toast.error("Export failed. Please try again.");
     }
   };
 

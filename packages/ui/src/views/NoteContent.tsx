@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { convertFileSrc } from '@tauri-apps/api/core';
 import {
   Dialog,
   DialogTitle,
@@ -131,7 +132,7 @@ export function NoteContent({
     if (!backgroundSettings.show_background) return {};
 
     const imageUrl = backgroundSettings.use_custom_image && backgroundSettings.custom_image_src
-      ? `url(${backgroundSettings.custom_image_src})`
+      ? `url(${convertFileSrc(backgroundSettings.custom_image_src)})`
       : 'url(/background.png)';
 
     return {

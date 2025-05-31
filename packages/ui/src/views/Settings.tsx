@@ -1,3 +1,4 @@
+import { convertFileSrc } from '@tauri-apps/api/core';
 import {
   Card,
   CardTitle,
@@ -291,13 +292,13 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                               ? "border-primary/30 bg-primary/10"
                               : "border-muted-foreground/25"
                           )}
-                          onClick={() => fileInputRef.current?.click()}
+                          onClick={handleCustomImageChange}
                         >
                           {backgroundSettings.custom_image_src ? (
                             <div className="relative group">
                               <div className="flex justify-center items-center p-2 min-h-[120px] rounded-lg overflow-hidden">
                                 <img
-                                  src={backgroundSettings.custom_image_src}
+                                  src={backgroundSettings.custom_image_src ? convertFileSrc(backgroundSettings.custom_image_src) : undefined}
                                   alt="Selected background"
                                   className="max-w-full max-h-[120px] object-contain rounded-md shadow-sm"
                                 />
@@ -336,13 +337,6 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                             </div>
                           )}
                         </div>
-                        <input
-                          type="file"
-                          ref={fileInputRef}
-                          accept="image/png, image/jpeg, image/gif, image/webp"
-                          onChange={handleCustomImageChange}
-                          className="hidden"
-                        />
                       </TabsContent>
                     </Tabs>
                     <Separator />
@@ -405,7 +399,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                           className="absolute inset-0 bg-center bg-no-repeat"
                           style={{
                             backgroundImage: backgroundSettings.use_custom_image && backgroundSettings.custom_image_src
-                              ? `url(${backgroundSettings.custom_image_src})`
+                              ? `url(${convertFileSrc(backgroundSettings.custom_image_src)})`
                               : 'url(/background.png)',
                             opacity: backgroundSettings.opacity / 100,
                             filter: `brightness(${backgroundSettings.brightness / 100}) blur(${backgroundSettings.blur}px)`,

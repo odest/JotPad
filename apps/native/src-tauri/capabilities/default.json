@@ -10,6 +10,16 @@
     "opener:default",
     "log:default",
     "sql:default",
-    "sql:allow-execute"
+    "sql:allow-execute",
+    "dialog:default",
+    "fs:default",
+    "fs:allow-write-text-file",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        { "path": "$DOWNLOAD/*" },
+        { "path": "$DOCUMENT/*" }
+      ]
+    }
   ]
 }
