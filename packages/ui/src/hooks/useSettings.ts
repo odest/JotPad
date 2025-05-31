@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { invoke } from '@tauri-apps/api/core';
+import { open } from '@tauri-apps/plugin-dialog';
 import { getVersion } from '@tauri-apps/api/app';
 import { toast } from "sonner"
 import { exportAllNotes } from "@repo/ui/lib/exportNotes";
@@ -121,17 +122,22 @@ export function useSettings() {
     })();
   };
 
-  const handleCustomImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
+  const handleCustomImageChange = async () => {
+    try {
+      const selected = await open({
+        multiple: false,
+        filters: [
+          { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'] }
+        ]
+      });
+      if (typeof selected === 'string') {
         setBackgroundSettings({
-          custom_image_src: reader.result as string,
+          custom_image_src: selected,
           use_custom_image: true,
         });
-      };
-      reader.readAsDataURL(file);
+      }
+    } catch (e) {
+      toast.error('Failed to select image.');
     }
   };
 
