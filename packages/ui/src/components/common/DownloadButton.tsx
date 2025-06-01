@@ -3,64 +3,77 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@repo/ui/components/button'
 import { Download } from 'lucide-react'
+import { fetchLatestGithubVersion } from '@repo/ui/lib/utils';
 
 const DownloadButton = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [currentOS, setCurrentOS] = useState<'windows' | 'linux' | 'macos' | 'android'>('windows');
+  const [latestTag, setLatestTag] = useState<string | null>(null);
 
   type OSType = 'windows' | 'linux' | 'macos' | 'android';
 
-  const downloadOptions: Record<OSType, Array<{ name: string; url: string}>> = {
-    windows: [
-      {
-        url: 'https://github.com/odest/JotPad/releases/download/v0.1.0/JotPad_0.1.0_Windows_x64_en-US.msi',
-        name: 'Windows (x64) - MSI Installer'
-      },
-      {
-        url: 'https://github.com/odest/JotPad/releases/download/v0.1.0/JotPad_0.1.0_Windows_x64_Setup.exe',
-        name: 'Windows (x64) - EXE Installer'
-      }
-    ],
-    linux: [
-      {
-        url: 'https://github.com/odest/JotPad/releases/download/v0.1.0/JotPad_0.1.0_Linux_amd64.AppImage',
-        name: 'Linux (x86_64) - Portable AppImage'
-      },
-      {
-        url: 'https://github.com/odest/JotPad/releases/download/v0.1.0/JotPad_0.1.0_Linux_amd64.deb',
-        name: 'Linux (x86_64) - Debian/Ubuntu .deb Package'
-      },
-      {
-        url: 'https://github.com/odest/JotPad/releases/download/v0.1.0/JotPad_0.1.0_Linux_x86_64.rpm',
-        name: 'Linux (x86_64) - Fedora/RHEL .rpm Package'
-      }
-    ],
-    macos: [
-      {
-        url: 'https://github.com/odest/JotPad/releases/download/v0.1.0/JotPad_0.1.0_macOS_aarch64.dmg',
-        name: 'macOS (Apple Silicon) - DMG'
-      },
-      {
-        url: 'https://github.com/odest/JotPad/releases/download/v0.1.0/JotPad_0.1.0_macOS_aarch64_app.tar.gz',
-        name: 'macOS (Apple Silicon) - Tarball'
-      },
-      {
-        url: 'https://github.com/odest/JotPad/releases/download/v0.1.0/JotPad_0.1.0_macOS_x64.dmg',
-        name: 'macOS (Intel) - DMG'
-      },
-      {
-        url: 'https://github.com/odest/JotPad/releases/download/v0.1.0/JotPad_0.1.0_macOS_x64_app.tar.gz',
-        name: 'macOS (Intel) - Tarball'
-      }
-    ],
-    android: [
-      {
-        url: 'https://github.com/odest/JotPad/releases/download/v0.1.0/JotPad_0.1.0_Android_universal.apk',
-        name: 'Android - Universal APK'
-      }
-    ]
+  useEffect(() => {
+    fetchLatestGithubVersion().then(tag => {
+      if (tag) setLatestTag(tag);
+    });
+  }, []);
+
+  const getDownloadOptions = (tag: string | null) => {
+    const version = `v${tag}`;
+    return {
+      windows: [
+        {
+          url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_Windows_x64_en-US.msi`,
+          name: 'Windows (x64) - MSI Installer'
+        },
+        {
+          url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_Windows_x64_Setup.exe`,
+          name: 'Windows (x64) - EXE Installer'
+        }
+      ],
+      linux: [
+        {
+          url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_Linux_amd64.AppImage`,
+          name: 'Linux (x86_64) - Portable AppImage'
+        },
+        {
+          url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_Linux_amd64.deb`,
+          name: 'Linux (x86_64) - Debian/Ubuntu .deb Package'
+        },
+        {
+          url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_Linux_x86_64.rpm`,
+          name: 'Linux (x86_64) - Fedora/RHEL .rpm Package'
+        }
+      ],
+      macos: [
+        {
+          url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_macOS_aarch64.dmg`,
+          name: 'macOS (Apple Silicon) - DMG'
+        },
+        {
+          url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_macOS_aarch64_app.tar.gz`,
+          name: 'macOS (Apple Silicon) - Tarball'
+        },
+        {
+          url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_macOS_x64.dmg`,
+          name: 'macOS (Intel) - DMG'
+        },
+        {
+          url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_macOS_x64_app.tar.gz`,
+          name: 'macOS (Intel) - Tarball'
+        }
+      ],
+      android: [
+        {
+          url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_Android_universal.apk`,
+          name: 'Android - Universal APK'
+        }
+      ]
+    };
   };
+
+  const downloadOptions = getDownloadOptions(latestTag);
 
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();

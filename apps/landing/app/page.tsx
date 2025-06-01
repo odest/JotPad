@@ -1,5 +1,5 @@
 'use client';
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Globe, Menu, X, Star, Feather, Code, Shield, Smartphone, MessageCircle } from 'lucide-react'
@@ -8,6 +8,7 @@ import { AnimatedGroup } from '@repo/ui/components/effects/animated-group'
 import DownloadButton from '@repo/ui/components/common/DownloadButton'
 import { TextEffect } from '@repo/ui/components/effects/text-effect'
 import { Footer } from '@repo/ui/components/common/footer-section'
+import { fetchLatestGithubVersion } from '@repo/ui/lib/utils';
 import { Button } from '@repo/ui/components/button'
 import { cn } from '@repo/ui/lib/utils'
 
@@ -32,6 +33,14 @@ const transitionVariants = {
 }
 
 export default function Home() {
+  const [latestTag, setLatestTag] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchLatestGithubVersion().then(tag => {
+      if (tag) setLatestTag(tag);
+    });
+  }, []);
+
   return (
     <>
       <HeroHeader />
@@ -67,7 +76,7 @@ export default function Home() {
               <Image
                 src="/light.png"
                 alt="background"
-                className="absolute inset-x-0 top-56 -z-20 lg:top-32"
+                className="absolute left-1/2 top-56 -translate-x-1/2 -z-20 lg:top-32"
                 width={1500}
                 height={1500}
               />
@@ -77,12 +86,12 @@ export default function Home() {
               <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
                 <AnimatedGroup variants={transitionVariants}>
                   <Link
-                    href="https://github.com/odest/JotPad/releases/tag/v0.1.0"
+                    href="https://github.com/odest/JotPad/releases/latest"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-black/5 transition-all duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
                     <span className="text-foreground text-sm">
-                      JotPad v0.1.0 MVP Released
+                      JotPad v{latestTag} Released
                     </span>
                     <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
 
