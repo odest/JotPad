@@ -7,8 +7,19 @@ import {
 import { Input } from "@repo/ui/components/input";
 import { Button } from "@repo/ui/components/button";
 import { Pencil, Trash } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkToc from "remark-toc";
+import remarkBreaks from "remark-breaks";
+import rehypeRaw from "rehype-raw";
+import rehypeSlug from "rehype-slug";
+import rehypeSanitize from "rehype-sanitize";
+import rehypeExternalLinks from "rehype-external-links";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { NoteEntry } from "@repo/ui/lib/database";
 import { highlightText } from "@repo/ui/utils/textUtils";
+import { useTheme } from "@repo/ui/providers/theme-provider";
 
 interface NoteEntryItemProps {
   entry: NoteEntry;
@@ -34,6 +45,7 @@ export function NoteEntryItem({
   setEditingEntry
 }: NoteEntryItemProps) {
   const isEditing = editingEntry?.id === entry.id;
+  const { appliedTheme } = useTheme();
 
   return (
     <div className="flex flex-col items-end w-full mb-5">
@@ -77,9 +89,46 @@ export function NoteEntryItem({
               className="bg-muted p-3 rounded-xl shadow-sm inline-block max-w-[85%] md:max-w-[70%] text-left"
               style={{ wordBreak: 'break-word', minWidth: '70px'}}
             >
-              <p className="text-[15px] md:text-sm whitespace-pre-wrap leading-relaxed">
-                {highlightText(entry.text, searchQuery)}
-              </p>
+              {searchQuery ? (
+                <p className="text-[15px] md:text-sm whitespace-pre-wrap leading-relaxed">
+                  {highlightText(entry.text, searchQuery)}
+                </p>
+              ) : (
+                <div className="prose prose-neutral dark:prose-invert prose-pre:bg-transparent prose-pre:m-0 prose-pre:p-0 max-w-none text-[15px] md:text-sm leading-relaxed">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkBreaks, remarkToc]}
+                    rehypePlugins={[
+                      rehypeSlug,
+                      rehypeSanitize,
+                      rehypeRaw,
+                      [rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] }]
+                    ]}
+                    components={{
+                      code({node, className, children, ...props}) {
+                        const match = /language-(\w+)/.exec(className || "");
+                        const { ref, ...rest } = props;
+                        return match ? (
+                          <SyntaxHighlighter
+                            style={appliedTheme === 'dark' ? oneDark : oneLight as any}
+                            language={match[1]}
+                            wrapLongLines={true}
+                            PreTag="div"
+                            {...rest}
+                          >
+                            {String(children).replace(/\n$/, "")}
+                          </SyntaxHighlighter>
+                        ) : (
+                          <code className={className} {...rest}>
+                            {children}
+                          </code>
+                        );
+                      }
+                    }}
+                  >
+                    {entry.text}
+                  </ReactMarkdown>
+                </div>
+              )}
               <p className="text-xs text-muted-foreground mt-1 text-right">
                 {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>

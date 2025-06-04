@@ -1,14 +1,14 @@
 import { RefObject } from "react";
 import { Send } from "lucide-react";
-import { Input } from "@repo/ui/components/input";
 import { Button } from "@repo/ui/components/button";
+import TextareaAutosize from "react-textarea-autosize";
 
 interface AddEntryInputProps {
   newEntryText: string;
   setNewEntryText: (text: string) => void;
-  handleKeyPress: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  handleKeyPress: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   handleAddEntry: () => void;
-  newEntryInputRef: RefObject<HTMLInputElement | null>;
+  newEntryInputRef: RefObject<HTMLTextAreaElement | null>;
   bottomInputContainerRef: RefObject<HTMLDivElement | null>;
   NOTE_CONTENT_INPUT_HEIGHT: number;
 }
@@ -29,14 +29,15 @@ export function AddEntryInput({
       style={{ height: NOTE_CONTENT_INPUT_HEIGHT, minHeight: NOTE_CONTENT_INPUT_HEIGHT }}
     >
       <div className="max-w-3xl mx-auto flex items-center gap-2">
-        <Input
-          type="text"
+        <TextareaAutosize
           placeholder="Add a new note entry..."
-          className="flex-1"
+          className="flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 custom-scrollbar"
           value={newEntryText}
           onChange={(e) => setNewEntryText(e.target.value)}
           onKeyDown={handleKeyPress}
           ref={newEntryInputRef}
+          minRows={1}
+          maxRows={10}
         />
         <Button
           type="button"

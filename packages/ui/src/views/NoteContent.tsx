@@ -46,7 +46,7 @@ export function NoteContent({
   const entriesContainerRef = useRef<null | HTMLDivElement>(null);
   const searchResultsContainerRef = useRef<null | HTMLDivElement>(null);
   const bottomInputContainerRef = useRef<HTMLDivElement>(null);
-  const newEntryInputRef = useRef<HTMLInputElement>(null);
+  const newEntryInputRef = useRef<HTMLTextAreaElement>(null);
   const NOTE_CONTENT_INPUT_HEIGHT = 72;
 
   const { backgroundSettings } = useTheme();
@@ -121,7 +121,7 @@ export function NoteContent({
     setEntryIdToDelete(entryId);
   };
 
-  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       handleAddEntry();
