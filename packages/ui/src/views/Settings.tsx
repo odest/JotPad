@@ -80,6 +80,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
     isAppearanceExpanded, setIsAppearanceExpanded,
     isBackgroundExpanded, setIsBackgroundExpanded,
     isExportExpanded, setIsExportExpanded,
+    isPrivacyExpanded, setIsPrivacyExpanded,
     isAboutExpanded, setIsAboutExpanded,
     selectedExportFormat, setSelectedExportFormat,
     currentExportFormatDisplay,
@@ -89,7 +90,8 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
     handleExportNotes,
     exportFormats,
     autoCheckUpdates, setAutoCheckUpdates,
-    handleCheckForUpdates
+    handleCheckForUpdates,
+    linkPreviewEnabled, setLinkPreviewEnabled,
   } = useSettings();
 
   const [checkingUpdate, setCheckingUpdate] = useState(false);
@@ -474,6 +476,42 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                 <Download className="mr-2 h-4 w-4" />
                 Export All Notes as {currentExportFormatDisplay.label}
               </Button>
+            </CardContent>
+          )}
+        </Card>
+
+        <Card>
+          <CardHeader
+            className="flex items-center justify-between cursor-pointer"
+            onClick={() => setIsPrivacyExpanded(!isPrivacyExpanded)}
+            onKeyDown={(e) => handleKeyDown(e, () => setIsPrivacyExpanded(!isPrivacyExpanded))}
+            role="button"
+            aria-expanded={isPrivacyExpanded}
+            aria-controls="privacy-content"
+            tabIndex={0}
+          >
+            <div>
+              <CardTitle className="text-base">Privacy & Security</CardTitle>
+              <CardDescription className="text-sm">Control privacy and security related features.</CardDescription>
+            </div>
+            {isPrivacyExpanded ? (
+              <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
+            ) : (
+              <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+            )}
+          </CardHeader>
+          {isPrivacyExpanded && (
+            <CardContent id="privacy-content" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Enable link previews</Label>
+                  <p className="text-xs text-muted-foreground">Show website previews for links in your notes.</p>
+                </div>
+                <Switch
+                  checked={linkPreviewEnabled}
+                  onCheckedChange={setLinkPreviewEnabled}
+                />
+              </div>
             </CardContent>
           )}
         </Card>

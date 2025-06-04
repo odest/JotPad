@@ -26,7 +26,9 @@ export function useSettings() {
   const [isBackgroundExpanded, setIsBackgroundExpanded] = useState(false);
   const [isExportExpanded, setIsExportExpanded] = useState(false);
   const [isAboutExpanded, setIsAboutExpanded] = useState(false);
+  const [isPrivacyExpanded, setIsPrivacyExpanded] = useState(false);
   const [autoCheckUpdates, setAutoCheckUpdatesState] = useState(false);
+  const [linkPreviewEnabled, setLinkPreviewEnabledState] = useState(false);
 
   const [selectedExportFormat, setSelectedExportFormat] = useState<ExportFormat>("json");
   const [sortType, setSortTypeState] = useState<SortType>("newest");
@@ -46,7 +48,8 @@ export function useSettings() {
     },
     export_format: "json",
     sort_type: "newest",
-    auto_check_updates: false
+    auto_check_updates: false,
+    link_preview_enabled: false
   };
 
   const resetSettings = async () => {
@@ -69,6 +72,9 @@ export function useSettings() {
         }
         if (settings.auto_check_updates) {
           setAutoCheckUpdatesState(settings.auto_check_updates);
+        }
+        if (settings.link_preview_enabled) {
+          setLinkPreviewEnabledState(settings.link_preview_enabled);
         }
         setLoaded(true);
       } catch (e) {
@@ -173,6 +179,21 @@ export function useSettings() {
     }
   };
 
+  const setLinkPreviewEnabled = (enabled: boolean) => {
+    setLinkPreviewEnabledState(enabled);
+    (async () => {
+      try {
+        const settings = await invoke<any>('read_settings');
+        await invoke('write_settings', {
+          settings: {
+            ...settings,
+            link_preview_enabled: enabled,
+          }
+        });
+      } catch (e) {}
+    })();
+  };
+
   const setAutoCheckUpdates = (checked: boolean) => {
     setAutoCheckUpdatesState(checked);
     (async () => {
@@ -234,6 +255,7 @@ export function useSettings() {
     isBackgroundExpanded, setIsBackgroundExpanded,
     isExportExpanded, setIsExportExpanded,
     isAboutExpanded, setIsAboutExpanded,
+    isPrivacyExpanded, setIsPrivacyExpanded,
     autoCheckUpdates, setAutoCheckUpdates,
     selectedExportFormat, setSelectedExportFormat: setSelectedExportFormatAndPersist,
     currentExportFormatDisplay,
@@ -244,6 +266,7 @@ export function useSettings() {
     handleKeyDown,
     handleExportNotes,
     exportFormats,
-    handleCheckForUpdates
+    handleCheckForUpdates,
+    linkPreviewEnabled, setLinkPreviewEnabled,
   };
 } 

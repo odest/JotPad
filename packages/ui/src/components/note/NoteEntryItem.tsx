@@ -19,7 +19,9 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { NoteEntry } from "@repo/ui/lib/database";
 import { highlightText } from "@repo/ui/utils/textUtils";
+import { useSettings } from "@repo/ui/hooks/useSettings";
 import { useTheme } from "@repo/ui/providers/theme-provider";
+import { LinkPreview } from "@repo/ui/components/note/LinkPreview";
 
 interface NoteEntryItemProps {
   entry: NoteEntry;
@@ -46,6 +48,7 @@ export function NoteEntryItem({
 }: NoteEntryItemProps) {
   const isEditing = editingEntry?.id === entry.id;
   const { appliedTheme } = useTheme();
+  const { linkPreviewEnabled } = useSettings();
 
   return (
     <div className="flex flex-col items-end w-full mb-5">
@@ -95,6 +98,14 @@ export function NoteEntryItem({
                 </p>
               ) : (
                 <div className="prose prose-neutral dark:prose-invert prose-pre:bg-transparent prose-pre:m-0 prose-pre:p-0 max-w-none text-[15px] md:text-sm leading-relaxed">
+                  {linkPreviewEnabled && (() => {
+                    const urlRegex = /(https?:\/\/[\w\-._~:/?#[\]@!$&'()*+,;=%]+)/gi;
+                    const match = entry.text.match(urlRegex);
+                    if (match && match[0]) {
+                      return <LinkPreview url={match[0]} />;
+                    }
+                    return null;
+                  })()}
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkBreaks, remarkToc]}
                     rehypePlugins={[
