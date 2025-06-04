@@ -24,6 +24,7 @@ pub struct Settings {
     pub export_format: String,
     pub sort_type: String,
     pub auto_check_updates: bool,
+    pub link_preview_enabled: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -52,6 +53,7 @@ impl Default for Settings {
             export_format: "json".to_string(),
             sort_type: "newest".to_string(),
             auto_check_updates: false,
+            link_preview_enabled: false,
         }
     }
 }
