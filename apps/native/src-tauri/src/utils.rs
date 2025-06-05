@@ -18,6 +18,7 @@ pub fn log_message(level: &str, message: &str) {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Settings {
+    pub language: String,
     pub theme: String,
     pub color_theme: String,
     pub background: BackgroundSettings,
@@ -40,6 +41,7 @@ pub struct BackgroundSettings {
 impl Default for Settings {
     fn default() -> Self {
         Self {
+            language: "en".to_string(),
             theme: "system".to_string(),
             color_theme: "zinc".to_string(),
             background: BackgroundSettings {

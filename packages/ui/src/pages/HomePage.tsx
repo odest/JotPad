@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getVersion } from "@tauri-apps/api/app";
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -17,6 +18,7 @@ import { useSettings } from "@repo/ui/hooks/useSettings";
 import { compareVersions, checkOnline, fetchLatestGithubVersion } from '@repo/ui/lib/utils';
 
 export function HomePage() {
+  const { t } = useTranslation();
   const {
     open,
     noteTitle, setNoteTitle,
@@ -134,12 +136,12 @@ export function HomePage() {
       <Dialog open={!!noteIdToDelete} onOpenChange={open => { if (!open) setNoteIdToDelete(null); }}>
         <DialogContent className="max-w-[calc(100vw-2rem)] rounded-lg sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Delete Note</DialogTitle>
+            <DialogTitle>{t('delete_note')}</DialogTitle>
           </DialogHeader>
-          <div>Are you sure you want to delete this note? This action cannot be undone.</div>
+          <div>{t('delete_note_confirm')}</div>
           <DialogFooter className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
             <Button variant="outline" onClick={() => setNoteIdToDelete(null)}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -150,7 +152,7 @@ export function HomePage() {
                 }
               }}
             >
-              Delete
+              {t('delete')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -158,12 +160,12 @@ export function HomePage() {
       <Dialog open={duplicateTitleDialogOpen} onOpenChange={setDuplicateTitleDialogOpen}>
         <DialogContent className="max-w-[calc(100vw-2rem)] rounded-lg sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Duplicate Note Title</DialogTitle>
+            <DialogTitle>{t('duplicate_note_title')}</DialogTitle>
           </DialogHeader>
-          <div>A note with the same title already exists. Please enter a different title.</div>
+          <div>{t('duplicate_note_title_desc')}</div>
           <DialogFooter className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
             <Button onClick={() => setDuplicateTitleDialogOpen(false)} autoFocus>
-              Close
+              {t('close')}
             </Button>
           </DialogFooter>
         </DialogContent>

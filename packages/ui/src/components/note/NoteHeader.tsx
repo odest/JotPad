@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { invoke } from '@tauri-apps/api/core';
+import { useTranslation } from 'react-i18next';
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -43,6 +44,7 @@ export function NoteHeader({
   setSearchQuery,
   SIDEBAR_HEADER_HEIGHT
 }: NoteHeaderProps) {
+  const { t } = useTranslation();
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const { selectedExportFormat } = useSettings();
 
@@ -96,7 +98,7 @@ export function NoteHeader({
               <div className="min-w-0 flex-1">
                 <h2 className="text-lg font-bold truncate">{selectedNote.title}</h2>
                 <div className="flex items-center text-xs italic text-muted-foreground">
-                  Created: {new Date(selectedNote.created_at).toLocaleDateString()}
+                  {t('created')}: {new Date(selectedNote.created_at).toLocaleDateString()}
                 </div>
               </div>
             </div>
@@ -113,11 +115,11 @@ export function NoteHeader({
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem onClick={() => handleEditNote(selectedNote)}>
                     <Pencil className="w-4 h-4 mr-2" />
-                    <span>Edit Title</span>
+                    <span>{t('edit_title')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleOpenExportDialog}>
                     <Download className="w-4 h-4 mr-2" />
-                    <span>Export Note</span>
+                    <span>{t('export_note')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -125,7 +127,7 @@ export function NoteHeader({
                     onClick={() => handleDeleteNote(selectedNote.id)}
                   >
                     <Trash className="w-4 h-4 mr-2" />
-                    <span>Delete Note</span>
+                    <span>{t('delete_note')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

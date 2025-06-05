@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -61,6 +61,7 @@ export function Sidebar({
   onToggleSettings,
   isEdit,
 }: SidebarProps) {
+  const { t } = useTranslation();
   const { appliedTheme } = useTheme();
   const { setThemeAndPersist, sortType, setSortType } = useSettings();
   const SIDEBAR_HEADER_HEIGHT = 72;
@@ -81,10 +82,10 @@ export function Sidebar({
   });
 
   const sortLabels = {
-    az: 'A-Z',
-    za: 'Z-A',
-    newest: 'Newest',
-    oldest: 'Oldest',
+    az: t('sort_az'),
+    za: t('sort_za'),
+    newest: t('sort_newest'),
+    oldest: t('sort_oldest'),
   };
 
   const toggleThemeInSidebar = () => {
@@ -98,28 +99,24 @@ export function Sidebar({
       <div className="flex flex-col h-full">
         <div className="border-b p-4 shrink-0" style={{ height: SIDEBAR_HEADER_HEIGHT, minHeight: SIDEBAR_HEADER_HEIGHT }}>
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Notes</h1>
+            <h1 className="text-2xl font-bold">{t('notes')}</h1>
             <div className="flex items-center space-x-1">
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={toggleThemeInSidebar}
                 className="relative h-9 w-9"
-                aria-label="Toggle theme"
               >
                 <Moon className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                 <Sun className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                <span className="sr-only">Toggle theme</span>
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onToggleSettings}
                 className="h-9 w-9"
-                aria-label="Open settings"
               >
                 <Settings className="h-5 w-5" />
-                <span className="sr-only">Settings</span>
               </Button>
             </div>
           </div>
@@ -129,7 +126,7 @@ export function Sidebar({
             <span className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Search notes..."
+                placeholder={t('search_notes')}
                 className="pl-10 pr-10"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -148,7 +145,7 @@ export function Sidebar({
             </span>
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <Button variant="outline" size="icon" className="ml-1 border" aria-label="Filtrele">
+                <Button variant="outline" size="icon" className="ml-1 border">
                   <ArrowDownUp className="w-5 h-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -178,8 +175,8 @@ export function Sidebar({
             <div className="flex flex-col items-center justify-center h-full p-4 text-center">
               <div className="flex-1 flex flex-col items-center justify-center">
                 <NotebookText className="w-16 h-16 text-gray-300 mb-4" />
-                <h3 className="text-xl font-medium text-center">No notes found</h3>
-                <p className="text-gray-500 mt-2 text-center">Create a new note to get started</p>
+                <h3 className="text-xl font-medium text-center">{t('no_notes_found')}</h3>
+                <p className="text-gray-500 mt-2 text-center">{t('create_new_note')}</p>
               </div>
             </div>
           ) : (
@@ -205,7 +202,7 @@ export function Sidebar({
                 setNoteTitle("");
                 setOpen(true);
               }}>
-                <Plus className="w-4 h-4 mr-2" /> New Note
+                <Plus className="w-4 h-4 mr-2" /> {t('new_note')}
               </Button>
             }
           />

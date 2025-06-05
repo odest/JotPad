@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from 'react-i18next';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -30,10 +31,11 @@ export const NoteList: React.FC<NoteListProps> = ({
   handleEditNote,
   handleDeleteNote,
 }) => {
+  const { t } = useTranslation();
   if (!filteredNotes || filteredNotes.length === 0) {
     return (
       <div className="flex items-center justify-center h-full text-gray-500">
-        No notes found.
+        {t('no_notes_found')}
       </div>
     );
   }
@@ -79,7 +81,7 @@ export const NoteList: React.FC<NoteListProps> = ({
                       ? note.lastEntryText.length > 40
                         ? note.lastEntryText.slice(0, 40) + "..."
                         : note.lastEntryText
-                      : "No note content yet..."}
+                      : t('no_note_content_yet')}
                   </span>
                 </div>
               </div>
@@ -87,14 +89,14 @@ export const NoteList: React.FC<NoteListProps> = ({
             <ContextMenuContent className="w-48">
               <ContextMenuItem onSelect={() => handleEditNote && handleEditNote(note)}>
                 <Pencil className="mr-2 h-4 w-4" />
-                <span>Edit Note Title</span>
+                <span>{t('edit_note_title')}</span>
               </ContextMenuItem>
               <ContextMenuItem
                 className="text-red-500 focus:text-red-500 focus:bg-red-500/10"
                 onSelect={() => handleDeleteNote && handleDeleteNote(note.id)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                <span>Delete Note</span>
+                <span>{t('delete_note')}</span>
               </ContextMenuItem>
             </ContextMenuContent>
           </ContextMenu>

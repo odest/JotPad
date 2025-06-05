@@ -1,4 +1,5 @@
 import { convertFileSrc } from '@tauri-apps/api/core';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   CardTitle,
@@ -56,42 +57,42 @@ interface SettingsProps {
   SIDEBAR_HEADER_HEIGHT: number;
 }
 
-const availableColorThemes: Array<{ name: "zinc" | "red" | "rose" | "orange" | "green" | "blue" | "yellow" | "violet"; label: string; previewColor: string }> = [
-  { name: "zinc", label: "Default", previewColor: "hsl(240, 5%, 34%)" },
-  { name: "red", label: "Red", previewColor: "hsl(0, 72%, 51%)" },
-  { name: "rose", label: "Rose", previewColor: "hsl(347, 77%, 50%)" },
-  { name: "orange", label: "Orange", previewColor: "hsl(21, 90%, 48%)" },
-  { name: "green", label: "Green", previewColor: "hsl(142, 71%, 45%)" },
-  { name: "blue", label: "Blue", previewColor: "hsl(217, 91%, 60%)" },
-  { name: "yellow", label: "Yellow", previewColor: "hsl(48, 96%, 53%)" },
-  { name: "violet", label: "Violet", previewColor: "hsl(263, 70%, 50%)" },
+const availableColorThemes: Array<{ name: "zinc" | "red" | "rose" | "orange" | "green" | "blue" | "yellow" | "violet"; previewColor: string }> = [
+  { name: "zinc", previewColor: "hsl(240, 5%, 34%)" },
+  { name: "red", previewColor: "hsl(0, 72%, 51%)" },
+  { name: "rose", previewColor: "hsl(347, 77%, 50%)" },
+  { name: "orange", previewColor: "hsl(21, 90%, 48%)" },
+  { name: "green", previewColor: "hsl(142, 71%, 45%)" },
+  { name: "blue", previewColor: "hsl(217, 91%, 60%)" },
+  { name: "yellow", previewColor: "hsl(48, 96%, 53%)" },
+  { name: "violet", previewColor: "hsl(263, 70%, 50%)" },
 ];
 
 export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
+  const { t } = useTranslation();
   const {
-    resetSettings,
-    themeSetting,
-    setTheme,
-    colorTheme,
-    setColorTheme,
-    backgroundSettings,
-    setBackgroundSettings,
-    fileInputRef,
+    selectedLanguage, setSelectedLanguage,
+    themeSetting, setTheme,
+    colorTheme, setColorTheme,
+    backgroundSettings, setBackgroundSettings,
+    selectedExportFormat, setSelectedExportFormat,
+    autoCheckUpdates, setAutoCheckUpdates,
+    linkPreviewEnabled, setLinkPreviewEnabled,
     isAppearanceExpanded, setIsAppearanceExpanded,
     isBackgroundExpanded, setIsBackgroundExpanded,
     isExportExpanded, setIsExportExpanded,
     isPrivacyExpanded, setIsPrivacyExpanded,
     isAboutExpanded, setIsAboutExpanded,
-    selectedExportFormat, setSelectedExportFormat,
     currentExportFormatDisplay,
+    availableLanguages,
+    exportFormats,
+    fileInputRef,
     handleCustomImageChange,
     handleRemoveCustomImage,
     handleKeyDown,
     handleExportNotes,
-    exportFormats,
-    autoCheckUpdates, setAutoCheckUpdates,
     handleCheckForUpdates,
-    linkPreviewEnabled, setLinkPreviewEnabled,
+    resetSettings,
   } = useSettings();
 
   const [checkingUpdate, setCheckingUpdate] = useState(false);
@@ -103,10 +104,10 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
 
   const getCurrentThemeDisplay = () => {
     switch (themeSetting) {
-      case "light": return { name: "Light", Icon: Sun };
-      case "dark": return { name: "Dark", Icon: Moon };
-      case "system": return { name: "System", Icon: Laptop };
-      default: return { name: "System", Icon: Laptop };
+      case "light": return { name: t('light'), Icon: Sun };
+      case "dark": return { name: t('dark'), Icon: Moon };
+      case "system": return { name: t('system'), Icon: Laptop };
+      default: return { name: t('system'), Icon: Laptop };
     }
   };
   const currentThemeDisplay = getCurrentThemeDisplay();
@@ -118,12 +119,46 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
         style={{ height: SIDEBAR_HEADER_HEIGHT, minHeight: SIDEBAR_HEADER_HEIGHT }}
       >
         <Button variant="ghost" size="icon" onClick={onClose} className="mr-2 h-8 w-8 md:hidden">
-          <ArrowLeft className="h-4 w-4" /> <span className="sr-only">Back</span>
+          <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h2 className="text-lg font-semibold">Settings</h2>
+        <h2 className="text-lg font-semibold">{t('settings')}</h2>
       </div>
 
       <div className="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-4">
+
+        <Card>
+          <CardHeader
+            className="flex items-center justify-between"
+            aria-controls="language-content"
+            tabIndex={0}
+          >
+            <div>
+              <CardTitle className="text-base">{t('language')}</CardTitle>
+              <CardDescription className="text-sm">{t('select_language_desc')}</CardDescription>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button variant="outline" size="sm" className="w-[130px] justify-start">
+                  <span className="text-sm">
+                    {availableLanguages.find(l => l.code === selectedLanguage)?.name || availableLanguages.find(l => l.code === 'en')?.name}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[130px]">
+                {availableLanguages.map(lang => (
+                  <DropdownMenuItem
+                    key={lang.code}
+                    onClick={() => setSelectedLanguage(lang.code)}
+                    className={cn((selectedLanguage === lang.code || (!availableLanguages.some(l => l.code === selectedLanguage) && lang.code === 'en')) && "bg-accent")}
+                  >
+                    <span className="text-sm">{lang.name}</span>
+                    {(selectedLanguage === lang.code || (!availableLanguages.some(l => l.code === selectedLanguage) && lang.code === 'en')) && <Check className="ml-auto h-3 w-3" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </CardHeader>
+        </Card>
 
         <Card>
           <CardHeader
@@ -136,8 +171,8 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
             tabIndex={0}
           >
             <div>
-              <CardTitle className="text-base">Appearance</CardTitle>
-              <CardDescription className="text-sm">Customize the look and feel.</CardDescription>
+              <CardTitle className="text-base">{t('appearance')}</CardTitle>
+              <CardDescription className="text-sm">{t('appearance_desc')}</CardDescription>
             </div>
             {isAppearanceExpanded ? (
               <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
@@ -149,8 +184,8 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
             <CardContent id="appearance-content" className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Theme Mode</Label>
-                  <p className="text-xs text-muted-foreground">Light, dark, or system default</p>
+                  <Label className="text-sm font-medium">{t('theme_mode')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('theme_mode_desc')}</p>
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger>
@@ -162,27 +197,27 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                   <DropdownMenuContent align="end" className="w-[130px]">
                     <DropdownMenuItem
                       onClick={() => setTheme("light")}
-                      className={cn(currentThemeDisplay.name === "Light" && "bg-accent")}
+                      className={cn(currentThemeDisplay.name === t('light') && "bg-accent")}
                     >
                       <Sun className="mr-2 h-3 w-3" />
-                      <span className="text-sm">Light</span>
-                      {currentThemeDisplay.name === "Light" && <Check className="ml-auto h-3 w-3" />}
+                      <span className="text-sm">{t('light')}</span>
+                      {currentThemeDisplay.name === t('light') && <Check className="ml-auto h-3 w-3" />}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => setTheme("dark")}
-                      className={cn(currentThemeDisplay.name === "Dark" && "bg-accent")}
+                      className={cn(currentThemeDisplay.name === t('dark') && "bg-accent")}
                     >
                       <Moon className="mr-2 h-3 w-3" />
-                      <span className="text-sm">Dark</span>
-                      {currentThemeDisplay.name === "Dark" && <Check className="ml-auto h-3 w-3" />}
+                      <span className="text-sm">{t('dark')}</span>
+                      {currentThemeDisplay.name === t('dark') && <Check className="ml-auto h-3 w-3" />}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => setTheme("system")}
-                      className={cn(currentThemeDisplay.name === "System" && "bg-accent")}
+                      className={cn(currentThemeDisplay.name === t('system') && "bg-accent")}
                     >
                       <Laptop className="mr-2 h-3 w-3" />
-                      <span className="text-sm">System</span>
-                      {currentThemeDisplay.name === "System" && <Check className="ml-auto h-3 w-3" />}
+                      <span className="text-sm">{t('system')}</span>
+                      {currentThemeDisplay.name === t('system') && <Check className="ml-auto h-3 w-3" />}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -191,7 +226,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
               <Separator />
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Accent Color</Label>
+                <Label className="text-sm font-medium">{t('accent_color')}</Label>
                 <div className="grid grid-cols-8 gap-2">
                   <TooltipProvider delayDuration={100}>
                     {availableColorThemes.map((themeOpt) => (
@@ -218,7 +253,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent side="bottom" sideOffset={5}>
-                          <span className="text-xs">{themeOpt.label}</span>
+                          <span className="text-xs">{t(themeOpt.name)}</span>
                         </TooltipContent>
                       </Tooltip>
                     ))}
@@ -240,8 +275,8 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
             tabIndex={0}
           >
             <div>
-              <CardTitle className="text-base">Background</CardTitle>
-              <CardDescription className="text-sm">Customize note content background.</CardDescription>
+              <CardTitle className="text-base">{t('background')}</CardTitle>
+              <CardDescription className="text-sm">{t('background_desc')}</CardDescription>
             </div>
             {isBackgroundExpanded ? (
               <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
@@ -253,8 +288,8 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
             <CardContent id="background-content" className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Show Background</Label>
-                  <p className="text-xs text-muted-foreground">Toggle background visibility</p>
+                  <Label className="text-sm font-medium">{t('show_background')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('show_background_desc')}</p>
                 </div>
                 <Switch
                   checked={backgroundSettings.show_background}
@@ -279,10 +314,10 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                     >
                       <TabsList className="grid w-full grid-cols-2 h-10 bg-muted/50">
                         <TabsTrigger value="doodle" className="text-xs h-8 font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                          Default
+                          {t('default')}
                         </TabsTrigger>
                         <TabsTrigger value="custom" className="text-xs h-8 font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                          Custom
+                          {t('custom')}
                         </TabsTrigger>
                       </TabsList>
                       <TabsContent value="custom" className="mt-4 space-y-4">
@@ -308,7 +343,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
                                 <div className="text-white text-center">
                                   <UploadCloud className="h-6 w-6 mx-auto mb-1" />
-                                  <p className="text-xs font-medium">Click to change</p>
+                                  <p className="text-xs font-medium">{t('click_to_browse')}</p>
                                 </div>
                               </div>
                               <Button
@@ -329,12 +364,10 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                                 <UploadCloud className="h-6 w-6 text-muted-foreground" />
                               </div>
                               <p className="text-sm font-medium text-foreground mb-1">
-                                Select Custom Image
+                                {t('select_custom_image')}
                               </p>
                               <p className="text-xs text-muted-foreground text-center">
-                                Click to browse
-                                <br />
-                                PNG, JPG, GIF, WEBP supported
+                                {t('click_to_browse')}
                               </p>
                             </div>
                           )}
@@ -343,11 +376,11 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                     </Tabs>
                     <Separator />
                     <div className="space-y-3">
-                      <Label className="text-sm font-medium">Effects</Label>
+                      <Label className="text-sm font-medium">{t('effects')}</Label>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <Label className="flex items-center text-xs">
-                            <Eye className="mr-1 h-3 w-3" /> Opacity
+                            <Eye className="mr-1 h-3 w-3" /> {t('opacity')}
                           </Label>
                           <span className="text-xs text-muted-foreground">{backgroundSettings.opacity}%</span>
                         </div>
@@ -363,7 +396,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <Label className="flex items-center text-xs">
-                            <Sparkles className="mr-1 h-3 w-3" /> Brightness
+                            <Sparkles className="mr-1 h-3 w-3" /> {t('brightness')}
                           </Label>
                           <span className="text-xs text-muted-foreground">{backgroundSettings.brightness}%</span>
                         </div>
@@ -379,7 +412,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <Label className="flex items-center text-xs">
-                            <Blend className="mr-1 h-3 w-3" /> Blur
+                            <Blend className="mr-1 h-3 w-3" /> {t('blur')}
                           </Label>
                           <span className="text-xs text-muted-foreground">{backgroundSettings.blur}px</span>
                         </div>
@@ -395,7 +428,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                     </div>
                     <Separator />
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Preview</Label>
+                      <Label className="text-sm font-medium">{t('preview')}</Label>
                       <div className="relative rounded-md border bg-background p-3 h-32 overflow-hidden flex items-center justify-center">
                         <div
                           className="absolute inset-0 bg-center bg-no-repeat"
@@ -408,7 +441,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                           }}
                         />
                         <div className="relative z-[1] bg-muted p-2 rounded-lg shadow-sm max-w-[80%]">
-                          <p className="text-xs">Sample note entry</p>
+                          <p className="text-xs">{t('sample_note_entry')}</p>
                           <p className="text-[10px] text-muted-foreground/80 mt-1 text-right">10:30</p>
                         </div>
                       </div>
@@ -431,8 +464,8 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
             tabIndex={0}
           >
             <div>
-              <CardTitle className="text-base">Export Notes</CardTitle>
-              <CardDescription className="text-sm">Save your notes in various formats.</CardDescription>
+              <CardTitle className="text-base">{t('export_notes')}</CardTitle>
+              <CardDescription className="text-sm">{t('export_notes_desc')}</CardDescription>
             </div>
             {isExportExpanded ? (
               <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
@@ -444,14 +477,14 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
             <CardContent id="export-content" className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Export Format</Label>
-                  <p className="text-xs text-muted-foreground">Choose the format for your notes.</p>
+                  <Label className="text-sm font-medium">{t('export_format')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('export_format_desc')}</p>
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger>
                     <Button variant="outline" size="sm" className="w-[150px] justify-start">
                       <currentExportFormatDisplay.Icon className="mr-2 h-3 w-3" />
-                      <span className="text-sm">{currentExportFormatDisplay.label}</span>
+                      <span className="text-sm">{t(currentExportFormatDisplay.label)}</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-[150px]">
@@ -462,7 +495,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                         className={cn(selectedExportFormat === format.value && "bg-accent")}
                       >
                         <format.Icon className="mr-2 h-3 w-3" />
-                        <span className="text-sm">{format.label}</span>
+                        <span className="text-sm">{t(format.label)}</span>
                         {selectedExportFormat === format.value && <Check className="ml-auto h-3 w-3" />}
                       </DropdownMenuItem>
                     ))}
@@ -474,7 +507,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
 
               <Button onClick={handleExportNotes} className="w-full">
                 <Download className="mr-2 h-4 w-4" />
-                Export All Notes as {currentExportFormatDisplay.label}
+                {t('export_all_notes', { format: t(currentExportFormatDisplay.label) })}
               </Button>
             </CardContent>
           )}
@@ -491,8 +524,8 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
             tabIndex={0}
           >
             <div>
-              <CardTitle className="text-base">Privacy & Security</CardTitle>
-              <CardDescription className="text-sm">Control privacy and security related features.</CardDescription>
+              <CardTitle className="text-base">{t('privacy_security')}</CardTitle>
+              <CardDescription className="text-sm">{t('privacy_security_desc')}</CardDescription>
             </div>
             {isPrivacyExpanded ? (
               <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
@@ -504,8 +537,8 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
             <CardContent id="privacy-content" className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Enable link previews</Label>
-                  <p className="text-xs text-muted-foreground">Show website previews for links in your notes.</p>
+                  <Label className="text-sm font-medium">{t('enable_link_previews')}</Label>
+                  <p className="text-xs text-muted-foreground">{t('enable_link_previews_desc')}</p>
                 </div>
                 <Switch
                   checked={linkPreviewEnabled}
@@ -527,8 +560,8 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
             tabIndex={0}
           >
             <div>
-              <CardTitle className="text-base">About</CardTitle>
-              <CardDescription className="text-sm">App information and updates.</CardDescription>
+              <CardTitle className="text-base">{t('about')}</CardTitle>
+              <CardDescription className="text-sm">{t('about_desc')}</CardDescription>
             </div>
             {isAboutExpanded ? (
               <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
@@ -540,9 +573,9 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
             <CardContent id="about-content" className="space-y-4">
               <div className="flex flex-col gap-2">
                 {projectLinks.map((item) => (
-                  <div key={item.label} className="flex items-center justify-between">
+                  <div key={t(item.label)} className="flex items-center justify-between">
                     <span className="flex items-center gap-2 text-sm font-medium">
-                      <item.icon className="w-4 h-4" /> {item.label}
+                      <item.icon className="w-4 h-4" /> {t(item.label)}
                     </span>
                     {item.value === "version" ? (
                       <a
@@ -571,7 +604,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
               <Separator />
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2 text-sm font-medium">
-                  Check for updates on startup
+                  {t('check_for_updates_on_startup')}
                 </span>
                 <Switch
                   checked={autoCheckUpdates}
@@ -592,7 +625,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                 ) : (
                   <RefreshCw className="h-4 w-4" />
                 )}
-                Check for Updates
+                {t('check_for_updates')}
               </Button>
             </CardContent>
           )}
@@ -603,13 +636,13 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
             className="flex items-center justify-between"
           >
             <div>
-              <CardTitle className="text-base">Reset Preferences</CardTitle>
+              <CardTitle className="text-base">{t('reset_preferences')}</CardTitle>
               <CardDescription className="text-sm">
-                This will reset all your user preferences to their defaults.
+                {t('reset_preferences_desc')}
               </CardDescription>
             </div>
             <Button variant="destructive" onClick={resetSettings}>
-              Reset to Defaults
+              {t('reset_to_defaults')}
             </Button>
           </CardHeader>
         </Card>

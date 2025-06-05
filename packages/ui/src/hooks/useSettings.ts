@@ -2,6 +2,8 @@ import { useRef, useState, useEffect } from "react";
 import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
 import { getVersion } from '@tauri-apps/api/app';
+import { useTranslation } from 'react-i18next';
+import i18n from '@repo/ui/lib/i18n';
 import { toast } from "sonner"
 import { exportAllNotes } from "@repo/ui/lib/exportNotes";
 import { useTheme } from "@repo/ui/providers/theme-provider";
@@ -19,6 +21,7 @@ export function useSettings() {
     backgroundSettings,
     setBackgroundSettings
   } = useTheme();
+  const { t } = useTranslation();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -35,7 +38,23 @@ export function useSettings() {
   const [loaded, setLoaded] = useState(false);
   const currentExportFormatDisplay = exportFormats.find(f => f.value === selectedExportFormat)!;
 
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
+
+  const availableLanguages = [
+    { code: 'ar', name: t('arabic') },
+    { code: 'de', name: t('german') },
+    { code: 'en', name: t('english') },
+    { code: 'es', name: t('spanish') },
+    { code: 'fr', name: t('french') },
+    { code: 'hi', name: t('hindi') },
+    { code: 'ja', name: t('japanese') },
+    { code: 'ru', name: t('russian') },
+    { code: 'tr', name: t('turkish') },
+    { code: 'zh', name: t('chinese') },
+  ];
+
   const defaultSettings = {
+    language: 'en',
     theme: "system",
     color_theme: "zinc",
     background: {
@@ -64,6 +83,10 @@ export function useSettings() {
     (async () => {
       try {
         const settings = await invoke<any>('read_settings');
+        if (settings.language) {
+          setSelectedLanguage(settings.language);
+          i18n.changeLanguage(settings.language);
+        }
         if (settings.export_format) {
           setSelectedExportFormat(settings.export_format);
         }
@@ -82,6 +105,22 @@ export function useSettings() {
       }
     })();
   }, []);
+
+  const setSelectedLanguageAndPersist = (lang: string) => {
+    setSelectedLanguage(lang);
+    i18n.changeLanguage(lang);
+    (async () => {
+      try {
+        const settings = await invoke<any>('read_settings');
+        await invoke('write_settings', {
+          settings: {
+            ...settings,
+            language: lang,
+          }
+        });
+      } catch (e) {}
+    })();
+  };
 
   const setSelectedExportFormatAndPersist = (format: ExportFormat) => {
     setSelectedExportFormat(format);
@@ -143,7 +182,7 @@ export function useSettings() {
         });
       }
     } catch (e) {
-      toast.error('Failed to select image.');
+      toast.error(t('failed_to_select_image'));
     }
   };
 
@@ -169,13 +208,13 @@ export function useSettings() {
       const result = await exportAllNotes(selectedExportFormat);
       if (result === "success") {
         await invoke('log_message', { level: 'info', message: `Notes successfully exported. Format: ${selectedExportFormat}`});
-        toast.success("Notes exported successfully.");
+        toast.success(t('notes_exported_successfully'));
       } else if (result === "error") {
-        toast.error("Export failed. Please try again.");
+        toast.error(t('export_failed'));
       }
     } catch (error: any) {
       await invoke('log_message', { level: 'error', message: `Export failed for notes with format ${selectedExportFormat}:`, error });
-      toast.error("Export failed. Please try again.");
+      toast.error(t('export_failed'));
     }
   };
 
@@ -211,33 +250,39 @@ export function useSettings() {
 
   const handleCheckForUpdates = async () => {
     if (!checkOnline()) {
-      toast.error('No internet connection. Please check your network and try again.');
+      toast.error(t('no_internet_connection'));
       return;
     }
     let currentVersion = '';
     try {
       currentVersion = await getVersion();
     } catch {
-      toast.error('Could not determine current app version.');
+      toast.error(t('could_not_determine_current_version'));
       return;
     }
     try {
       const latestTag = await fetchLatestGithubVersion();
       const current = currentVersion.replace(/^v/, '');
       if (!latestTag) {
-        toast.error('Could not determine latest version.');
+        toast.error(t('could_not_determine_latest_version'));
         return;
       }
       const cmp = compareVersions(current, latestTag);
       if (cmp === 0) {
-        toast.success('You are using the latest version.');
+        toast.success(t('you_are_using_the_latest_version'));
       } else if (cmp < 0) {
-        toast.info(`A new version is available: v${latestTag}\nYou are using: v${current}`);
+        toast.info(t('a_new_version_is_available', {
+          latestTag: `${latestTag}`,
+          current:   `${current}`
+        }));
       } else {
-        toast.success(`You are using a newer version (v${current}) than the latest release (v${latestTag}).`);
+        toast.success(t('you_are_using_a_newer_version', {
+          current: `${current}`,
+          latestTag: `${latestTag}`
+        }));
       }
     } catch (e) {
-      toast.error('Failed to check for updates. Please try again later.');
+      toast.error(t('failed_to_check_for_updates'));
     }
   };
 
@@ -268,5 +313,7 @@ export function useSettings() {
     exportFormats,
     handleCheckForUpdates,
     linkPreviewEnabled, setLinkPreviewEnabled,
+    selectedLanguage, setSelectedLanguage: setSelectedLanguageAndPersist,
+    availableLanguages
   };
 } 

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from 'react-i18next';
 import { Input } from "@repo/ui/components/input";
 import { Button } from "@repo/ui/components/button";
 import { ChevronUp, ChevronDown, X } from "lucide-react";
@@ -20,6 +21,7 @@ export function SearchBar({
   totalMatches,
   handleNavigateMatch
 }: SearchBarProps) {
+  const { t } = useTranslation();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export function SearchBar({
         <Input
           ref={searchInputRef}
           type="text"
-          placeholder="Search in entries..."
+          placeholder={t('search_in_entries')}
           className="flex-1 h-9 text-sm"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

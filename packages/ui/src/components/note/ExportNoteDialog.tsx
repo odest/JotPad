@@ -1,4 +1,5 @@
 import { useState, ComponentType, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogTitle,
@@ -30,9 +31,9 @@ export interface ExportFormatOption {
 }
 
 export const exportFormats: ExportFormatOption[] = [
-  { value: "json", label: "JSON", Icon: FileJson, mimeType: "application/json", extension: "json" },
-  { value: "txt", label: "Plain Text", Icon: FileType, mimeType: "text/plain", extension: "txt" },
-  { value: "md", label: "Markdown", Icon: FileCode, mimeType: "text/markdown", extension: "md" },
+  { value: "json", label: "json", Icon: FileJson, mimeType: "application/json", extension: "json" },
+  { value: "txt", label: "plain_text", Icon: FileType, mimeType: "text/plain", extension: "txt" },
+  { value: "md", label: "markdown", Icon: FileCode, mimeType: "text/markdown", extension: "md" },
 ];
 
 interface ExportNoteDialogProps {
@@ -50,6 +51,7 @@ export function ExportNoteDialog({
   onConfirmExport,
   defaultFormat = "json",
 }: ExportNoteDialogProps) {
+  const { t } = useTranslation();
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>(defaultFormat);
   const currentFormatDetails =
     exportFormats.find((f) => f.value === selectedFormat)!;
@@ -69,24 +71,24 @@ export function ExportNoteDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[calc(100vw-2rem)] rounded-lg sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle>Export Note: "{note.title}"</DialogTitle>
+          <DialogTitle>{t('export_note')}: "{note.title}"</DialogTitle>
           <DialogDescription>
-            Choose the format and export your note.
+            {t('export_notes_desc')}
           </DialogDescription>
         </DialogHeader>
         <div className="py-4 space-y-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label className="text-base font-medium">Export Format</Label>
+              <Label className="text-base font-medium">{t('export_format')}</Label>
               <p className="text-sm text-muted-foreground">
-                Choose the format for your note.
+                {t('export_format_desc')}
               </p>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <Button variant="outline" className="w-[160px] justify-start text-sm">
                   <currentFormatDetails.Icon className="mr-2 h-4 w-4" />
-                  <span>{currentFormatDetails.label}</span>
+                  <span>{t(currentFormatDetails.label)}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-[160px]">
@@ -97,7 +99,7 @@ export function ExportNoteDialog({
                     className={cn(selectedFormat === format.value && "bg-accent")}
                   >
                     <format.Icon className="mr-2 h-4 w-4" />
-                    <span>{format.label}</span>
+                    <span>{t(format.label)}</span>
                     {selectedFormat === format.value && (
                       <Check className="ml-auto h-4 w-4" />
                     )}
@@ -109,11 +111,11 @@ export function ExportNoteDialog({
         </div>
         <DialogFooter className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t('cancel')}
           </Button>
           <Button onClick={handleExportClick}>
             <Download className="mr-2 h-4 w-4" />
-            Export as {currentFormatDetails.label}
+            {t('export_as', { format: t(currentFormatDetails.label) })}
           </Button>
         </DialogFooter>
       </DialogContent>
