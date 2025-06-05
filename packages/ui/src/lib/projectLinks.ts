@@ -11,31 +11,31 @@ export interface ProjectLink {
 export const projectLinks: ProjectLink[] = [
   {
     icon: Tag,
-    label: "Version",
+    label: "version",
     value: "version",
     href: "https://github.com/odest/JotPad/releases/latest",
   },
   {
     icon: FileText,
-    label: "License",
+    label: "license",
     value: "GPLv3",
     href: "https://github.com/odest/JotPad/tree/master?tab=GPL-3.0-1-ov-file",
   },
   {
     icon: User,
-    label: "Developer",
+    label: "developer",
     value: "odest",
     href: "https://github.com/odest",
   },
   {
     icon: Github,
-    label: "Source Code",
+    label: "source_code",
     value: "GitHub",
     href: "https://github.com/odest/JotPad",
   },
   {
     icon: Globe,
-    label: "Project Website",
+    label: "project_website",
     value: "jotpad.odest.tech",
     href: "https://jotpad.odest.tech/",
   },

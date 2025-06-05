@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from 'react-i18next';
 import { Note, NoteEntry } from "@repo/ui/lib/database";
 import { NoteEntryItem } from "@repo/ui/components/note/NoteEntryItem";
 import { formatDateForSeparator } from "@repo/ui/lib/utils";
@@ -32,10 +33,11 @@ export function NoteEntriesList({
   setEditingEntry,
   noteEntries
 }: NoteEntriesListProps) {
+  const { t } = useTranslation();
   if (selectedNote.content && noteEntries.length === 0 && !searchQuery && !isSearchActive) {
     return (
       <div className="text-center text-muted-foreground py-10">
-        No note content yet...
+        {t('no_note_content_yet')}
       </div>
     );
   }
@@ -43,7 +45,7 @@ export function NoteEntriesList({
   if (searchQuery && filteredEntries.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-10">
-        No entries found matching your search.
+        {t('no_entries_found')}
       </div>
     );
   }
@@ -51,7 +53,7 @@ export function NoteEntriesList({
   if (noteEntries.length === 0 && !selectedNote.content && !searchQuery && !isSearchActive) {
     return (
       <div className="text-center text-muted-foreground py-10">
-        No note content yet...
+        {t('no_note_content_yet')}
       </div>
     );
   }

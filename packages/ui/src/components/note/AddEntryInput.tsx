@@ -1,4 +1,5 @@
 import { RefObject } from "react";
+import { useTranslation } from 'react-i18next';
 import { Send } from "lucide-react";
 import { Button } from "@repo/ui/components/button";
 import TextareaAutosize from "react-textarea-autosize";
@@ -22,6 +23,7 @@ export function AddEntryInput({
   bottomInputContainerRef,
   NOTE_CONTENT_INPUT_HEIGHT
 }: AddEntryInputProps) {
+  const { t } = useTranslation();
   return (
     <div
       ref={bottomInputContainerRef}
@@ -30,7 +32,7 @@ export function AddEntryInput({
     >
       <div className="max-w-3xl mx-auto flex items-center gap-2">
         <TextareaAutosize
-          placeholder="Add a new note entry..."
+          placeholder={t('add_new_note_entry')}
           className="flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 custom-scrollbar"
           value={newEntryText}
           onChange={(e) => setNewEntryText(e.target.value)}
@@ -46,7 +48,6 @@ export function AddEntryInput({
           disabled={!newEntryText.trim()}
         >
           <Send className="h-5 w-5" />
-          <span className="sr-only">Add entry</span>
         </Button>
       </div>
     </div>

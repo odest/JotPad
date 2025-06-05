@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { Link2 } from "lucide-react";
 
 interface LinkPreviewProps {
@@ -18,6 +19,7 @@ interface PreviewData {
 }
 
 export const LinkPreview: React.FC<LinkPreviewProps> = ({ url }) => {
+  const { t } = useTranslation();
   const [data, setData] = useState<PreviewData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +46,7 @@ export const LinkPreview: React.FC<LinkPreviewProps> = ({ url }) => {
       .finally(() => setLoading(false));
   }, [url]);
 
-  if (loading) return <div className="text-xs text-muted-foreground mt-2">Loading preview...</div>;
+  if (loading) return <div className="text-xs text-muted-foreground mt-2">{t('loading_preview')}</div>;
   if (error || !data) return null;
 
   return (

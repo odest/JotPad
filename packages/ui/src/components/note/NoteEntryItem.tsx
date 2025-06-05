@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -46,6 +47,7 @@ export function NoteEntryItem({
   handleDeleteEntry,
   setEditingEntry
 }: NoteEntryItemProps) {
+  const { t } = useTranslation();
   const isEditing = editingEntry?.id === entry.id;
   const { appliedTheme } = useTheme();
   const { linkPreviewEnabled } = useSettings();
@@ -78,10 +80,10 @@ export function NoteEntryItem({
                     setEditText("");
                   }}
                 >
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button size="sm" onClick={handleSaveEdit}>
-                  Save
+                  {t('save')}
                 </Button>
               </div>
             </div>
@@ -149,14 +151,14 @@ export function NoteEntryItem({
         <ContextMenuContent>
           <ContextMenuItem onClick={() => handleEditEntry(entry)}>
             <Pencil className="w-4 h-4 mr-2" />
-            Edit
+            {t('edit')}
           </ContextMenuItem>
           <ContextMenuItem
             className="text-red-500 focus:text-red-500 focus:bg-red-500/10"
             onClick={() => handleDeleteEntry(entry.id)}
           >
             <Trash className="w-4 h-4 mr-2" />
-            Delete
+            {t('delete')}
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>

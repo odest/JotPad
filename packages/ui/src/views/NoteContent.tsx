@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { convertFileSrc } from '@tauri-apps/api/core';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogTitle,
@@ -37,6 +38,7 @@ export function NoteContent({
   onEntryAdded,
   showSidebar
 }: NoteContentProps) {
+  const { t } = useTranslation();
   const [newEntryText, setNewEntryText] = useState("");
   const [editingEntry, setEditingEntry] = useState<NoteEntry | null>(null);
   const [editText, setEditText] = useState("");
@@ -216,12 +218,12 @@ export function NoteContent({
       <Dialog open={!!entryIdToDelete} onOpenChange={open => { if (!open) setEntryIdToDelete(null); }}>
         <DialogContent className="max-w-[calc(100vw-2rem)] rounded-lg sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Delete Entry</DialogTitle>
+            <DialogTitle>{t('delete_entry')}</DialogTitle>
           </DialogHeader>
-          <div>Are you sure you want to delete this entry? This action cannot be undone.</div>
+          <div>{t('delete_entry_confirm')}</div>
           <DialogFooter className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
             <Button variant="outline" onClick={() => setEntryIdToDelete(null)}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -232,7 +234,7 @@ export function NoteContent({
                 }
               }}
             >
-              Delete
+              {t('delete')}
             </Button>
           </DialogFooter>
         </DialogContent>
