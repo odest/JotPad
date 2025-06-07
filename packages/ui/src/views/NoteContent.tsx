@@ -45,11 +45,8 @@ export function NoteContent({
   const [entryIdToDelete, setEntryIdToDelete] = useState<string | null>(null);
 
   const entriesEndRef = useRef<null | HTMLDivElement>(null);
-  const entriesContainerRef = useRef<null | HTMLDivElement>(null);
   const searchResultsContainerRef = useRef<null | HTMLDivElement>(null);
-  const bottomInputContainerRef = useRef<HTMLDivElement>(null);
   const newEntryInputRef = useRef<HTMLTextAreaElement>(null);
-  const NOTE_CONTENT_INPUT_HEIGHT = 72;
 
   const { backgroundSettings } = useTheme();
 
@@ -70,23 +67,6 @@ export function NoteContent({
     handleNavigateMatch,
     filteredEntries
   } = useSearch(noteEntries, searchResultsContainerRef);
-
-  useEffect(() => {
-    const updateHeight = () => {
-      if (entriesContainerRef.current) {
-        const availableHeight = window.innerHeight - SIDEBAR_HEADER_HEIGHT - NOTE_CONTENT_INPUT_HEIGHT;
-        entriesContainerRef.current.style.height = `${Math.max(availableHeight, 0)}px`;
-      }
-    };
-    updateHeight();
-    const resizeObserver = new ResizeObserver(updateHeight);
-    if (bottomInputContainerRef.current) resizeObserver.observe(bottomInputContainerRef.current);
-    window.addEventListener('resize', updateHeight);
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener('resize', updateHeight);
-    };
-  }, [SIDEBAR_HEADER_HEIGHT, NOTE_CONTENT_INPUT_HEIGHT]);
 
   useEffect(() => {
     if (noteEntries.length > 0 && !searchQuery) {
@@ -170,8 +150,7 @@ export function NoteContent({
         />
 
         <div
-          className="flex-1 overflow-y-auto p-4 custom-scrollbar"
-          ref={entriesContainerRef}
+          className="flex-1 overflow-y-auto p-4 custom-scrollbar pb-20"
         >
           <div className="max-w-3xl mx-auto w-full" ref={searchResultsContainerRef}>
             {isSearchActive && (
@@ -204,15 +183,17 @@ export function NoteContent({
           </div>
         </div>
 
-        <AddEntryInput
-          newEntryText={newEntryText}
-          setNewEntryText={setNewEntryText}
-          handleKeyPress={handleKeyPress}
-          handleAddEntry={handleAddEntry}
-          newEntryInputRef={newEntryInputRef}
-          bottomInputContainerRef={bottomInputContainerRef}
-          NOTE_CONTENT_INPUT_HEIGHT={NOTE_CONTENT_INPUT_HEIGHT}
-        />
+        <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none">
+          <div className="pointer-events-auto">
+            <AddEntryInput
+              newEntryText={newEntryText}
+              setNewEntryText={setNewEntryText}
+              handleKeyPress={handleKeyPress}
+              handleAddEntry={handleAddEntry}
+              newEntryInputRef={newEntryInputRef}
+            />
+          </div>
+        </div>
       </div>
 
       <Dialog open={!!entryIdToDelete} onOpenChange={open => { if (!open) setEntryIdToDelete(null); }}>

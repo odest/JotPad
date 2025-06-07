@@ -66,7 +66,6 @@ export function Sidebar({
   const { setThemeAndPersist, sortType, setSortType } = useSettings();
   const SIDEBAR_HEADER_HEIGHT = 72;
   const SIDEBAR_SEARCH_HEIGHT = 64;
-  const SIDEBAR_FOOTER_HEIGHT = 72;
 
   const sortedNotes = [...filteredNotes].sort((a, b) => {
     if (sortType === 'az') {
@@ -95,7 +94,7 @@ export function Sidebar({
   return (
     <div className={`w-full md:w-96 lg:w-[400px] md:border-r flex flex-col md:h-[calc(100vh-2.5rem)] h-[calc(100vh)] md:border md:ml-5 md:mt-5 md:mb-5 rounded-xl ${
       showSidebar ? 'block' : 'hidden md:block'
-    } relative bg-background md:mr-0`}>
+    } relative bg-background md:mr-0 overflow-hidden`}>
       <div className="flex flex-col h-full">
         <div className="border-b p-4 shrink-0" style={{ height: SIDEBAR_HEADER_HEIGHT, minHeight: SIDEBAR_HEADER_HEIGHT }}>
           <div className="flex items-center justify-between">
@@ -170,7 +169,7 @@ export function Sidebar({
             </DropdownMenu>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div className="flex-1 overflow-y-auto custom-scrollbar pb-20">
           {sortedNotes.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full p-4 text-center">
               <div className="flex-1 flex flex-col items-center justify-center">
@@ -189,7 +188,7 @@ export function Sidebar({
             />
           )}
         </div>
-        <div className="border-t p-4 shrink-0" style={{ height: SIDEBAR_FOOTER_HEIGHT, minHeight: SIDEBAR_FOOTER_HEIGHT }}>
+        <div className="absolute bottom-0 left-0 right-0 p-4 flex justify-center bg-gradient-to-t from-background via-background/80 to-transparent">
           <NoteDialog
             open={open}
             onOpenChange={setOpen}
@@ -198,10 +197,13 @@ export function Sidebar({
             onCreate={handleCreateNote}
             isEdit={isEdit}
             trigger={
-              <Button className="w-full" onClick={() => {
-                setNoteTitle("");
-                setOpen(true);
-              }}>
+              <Button 
+                className="h-12 px-6 shadow-lg w-full" 
+                onClick={() => {
+                  setNoteTitle("");
+                  setOpen(true);
+                }}
+              >
                 <Plus className="w-4 h-4 mr-2" /> {t('new_note')}
               </Button>
             }
