@@ -10,8 +10,6 @@ interface AddEntryInputProps {
   handleKeyPress: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   handleAddEntry: () => void;
   newEntryInputRef: RefObject<HTMLTextAreaElement | null>;
-  bottomInputContainerRef: RefObject<HTMLDivElement | null>;
-  NOTE_CONTENT_INPUT_HEIGHT: number;
 }
 
 export function AddEntryInput({
@@ -20,20 +18,14 @@ export function AddEntryInput({
   handleKeyPress,
   handleAddEntry,
   newEntryInputRef,
-  bottomInputContainerRef,
-  NOTE_CONTENT_INPUT_HEIGHT
 }: AddEntryInputProps) {
   const { t } = useTranslation();
   return (
-    <div
-      ref={bottomInputContainerRef}
-      className="border-t p-4 shrink-0 sticky bottom-0 z-10 bg-background"
-      style={{ height: NOTE_CONTENT_INPUT_HEIGHT, minHeight: NOTE_CONTENT_INPUT_HEIGHT }}
-    >
-      <div className="max-w-3xl mx-auto flex items-center gap-2">
+    <div className="shrink-0 p-4">
+      <div className="relative flex w-full max-w-3xl mx-auto items-center gap-2 border rounded-xl bg-card p-3 shadow-md focus-within:ring-2 focus-within:ring-primary">
         <TextareaAutosize
           placeholder={t('add_new_note_entry')}
-          className="flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 custom-scrollbar"
+          className="flex-1 resize-none border-0 bg-transparent px-2 py-1.5 text-sm placeholder:text-muted-foreground focus-visible:outline-none custom-scrollbar"
           value={newEntryText}
           onChange={(e) => setNewEntryText(e.target.value)}
           onKeyDown={handleKeyPress}
@@ -46,6 +38,7 @@ export function AddEntryInput({
           size="icon"
           onClick={handleAddEntry}
           disabled={!newEntryText.trim()}
+          className="self-end" 
         >
           <Send className="h-5 w-5" />
         </Button>
