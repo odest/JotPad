@@ -36,6 +36,7 @@ export function AddEntryInput({
         <Button
           type="button"
           size="icon"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={handleAddEntry}
           disabled={!newEntryText.trim()}
           className="self-end" 
