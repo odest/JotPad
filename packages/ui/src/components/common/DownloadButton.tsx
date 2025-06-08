@@ -21,6 +21,7 @@ const DownloadButton = () => {
 
   const getDownloadOptions = (tag: string | null) => {
     const version = `v${tag}`;
+
     return {
       windows: [
         {
@@ -67,7 +68,23 @@ const DownloadButton = () => {
       android: [
         {
           url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_Android_universal.apk`,
-          name: 'Android - Universal APK'
+          name: 'Android (Universal) - APK'
+        },
+        {
+          url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_Android_aarch64.apk`,
+          name: 'Android (ARM64) - APK'
+        },
+        {
+          url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_Android_armv7.apk`,
+          name: 'Android (ARMv7) - APK'
+        },
+        {
+          url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_Android_i686.apk`,
+          name: 'Android (x86) - APK'
+        },
+        {
+          url: `https://github.com/odest/JotPad/releases/download/${version}/JotPad_v${tag}_Android_x86_64.apk`,
+          name: 'Android (x86_64) - APK'
         }
       ]
     };
@@ -144,7 +161,7 @@ const DownloadButton = () => {
             setIsOpen(!isOpen);
           }
         }}
-        className="relative flex items-center gap-3 px-4 py-5 text-lg shadow-xl border-2 border-black dark:border-white hover:text-black hover:bg-transparent hover:dark:text-white hover:scale-105 hover:shadow-2xl transition-transform duration-200"
+        className="relative flex items-center gap-3 px-4 py-5 text-lg shadow-xl border-2 border-neutral-950 dark:border-neutral-50 hover:text-neutral-950 hover:bg-transparent hover:dark:text-neutral-50 hover:scale-105 hover:shadow-2xl transition-transform duration-200"
         
       >
         <i className={`fab ${osInfo.icon} w-5 h-5`}></i>
@@ -154,13 +171,13 @@ const DownloadButton = () => {
       {isOpen && downloadOptions[currentOS].length > 1 && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-0 right-0 mt-2 border-2 bg-black dark:bg-white text-white dark:text-black border-black dark:border-white rounded-lg shadow-xl overflow-hidden"
+          className="absolute top-full left-0 right-0 mt-2 border-2 bg-neutral-950 dark:bg-neutral-50 text-neutral-50 dark:text-neutral-950 border-neutral-950 dark:border-neutral-50 rounded-lg shadow-xl overflow-hidden"
         >
           {downloadOptions[currentOS].map((option, index) => (
             <a
               key={index}
               href={option.url}
-              className="block px-4 py-4 text-left border-b last:border-b-0 hover:bg-white hover:dark:bg-black hover:text-black hover:dark:text-white border-white dark:border-black"
+              className="block px-4 py-4 text-left border-b last:border-b-0 hover:bg-neutral-50 hover:dark:bg-neutral-950 hover:text-neutral-950 hover:dark:text-neutral-50 border-neutral-50 dark:border-neutral-950"
               onClick={() => setIsOpen(false)}
             >
               <div className="flex items-center gap-3">
