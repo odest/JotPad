@@ -316,10 +316,11 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                 />
               </div>
 
-              {backgroundSettings.show_background && currentPlatform != "android" && (
+              {backgroundSettings.show_background && (
                 <>
                   <Separator />
                   <div className="space-y-3">
+                    {currentPlatform != "android" && (
                     <Tabs
                       value={backgroundSettings.use_custom_image ? "custom" : "doodle"}
                       onValueChange={(value) => {
@@ -392,8 +393,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                           )}
                         </div>
                       </TabsContent>
-                    </Tabs>
-                    <Separator />
+                    </Tabs>)}
                     <div className="space-y-3">
                       <Label className="text-sm font-medium">{t('effects')}</Label>
                       <div className="space-y-2">
@@ -445,8 +445,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                         />
                       </div>
                     </div>
-                    <Separator />
-                    <div className="space-y-2">
+                    <div className="space-y-2 pt-4">
                       <Label className="text-sm font-medium">{t('preview')}</Label>
                       <div className="relative rounded-md border bg-background p-3 h-32 overflow-hidden flex items-center justify-center">
                         <div

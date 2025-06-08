@@ -139,7 +139,6 @@ export default function Home() {
                       ...transitionVariants,
                   }}
                   className="mt-12 flex flex-col items-center justify-center gap-4 md:flex-row">
-                  <DownloadButton />
                   <Link href="https://github.com/odest/JotPad" target="_blank" rel="noopener noreferrer">
                     <Button
                       size="lg"
@@ -147,6 +146,7 @@ export default function Home() {
                         <Star className="w-5 h-5" /> Star on GitHub
                       </Button>
                   </Link>
+                  <DownloadButton />
                 </AnimatedGroup>
               </div>
             </div>
