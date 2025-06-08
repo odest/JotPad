@@ -19,6 +19,12 @@ import { NoteEntriesList } from "@repo/ui/components/note/NoteEntriesList";
 import { useTheme } from "@repo/ui/providers/theme-provider";
 import { useNoteEntries } from "@repo/ui/hooks/useNoteEntries";
 
+declare global {
+  interface Window {
+    androidBackCallback?: () => boolean;
+  }
+}
+
 interface NoteContentProps {
   selectedNote: Note | null;
   handleEditNote: (note: Note) => void;
@@ -75,6 +81,20 @@ export function NoteContent({
       }, 0);
     }
   }, [noteEntries, searchQuery]);
+
+  useEffect(() => {
+    window.androidBackCallback = (): boolean => {
+      if (showSidebar) {
+        return true;
+      }
+      setShowSidebar(true);
+      return false;
+    };
+
+    return () => {
+      window.androidBackCallback = undefined;
+    };
+  }, [showSidebar, setShowSidebar]);
 
   const handleAddEntry = async () => {
     if (!selectedNote || !newEntryText.trim()) return;
