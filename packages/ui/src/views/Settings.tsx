@@ -1,4 +1,5 @@
 import { convertFileSrc } from '@tauri-apps/api/core';
+import { platform } from '@tauri-apps/plugin-os';
 import { useTranslation } from 'react-i18next';
 import {
   Card,
@@ -76,6 +77,7 @@ const availableColorThemes: Array<{ name: "zinc" | "red" | "rose" | "orange" | "
 
 export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
   const { t } = useTranslation();
+  const currentPlatform = platform();
   const {
     selectedLanguage, setSelectedLanguage,
     themeSetting, setTheme,
@@ -314,7 +316,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                 />
               </div>
 
-              {backgroundSettings.show_background && (
+              {backgroundSettings.show_background && currentPlatform != "android" && (
                 <>
                   <Separator />
                   <div className="space-y-3">

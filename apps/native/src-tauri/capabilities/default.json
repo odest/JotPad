@@ -17,9 +17,14 @@
     {
       "identifier": "fs:scope",
       "allow": [
-        { "path": "$DOWNLOAD/*" },
-        { "path": "$DOCUMENT/*" }
+        {
+          "path": "$DOWNLOAD/*"
+        },
+        {
+          "path": "$DOCUMENT/*"
+        }
       ]
-    }
+    },
+    "os:default"
   ]
 }
