@@ -13,6 +13,7 @@
     "sql:allow-execute",
     "dialog:default",
     "fs:default",
+    "fs:allow-write-file",
     "fs:allow-write-text-file",
     {
       "identifier": "fs:scope",
@@ -22,6 +23,9 @@
         },
         {
           "path": "$DOCUMENT/*"
+        },
+        {
+          "path": "$APPDATA/*"
         }
       ]
     },

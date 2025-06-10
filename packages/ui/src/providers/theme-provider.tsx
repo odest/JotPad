@@ -12,6 +12,7 @@ export type BackgroundSettings = {
   show_background: boolean;
   use_custom_image: boolean;
   custom_image_src: string | null;
+  image_version: number;
   opacity: number;
   brightness: number;
   blur: number;
@@ -41,6 +42,7 @@ const defaultInitialBackgroundSettings: BackgroundSettings = {
   show_background: true,
   use_custom_image: false,
   custom_image_src: null,
+  image_version: 0,
   opacity: 30,
   brightness: 100,
   blur: 0,

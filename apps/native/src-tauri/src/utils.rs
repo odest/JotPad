@@ -1,5 +1,6 @@
 use log::{debug, error, info, trace, warn};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
@@ -33,6 +34,7 @@ pub struct BackgroundSettings {
     pub show_background: bool,
     pub use_custom_image: bool,
     pub custom_image_src: Option<String>,
+    pub image_version: u64,
     pub opacity: u8,
     pub brightness: u8,
     pub blur: f32,
@@ -48,6 +50,7 @@ impl Default for Settings {
                 show_background: true,
                 use_custom_image: false,
                 custom_image_src: None,
+                image_version: 0,
                 opacity: 30,
                 brightness: 100,
                 blur: 0.0,
@@ -65,11 +68,27 @@ fn settings_file_path(app_handle: &AppHandle) -> PathBuf {
     config_dir.join("jotpad_settings.json")
 }
 
+fn merge(a: &mut Value, b: &Value) {
+    if let Value::Object(a) = a {
+        if let Value::Object(b) = b {
+            for (k, v) in b {
+                if v.is_null() {
+                } else {
+                    merge(a.entry(k.clone()).or_insert(Value::Null), v);
+                }
+            }
+        }
+    } else {
+        *a = b.clone();
+    }
+}
+
 #[tauri::command]
 pub fn read_settings(app_handle: AppHandle) -> Result<Settings, String> {
     let path = settings_file_path(&app_handle);
+    let default_settings = Settings::default();
+
     if !path.exists() {
-        let default_settings = Settings::default();
         if let Err(e) = fs::create_dir_all(path.parent().unwrap()) {
             return Err(format!("Failed to create config dir: {}", e));
         }
@@ -81,10 +100,26 @@ pub fn read_settings(app_handle: AppHandle) -> Result<Settings, String> {
         }
         return Ok(default_settings);
     }
-    let data = fs::read_to_string(&path).map_err(|e| format!("Failed to read settings: {}", e))?;
-    let settings: Settings =
-        serde_json::from_str(&data).map_err(|e| format!("Failed to parse settings: {}", e))?;
-    Ok(settings)
+
+    let data = fs::read_to_string(&path).map_err(|e| format!("Settings file read failed: {}", e))?;
+
+    let user_settings_value: Value = match serde_json::from_str(&data) {
+        Ok(val) => val,
+        Err(e) => {
+            warn!("Settings file is corrupted, default settings are being used: {}", e);
+            return Ok(default_settings);
+        }
+    };
+
+    let mut merged_settings_value =
+        serde_json::to_value(&default_settings).map_err(|e| e.to_string())?;
+
+    merge(&mut merged_settings_value, &user_settings_value);
+
+    let final_settings: Settings =
+        serde_json::from_value(merged_settings_value).map_err(|e| e.to_string())?;
+
+    Ok(final_settings)
 }
 
 #[tauri::command]
