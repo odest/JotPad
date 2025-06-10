@@ -1,5 +1,4 @@
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { platform } from '@tauri-apps/plugin-os';
 import { useTranslation } from 'react-i18next';
 import {
   Card,
@@ -77,7 +76,6 @@ const availableColorThemes: Array<{ name: "zinc" | "red" | "rose" | "orange" | "
 
 export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
   const { t } = useTranslation();
-  const currentPlatform = platform();
   const {
     selectedLanguage, setSelectedLanguage,
     themeSetting, setTheme,
@@ -130,6 +128,14 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
     }
   };
   const currentThemeDisplay = getCurrentThemeDisplay();
+
+  const finalImageUrl = (() => {
+    if (backgroundSettings.use_custom_image && backgroundSettings.custom_image_src) {
+      const baseUrl = convertFileSrc(backgroundSettings.custom_image_src);
+      return `${baseUrl}?v=${backgroundSettings.image_version || Date.now()}`;
+    }
+    return undefined;
+  })();
 
   return (
     <div className={`relative flex-1 flex flex-col h-[calc(100vh)] md:h-[calc(100vh-2.5rem)] md:border md:m-5 md:mb-5 rounded-xl overflow-hidden bg-background`}>
@@ -320,7 +326,6 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                 <>
                   <Separator />
                   <div className="space-y-3">
-                    {currentPlatform != "android" && (
                     <Tabs
                       value={backgroundSettings.use_custom_image ? "custom" : "doodle"}
                       onValueChange={(value) => {
@@ -355,7 +360,7 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                             <div className="relative group">
                               <div className="flex justify-center items-center p-2 min-h-[120px] rounded-lg overflow-hidden">
                                 <img
-                                  src={backgroundSettings.custom_image_src ? convertFileSrc(backgroundSettings.custom_image_src) : undefined}
+                                  src={finalImageUrl}
                                   alt="Selected background"
                                   className="max-w-full max-h-[120px] object-contain rounded-md shadow-sm"
                                 />
@@ -393,7 +398,8 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                           )}
                         </div>
                       </TabsContent>
-                    </Tabs>)}
+                    </Tabs>
+                    <Separator />
                     <div className="space-y-3">
                       <Label className="text-sm font-medium">{t('effects')}</Label>
                       <div className="space-y-2">
@@ -451,8 +457,8 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
                         <div
                           className="absolute inset-0 bg-center bg-no-repeat"
                           style={{
-                            backgroundImage: backgroundSettings.use_custom_image && backgroundSettings.custom_image_src
-                              ? `url(${convertFileSrc(backgroundSettings.custom_image_src)})`
+                            backgroundImage: finalImageUrl
+                              ? `url(${finalImageUrl})`
                               : 'url(/background.png)',
                             opacity: backgroundSettings.opacity / 100,
                             filter: `brightness(${backgroundSettings.brightness / 100}) blur(${backgroundSettings.blur}px)`,

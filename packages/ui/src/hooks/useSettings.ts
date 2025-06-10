@@ -1,6 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
+import { appDataDir, join } from '@tauri-apps/api/path';
+import { readFile, writeFile } from '@tauri-apps/plugin-fs';
 import { getVersion } from '@tauri-apps/api/app';
 import { useTranslation } from 'react-i18next';
 import i18n from '@repo/ui/lib/i18n';
@@ -61,6 +63,7 @@ export function useSettings() {
       show_background: true,
       use_custom_image: false,
       custom_image_src: null,
+      image_version: 0,
       opacity: 30,
       brightness: 100,
       blur: 0,
@@ -175,20 +178,48 @@ export function useSettings() {
           { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'] }
         ]
       });
-      if (typeof selected === 'string') {
-        setBackgroundSettings({
-          custom_image_src: selected,
-          use_custom_image: true,
-        });
+
+      if (typeof selected !== 'string') {
+        return;
       }
+
+      const processImagePromise = async () => {
+        const appDataPath = await appDataDir();
+        const fileName = 'custom_background.jpg';
+        const destPath = await join(appDataPath, fileName);
+  
+        const contents = await readFile(selected);
+        await writeFile(destPath, contents);
+  
+        setBackgroundSettings({
+          custom_image_src: destPath,
+          use_custom_image: true,
+          image_version: Date.now()
+        });
+
+        return { newPath: destPath };
+      };
+  
+      await toast.promise(processImagePromise(), {
+        loading: t('processing_image'),
+        success: () => {
+          return t('background_updated_successfully');
+        },
+        error: (err) => {
+          return t('failed_to_process_image');
+        },
+      });
     } catch (e) {
-      toast.error(t('failed_to_select_image'));
+      toast.error(t('failed_to_select_image'), {
+        description: e instanceof Error ? e.message : String(e)
+      });
     }
   };
 
   const handleRemoveCustomImage = () => {
     setBackgroundSettings({
       custom_image_src: null,
+      image_version: 0,
     });
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
