@@ -40,6 +40,7 @@ export function HomePage() {
     filteredNotes,
     SIDEBAR_HEADER_HEIGHT,
     handleDialogOpenChange,
+    tags, setTags,
   } = useNotes();
 
   const [appVersion, setAppVersion] = useState<string | null>(null);
@@ -116,6 +117,8 @@ export function HomePage() {
         handleDeleteNote={(id) => setNoteIdToDelete(id)}
         onToggleSettings={openSettings}
         isEdit={!!editId}
+        tags={tags}
+        setTags={setTags}
       />
       {showSettings ? (
         <Settings

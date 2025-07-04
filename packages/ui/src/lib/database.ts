@@ -6,6 +6,7 @@ export interface Note {
   content?: string;
   created_at: string;
   updated_at: string;
+  tags?: string[];
 }
 
 export interface NoteEntry {
@@ -32,18 +33,21 @@ class DatabaseService {
 
   async getNotes(): Promise<Note[]> {
     const db = await this.initialize();
-    const result = await db.select<Note[]>('SELECT * FROM notes ORDER BY created_at DESC');
-    return result;
+    const result = await db.select<any[]>('SELECT * FROM notes ORDER BY created_at DESC');
+    return result.map(note => ({
+      ...note,
+      tags: note.tags ? JSON.parse(note.tags) : [],
+    }));
   }
 
-  async createNote(title: string, content?: string): Promise<Note> {
+  async createNote(title: string, content?: string, tags: string[] = []): Promise<Note> {
     const db = await this.initialize();
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
     
     await db.execute(
-      'INSERT INTO notes (id, title, content, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
-      [id, title, content || null, now, now]
+      'INSERT INTO notes (id, title, content, created_at, updated_at, tags) VALUES (?, ?, ?, ?, ?, ?)',
+      [id, title, content || null, now, now, JSON.stringify(tags)]
     );
 
     return {
@@ -51,17 +55,18 @@ class DatabaseService {
       title,
       content,
       created_at: now,
-      updated_at: now
+      updated_at: now,
+      tags,
     };
   }
 
-  async updateNote(id: string, title: string, content?: string): Promise<void> {
+  async updateNote(id: string, title: string, content?: string, tags: string[] = []): Promise<void> {
     const db = await this.initialize();
     const now = new Date().toISOString();
     
     await db.execute(
-      'UPDATE notes SET title = ?, content = ?, updated_at = ? WHERE id = ?',
-      [title, content || null, now, id]
+      'UPDATE notes SET title = ?, content = ?, updated_at = ?, tags = ? WHERE id = ?',
+      [title, content || null, now, JSON.stringify(tags), id]
     );
   }
 

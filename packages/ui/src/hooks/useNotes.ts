@@ -9,6 +9,7 @@ export interface AppNote extends DbNote {
 export function useNotes() {
   const [open, setOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
   const [notes, setNotes] = useState<AppNote[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
   const [selectedNote, setSelectedNote] = useState<AppNote | null>(null);
@@ -67,12 +68,12 @@ export function useNotes() {
       try {
         if (editId) {
           const currentNoteId = editId;
-          await db.updateNote(currentNoteId, noteTitle);
+          await db.updateNote(currentNoteId, noteTitle, undefined, tags);
           await loadNotes();
           await invoke('log_message', { level: 'info', message: `Note edited: ${noteTitle}` });
           setEditId(null);
         } else {
-          const newDbNote = await db.createNote(noteTitle);
+          const newDbNote = await db.createNote(noteTitle, undefined, tags);
           const newAppNote: AppNote = { ...newDbNote, lastEntryText: undefined };
           setNotes(prevNotes => [newAppNote, ...prevNotes]);
           setSelectedNote(newAppNote);
@@ -81,6 +82,7 @@ export function useNotes() {
           await invoke('log_message', { level: 'info', message: `New note created: ${noteTitle}` });
         }
         setNoteTitle("");
+        setTags([]);
         setOpen(false);
       } catch (error) {
         console.error('Failed to save note:', error);
@@ -110,6 +112,7 @@ export function useNotes() {
   const handleOpenEditDialog = (noteToEdit: AppNote) => {
     setEditId(noteToEdit.id);
     setNoteTitle(noteToEdit.title);
+    setTags(noteToEdit.tags || []);
     setOpen(true);
     invoke('log_message', { level: 'info', message: `Editing note: ${noteToEdit.title}` });
   };
@@ -144,12 +147,14 @@ export function useNotes() {
     if (!isOpen) {
       setEditId(null);
       setNoteTitle("");
+      setTags([]);
     }
   };
 
   return {
     open, setOpen,
     noteTitle, setNoteTitle,
+    tags, setTags,
     notes, setNotes,
     editId, setEditId,
     selectedNote, setSelectedNote,

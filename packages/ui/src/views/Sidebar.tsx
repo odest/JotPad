@@ -42,6 +42,8 @@ interface SidebarProps {
   handleDeleteNote?: (noteId: string) => void;
   onToggleSettings: () => void;
   isEdit: boolean;
+  tags: string[];
+  setTags: (tags: string[]) => void;
 }
 
 export function Sidebar({
@@ -60,6 +62,8 @@ export function Sidebar({
   handleDeleteNote,
   onToggleSettings,
   isEdit,
+  tags,
+  setTags,
 }: SidebarProps) {
   const { t } = useTranslation();
   const { appliedTheme } = useTheme();
@@ -196,6 +200,8 @@ export function Sidebar({
             setNoteTitle={setNoteTitle}
             onCreate={handleCreateNote}
             isEdit={isEdit}
+            tags={tags}
+            setTags={setTags}
             trigger={
               <Button 
                 className="h-12 px-6 shadow-lg w-full" 
