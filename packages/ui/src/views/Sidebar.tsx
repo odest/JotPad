@@ -28,6 +28,7 @@ import { NoteDialog } from "@repo/ui/components/note/NoteDialog";
 import { useTheme } from "@repo/ui/providers/theme-provider";
 import { NoteList, Note as NoteListNote } from "@repo/ui/components/note/NoteList";
 import { useSettings } from "@repo/ui/hooks/useSettings";
+import { TagWithColor } from "@repo/ui/lib/database";
 
 interface SidebarProps {
   filteredNotes: NoteListNote[];
@@ -45,8 +46,8 @@ interface SidebarProps {
   handleDeleteNote?: (noteId: string) => void;
   onToggleSettings: () => void;
   isEdit: boolean;
-  tags: string[];
-  setTags: (tags: string[]) => void;
+  tags: TagWithColor[];
+  setTags: (tags: TagWithColor[]) => void;
 }
 
 export function Sidebar({
@@ -79,7 +80,7 @@ export function Sidebar({
     const tagSet = new Set<string>();
     filteredNotes.forEach(note => {
       if (note.tags && Array.isArray(note.tags)) {
-        note.tags.forEach(tag => tagSet.add(tag));
+        note.tags.forEach(tag => tagSet.add(tag.name));
       }
     });
     console.log(tagSet);
@@ -88,7 +89,9 @@ export function Sidebar({
 
   const tagFilteredNotes = useMemo(() => {
     if (!selectedTag) return filteredNotes;
-    return filteredNotes.filter(note => note.tags && note.tags.includes(selectedTag));
+    return filteredNotes.filter(note => 
+      note.tags && note.tags.some(tag => tag.name === selectedTag)
+    );
   }, [filteredNotes, selectedTag]);
 
   const sortedNotes = [...tagFilteredNotes].sort((a, b) => {
@@ -181,17 +184,32 @@ export function Sidebar({
                   {t('all_tags')}
                   {!selectedTag && <Check className="w-4 h-4 ml-auto" />}
                 </DropdownMenuItem>
-                {allTags.map((tag: string) => (
-                  <DropdownMenuItem
-                    key={tag}
-                    onClick={() => setSelectedTag(tag)}
-                    className={selectedTag === tag ? 'bg-accent' : ''}
-                  >
-                    <Tag className="w-4 h-4 mr-2" />
-                    {tag}
-                    {selectedTag === tag && <Check className="w-4 h-4 ml-auto" />}
-                  </DropdownMenuItem>
-                ))}
+                {allTags.map((tagName: string) => {
+                  let tagColor = "#6b7280";
+                  for (const note of filteredNotes) {
+                    if (note.tags) {
+                      const tag = note.tags.find(t => t.name === tagName);
+                      if (tag) {
+                        tagColor = tag.color;
+                        break;
+                      }
+                    }
+                  }
+                  return (
+                    <DropdownMenuItem
+                      key={tagName}
+                      onClick={() => setSelectedTag(tagName)}
+                      className={selectedTag === tagName ? 'bg-accent' : ''}
+                    >
+                      <div 
+                        className="w-4 h-4 rounded-full mr-2"
+                        style={{ backgroundColor: tagColor }}
+                      />
+                      {tagName}
+                      {selectedTag === tagName && <Check className="w-4 h-4 ml-auto" />}
+                    </DropdownMenuItem>
+                  );
+                })}
               </DropdownMenuContent>
             </DropdownMenu>
             <DropdownMenu>

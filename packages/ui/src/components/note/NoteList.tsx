@@ -7,6 +7,7 @@ import {
   ContextMenuTrigger,
 } from "@repo/ui/components/context-menu";
 import { Pencil, Trash2 } from "lucide-react";
+import { TagWithColor } from "@repo/ui/lib/database";
 
 export interface Note {
   id: string;
@@ -14,7 +15,7 @@ export interface Note {
   content?: string;
   createdAt: Date;
   lastEntryText?: string | null;
-  tags?: string[];
+  tags?: TagWithColor[];
 }
 
 interface NoteListProps {
@@ -77,13 +78,27 @@ export const NoteList: React.FC<NoteListProps> = ({
                           })}
                     </span>
                   </div>
-                  <span className="text-sm text-gray-400 truncate">
-                    {note.lastEntryText
-                      ? note.lastEntryText.length > 40
-                        ? note.lastEntryText.slice(0, 40) + "..."
-                        : note.lastEntryText
-                      : t('no_note_content_yet')}
-                  </span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400 truncate">
+                      {note.lastEntryText
+                        ? note.lastEntryText.length > 40
+                          ? note.lastEntryText.slice(0, 40) + "..."
+                          : note.lastEntryText
+                        : t('no_note_content_yet')}
+                    </span>
+                    {note.tags && note.tags.length > 0 && (
+                      <div className="flex items-center gap-1 ml-2">
+                        {note.tags.map((tag, index) => (
+                          <div
+                            key={tag.name}
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: tag.color }}
+                            title={tag.name}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </ContextMenuTrigger>

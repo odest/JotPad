@@ -1,4 +1,4 @@
-import { ReactNode, useState, KeyboardEvent } from "react";
+import { ReactNode, useState, KeyboardEvent, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -13,6 +13,8 @@ import { Badge } from "@repo/ui/components/badge";
 import { Input } from "@repo/ui/components/input";
 import { Button } from "@repo/ui/components/button";
 import { CircleX, Tag, Plus } from "lucide-react";
+import { TagWithColor } from "@repo/ui/lib/database";
+import { ColorPicker } from "@repo/ui/components/note/ColorPicker";
 
 interface NoteDialogProps {
   open: boolean;
@@ -22,8 +24,8 @@ interface NoteDialogProps {
   onCreate: () => void;
   trigger?: ReactNode;
   isEdit?: boolean;
-  tags: string[];
-  setTags: (tags: string[]) => void;
+  tags: TagWithColor[];
+  setTags: (tags: TagWithColor[]) => void;
 }
 
 export function NoteDialog({
@@ -39,10 +41,15 @@ export function NoteDialog({
 }: NoteDialogProps) {
   const { t } = useTranslation();
   const [tagInput, setTagInput] = useState("");
+  const [selectedColor, setSelectedColor] = useState("#3b82f6");
 
   const handleAddTag = () => {
-    const newTag = tagInput.trim();
-    if (newTag && !tags.includes(newTag)) {
+    const newTagName = tagInput.trim();
+    if (newTagName && !tags.some(tag => tag.name === newTagName)) {
+      const newTag: TagWithColor = {
+        name: newTagName,
+        color: selectedColor
+      };
       setTags([...tags, newTag]);
     }
     setTagInput("");
@@ -58,9 +65,16 @@ export function NoteDialog({
     }
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
-  };
+  useEffect(() => {
+    if (!open) {
+      setTagInput("");
+      setSelectedColor("#3b82f6");
+    }
+  }, [open]);
+
+  const handleRemoveTag = (tagToRemove: TagWithColor) => {
+    setTags(tags.filter(tag => tag.name !== tagToRemove.name));
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -97,6 +111,11 @@ export function NoteDialog({
           </div>
           <div className="rounded-lg border p-4 space-y-4">
             <div className="flex items-center gap-2">
+              <ColorPicker
+                color={selectedColor}
+                onColorChange={setSelectedColor}
+                className="shrink-0"
+              />
               <div className="relative flex-grow">
                 <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -116,11 +135,30 @@ export function NoteDialog({
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="rounded-md py-1 px-2 gap-1.5 items-center">
-                    {tag}
-                    <button type="button" className="rounded-full hover:bg-muted-foreground/20" onClick={() => handleRemoveTag(tag)}>
-                      <CircleX className="h-4 w-4" />
-                    </button>
+                  <Badge 
+                    key={tag.name} 
+                    variant="secondary" 
+                    className="rounded-md py-1 px-2 gap-2 items-center border-2"
+                    style={{ 
+                      backgroundColor: `${tag.color}15`,
+                      borderColor: tag.color,
+                      color: tag.color
+                    }}
+                  >
+                    <div 
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: tag.color }}
+                    />
+                    <span className="text-sm font-medium">{tag.name}</span>
+                    <div className="flex items-center gap-1">
+                      <button 
+                        type="button" 
+                        className="rounded-full hover:bg-muted-foreground/20 p-0.5 transition-colors" 
+                        onClick={() => handleRemoveTag(tag)}
+                      >
+                        <CircleX className="h-3 w-3" />
+                      </button>
+                    </div>
                   </Badge>
                 ))}
               </div>

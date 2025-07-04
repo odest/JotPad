@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from '@tauri-apps/api/core';
-import { db, Note as DbNote } from "@repo/ui/lib/database";
+import { db, Note as DbNote, TagWithColor } from "@repo/ui/lib/database";
 
 export interface AppNote extends DbNote {
   lastEntryText?: string | null;
@@ -9,7 +9,7 @@ export interface AppNote extends DbNote {
 export function useNotes() {
   const [open, setOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<TagWithColor[]>([]);
   const [notes, setNotes] = useState<AppNote[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
   const [selectedNote, setSelectedNote] = useState<AppNote | null>(null);

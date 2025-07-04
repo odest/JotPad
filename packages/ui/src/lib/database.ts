@@ -1,12 +1,17 @@
 import Database from '@tauri-apps/plugin-sql';
 
+export interface TagWithColor {
+  name: string;
+  color: string;
+}
+
 export interface Note {
   id: string;
   title: string;
   content?: string;
   created_at: string;
   updated_at: string;
-  tags?: string[];
+  tags?: TagWithColor[];
 }
 
 export interface NoteEntry {
@@ -40,7 +45,7 @@ class DatabaseService {
     }));
   }
 
-  async createNote(title: string, content?: string, tags: string[] = []): Promise<Note> {
+  async createNote(title: string, content?: string, tags: TagWithColor[] = []): Promise<Note> {
     const db = await this.initialize();
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
@@ -60,7 +65,7 @@ class DatabaseService {
     };
   }
 
-  async updateNote(id: string, title: string, content?: string, tags: string[] = []): Promise<void> {
+  async updateNote(id: string, title: string, content?: string, tags: TagWithColor[] = []): Promise<void> {
     const db = await this.initialize();
     const now = new Date().toISOString();
     
