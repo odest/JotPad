@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DropdownMenu,
@@ -7,6 +8,7 @@ import {
 } from "@repo/ui/components/dropdown-menu";
 import {
   X,
+  Tag,
   Sun,
   Moon,
   Plus,
@@ -18,6 +20,7 @@ import {
   ArrowDownAZ,
   ArrowDownUp,
   NotebookText,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Input } from "@repo/ui/components/input";
 import { Button } from "@repo/ui/components/button";
@@ -25,6 +28,7 @@ import { NoteDialog } from "@repo/ui/components/note/NoteDialog";
 import { useTheme } from "@repo/ui/providers/theme-provider";
 import { NoteList, Note as NoteListNote } from "@repo/ui/components/note/NoteList";
 import { useSettings } from "@repo/ui/hooks/useSettings";
+import { TagWithColor } from "@repo/ui/lib/database";
 
 interface SidebarProps {
   filteredNotes: NoteListNote[];
@@ -42,6 +46,8 @@ interface SidebarProps {
   handleDeleteNote?: (noteId: string) => void;
   onToggleSettings: () => void;
   isEdit: boolean;
+  tags: TagWithColor[];
+  setTags: (tags: TagWithColor[]) => void;
 }
 
 export function Sidebar({
@@ -60,14 +66,35 @@ export function Sidebar({
   handleDeleteNote,
   onToggleSettings,
   isEdit,
+  tags,
+  setTags,
 }: SidebarProps) {
   const { t } = useTranslation();
   const { appliedTheme } = useTheme();
   const { setThemeAndPersist, sortType, setSortType } = useSettings();
   const SIDEBAR_HEADER_HEIGHT = 72;
   const SIDEBAR_SEARCH_HEIGHT = 64;
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
-  const sortedNotes = [...filteredNotes].sort((a, b) => {
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    filteredNotes.forEach(note => {
+      if (note.tags && Array.isArray(note.tags)) {
+        note.tags.forEach(tag => tagSet.add(tag.name));
+      }
+    });
+    console.log(tagSet);
+    return Array.from(tagSet);
+  }, [filteredNotes]);
+
+  const tagFilteredNotes = useMemo(() => {
+    if (!selectedTag) return filteredNotes;
+    return filteredNotes.filter(note => 
+      note.tags && note.tags.some(tag => tag.name === selectedTag)
+    );
+  }, [filteredNotes, selectedTag]);
+
+  const sortedNotes = [...tagFilteredNotes].sort((a, b) => {
     if (sortType === 'az') {
       return a.title.localeCompare(b.title);
     } else if (sortType === 'za') {
@@ -145,6 +172,49 @@ export function Sidebar({
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <Button variant="outline" size="icon" className="ml-1 border">
+                  <SlidersHorizontal className='w-5 h-5' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem
+                  onClick={() => setSelectedTag(null)}
+                  className={!selectedTag ? 'bg-accent' : ''}
+                >
+                  <Tag className="w-4 h-4 mr-2" />
+                  {t('all_tags')}
+                  {!selectedTag && <Check className="w-4 h-4 ml-auto" />}
+                </DropdownMenuItem>
+                {allTags.map((tagName: string) => {
+                  let tagColor = "#6b7280";
+                  for (const note of filteredNotes) {
+                    if (note.tags) {
+                      const tag = note.tags.find(t => t.name === tagName);
+                      if (tag) {
+                        tagColor = tag.color;
+                        break;
+                      }
+                    }
+                  }
+                  return (
+                    <DropdownMenuItem
+                      key={tagName}
+                      onClick={() => setSelectedTag(tagName)}
+                      className={selectedTag === tagName ? 'bg-accent' : ''}
+                    >
+                      <div 
+                        className="w-4 h-4 rounded-full mr-2"
+                        style={{ backgroundColor: tagColor }}
+                      />
+                      {tagName}
+                      {selectedTag === tagName && <Check className="w-4 h-4 ml-auto" />}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button variant="outline" size="icon" className="ml-1 border">
                   <ArrowDownUp className="w-5 h-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -196,6 +266,8 @@ export function Sidebar({
             setNoteTitle={setNoteTitle}
             onCreate={handleCreateNote}
             isEdit={isEdit}
+            tags={tags}
+            setTags={setTags}
             trigger={
               <Button 
                 className="h-12 px-6 shadow-lg w-full" 

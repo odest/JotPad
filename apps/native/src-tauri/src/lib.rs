@@ -25,6 +25,12 @@ pub fn run() {
                 FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
             );",
         kind: MigrationKind::Up,
+    },
+    Migration {
+        version: 2,
+        description: "add tags column to notes table",
+        sql: "ALTER TABLE notes ADD COLUMN tags TEXT;",
+        kind: MigrationKind::Up,
     }];
 
     tauri::Builder::default()

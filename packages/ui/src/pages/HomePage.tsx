@@ -40,6 +40,7 @@ export function HomePage() {
     filteredNotes,
     SIDEBAR_HEADER_HEIGHT,
     handleDialogOpenChange,
+    tags, setTags,
   } = useNotes();
 
   const [appVersion, setAppVersion] = useState<string | null>(null);
@@ -85,6 +86,7 @@ export function HomePage() {
           content: note.content,
           createdAt: new Date(note.created_at),
           lastEntryText: note.lastEntryText,
+          tags: note.tags || [],
         }))}
         selectedNote={selectedNote ? {
           id: selectedNote.id,
@@ -92,6 +94,7 @@ export function HomePage() {
           content: selectedNote.content,
           createdAt: new Date(selectedNote.created_at),
           lastEntryText: selectedNote.lastEntryText,
+          tags: selectedNote.tags || [],
         } : null}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -116,6 +119,8 @@ export function HomePage() {
         handleDeleteNote={(id) => setNoteIdToDelete(id)}
         onToggleSettings={openSettings}
         isEdit={!!editId}
+        tags={tags}
+        setTags={setTags}
       />
       {showSettings ? (
         <Settings
