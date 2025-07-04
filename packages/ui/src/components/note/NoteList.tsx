@@ -14,6 +14,7 @@ export interface Note {
   content?: string;
   createdAt: Date;
   lastEntryText?: string | null;
+  tags?: string[];
 }
 
 interface NoteListProps {

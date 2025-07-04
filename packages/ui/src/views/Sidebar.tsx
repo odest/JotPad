@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DropdownMenu,
@@ -7,6 +8,7 @@ import {
 } from "@repo/ui/components/dropdown-menu";
 import {
   X,
+  Tag,
   Sun,
   Moon,
   Plus,
@@ -18,6 +20,7 @@ import {
   ArrowDownAZ,
   ArrowDownUp,
   NotebookText,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Input } from "@repo/ui/components/input";
 import { Button } from "@repo/ui/components/button";
@@ -70,8 +73,25 @@ export function Sidebar({
   const { setThemeAndPersist, sortType, setSortType } = useSettings();
   const SIDEBAR_HEADER_HEIGHT = 72;
   const SIDEBAR_SEARCH_HEIGHT = 64;
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
-  const sortedNotes = [...filteredNotes].sort((a, b) => {
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    filteredNotes.forEach(note => {
+      if (note.tags && Array.isArray(note.tags)) {
+        note.tags.forEach(tag => tagSet.add(tag));
+      }
+    });
+    console.log(tagSet);
+    return Array.from(tagSet);
+  }, [filteredNotes]);
+
+  const tagFilteredNotes = useMemo(() => {
+    if (!selectedTag) return filteredNotes;
+    return filteredNotes.filter(note => note.tags && note.tags.includes(selectedTag));
+  }, [filteredNotes, selectedTag]);
+
+  const sortedNotes = [...tagFilteredNotes].sort((a, b) => {
     if (sortType === 'az') {
       return a.title.localeCompare(b.title);
     } else if (sortType === 'za') {
@@ -146,6 +166,34 @@ export function Sidebar({
                 </Button>
               )}
             </span>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button variant="outline" size="icon" className="ml-1 border">
+                  <SlidersHorizontal className='w-5 h-5' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem
+                  onClick={() => setSelectedTag(null)}
+                  className={!selectedTag ? 'bg-accent' : ''}
+                >
+                  <Tag className="w-4 h-4 mr-2" />
+                  {t('all_tags')}
+                  {!selectedTag && <Check className="w-4 h-4 ml-auto" />}
+                </DropdownMenuItem>
+                {allTags.map((tag: string) => (
+                  <DropdownMenuItem
+                    key={tag}
+                    onClick={() => setSelectedTag(tag)}
+                    className={selectedTag === tag ? 'bg-accent' : ''}
+                  >
+                    <Tag className="w-4 h-4 mr-2" />
+                    {tag}
+                    {selectedTag === tag && <Check className="w-4 h-4 ml-auto" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <Button variant="outline" size="icon" className="ml-1 border">
