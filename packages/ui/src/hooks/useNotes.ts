@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from '@tauri-apps/api/core';
+import { useGlobalTags } from "@repo/ui/hooks/useGlobalTags";
 import { db, Note as DbNote, TagWithColor } from "@repo/ui/lib/database";
 
 export interface AppNote extends DbNote {
@@ -18,6 +19,9 @@ export function useNotes() {
   const [showSettings, setShowSettings] = useState(false);
   const [noteIdToDelete, setNoteIdToDelete] = useState<string | null>(null);
   const [duplicateTitleDialogOpen, setDuplicateTitleDialogOpen] = useState(false);
+  const [tagManagerOpen, setTagManagerOpen] = useState(false);
+
+  const { allGlobalTags } = useGlobalTags(notes);
 
   useEffect(() => {
     loadNotes();
@@ -136,6 +140,47 @@ export function useNotes() {
     setShowSidebar(true);
   };
 
+  const handleUpdateTag = async (oldName: string, newName: string, newColor: string) => {
+    try {
+      await db.updateTagColor(oldName, newColor);
+
+      if (oldName.toLowerCase() !== newName.toLowerCase()) {
+        const notes = await db.getNotes();
+        for (const note of notes) {
+          if (note.tags && note.tags.length > 0) {
+            const updatedTags = note.tags.map(tag => 
+              tag.name.toLowerCase() === oldName.toLowerCase() 
+                ? { ...tag, name: newName, color: newColor }
+                : tag
+            );
+            if (JSON.stringify(note.tags) !== JSON.stringify(updatedTags)) {
+              await db.updateNote(note.id, note.title, note.content, updatedTags);
+            }
+          }
+        }
+      }
+
+      await loadNotes();
+      await invoke('log_message', { level: 'info', message: `Tag updated: ${oldName} -> ${newName}` });
+    } catch (error) {
+      console.error('Failed to update tag:', error);
+      await invoke('log_message', { level: 'error', message: `Failed to update tag: ${error}` });
+      throw error;
+    }
+  };
+
+  const handleDeleteTag = async (tagName: string) => {
+    try {
+      await db.removeTagFromAllNotes(tagName);
+      await loadNotes();
+      await invoke('log_message', { level: 'info', message: `Tag deleted: ${tagName}` });
+    } catch (error) {
+      console.error('Failed to delete tag:', error);
+      await invoke('log_message', { level: 'error', message: `Failed to delete tag: ${error}` });
+      throw error;
+    }
+  };
+
   const filteredNotes = notes.filter(note =>
     note.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -163,6 +208,8 @@ export function useNotes() {
     showSettings, setShowSettings,
     noteIdToDelete, setNoteIdToDelete,
     duplicateTitleDialogOpen, setDuplicateTitleDialogOpen,
+    tagManagerOpen, setTagManagerOpen,
+    allGlobalTags,
     loadNotes,
     handleCreateNote,
     handleDeleteNote,
@@ -170,6 +217,8 @@ export function useNotes() {
     handleNoteSelect,
     openSettings,
     closeSettings,
+    handleUpdateTag,
+    handleDeleteTag,
     filteredNotes,
     SIDEBAR_HEADER_HEIGHT,
     handleDialogOpenChange,
