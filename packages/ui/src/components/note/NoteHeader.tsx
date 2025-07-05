@@ -11,7 +11,9 @@ import {
 } from "@repo/ui/components/dropdown-menu";
 import { Button } from "@repo/ui/components/button";
 import {
+  Pin,
   Trash,
+  PinOff,
   Search,
   Pencil,
   Download,
@@ -27,6 +29,7 @@ interface NoteHeaderProps {
   selectedNote: Note;
   handleEditNote: (note: Note) => void;
   handleDeleteNote: (id: string) => void;
+  handleTogglePinNote?: (noteId: string, pinned: boolean) => void;
   setShowSidebar: (v: boolean) => void;
   isSearchActive: boolean;
   setIsSearchActive: (v: boolean) => void;
@@ -38,6 +41,7 @@ export function NoteHeader({
   selectedNote,
   handleEditNote,
   handleDeleteNote,
+  handleTogglePinNote,
   setShowSidebar,
   isSearchActive,
   setIsSearchActive,
@@ -116,6 +120,21 @@ export function NoteHeader({
                   <DropdownMenuItem onClick={() => handleEditNote(selectedNote)}>
                     <Pencil className="w-4 h-4 mr-2" />
                     <span>{t('edit_title')}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => handleTogglePinNote && handleTogglePinNote(selectedNote.id, !selectedNote.pinned)}
+                  >
+                    {selectedNote.pinned ? (
+                      <>
+                        <PinOff className="w-4 h-4 mr-2" />
+                        <span>{t('unpin_note')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Pin className="w-4 h-4 mr-2" />
+                        <span>{t('pin_note')}</span>
+                      </>
+                    )}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleOpenExportDialog}>
                     <Download className="w-4 h-4 mr-2" />

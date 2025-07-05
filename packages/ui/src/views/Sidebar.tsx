@@ -46,6 +46,7 @@ interface SidebarProps {
   showSidebar: boolean;
   handleEditNote?: (note: NoteListNote) => void;
   handleDeleteNote?: (noteId: string) => void;
+  handleTogglePinNote?: (noteId: string, pinned: boolean) => void;
   onToggleSettings: () => void;
   isEdit: boolean;
   tags: TagWithColor[];
@@ -68,6 +69,7 @@ export function Sidebar({
   showSidebar,
   handleEditNote,
   handleDeleteNote,
+  handleTogglePinNote,
   onToggleSettings,
   isEdit,
   tags,
@@ -95,12 +97,16 @@ export function Sidebar({
 
   const tagFilteredNotes = useMemo(() => {
     if (!selectedTag) return filteredNotes;
-    return filteredNotes.filter(note => 
-      note.tags && note.tags.some(tag => tag.name === selectedTag)
+    return filteredNotes.filter(note =>
+      note.pinned
+      || (note.tags && note.tags.some(tag => tag.name === selectedTag))
     );
   }, [filteredNotes, selectedTag]);
 
   const sortedNotes = [...tagFilteredNotes].sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+
     if (sortType === 'az') {
       return a.title.localeCompare(b.title);
     } else if (sortType === 'za') {
@@ -268,6 +274,7 @@ export function Sidebar({
               handleNoteSelect={handleNoteSelect}
               handleEditNote={handleEditNote}
               handleDeleteNote={handleDeleteNote}
+              handleTogglePinNote={handleTogglePinNote}
             />
           )}
         </div>

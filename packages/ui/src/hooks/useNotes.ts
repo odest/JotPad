@@ -5,6 +5,7 @@ import { db, Note as DbNote, TagWithColor } from "@repo/ui/lib/database";
 
 export interface AppNote extends DbNote {
   lastEntryText?: string | null;
+  pinned?: boolean;
 }
 
 export function useNotes() {
@@ -181,6 +182,23 @@ export function useNotes() {
     }
   };
 
+  const handleTogglePinNote = async (noteId: string, pinned: boolean) => {
+    try {
+      await db.togglePinNote(noteId, pinned);
+      await loadNotes();
+      const note = notes.find(n => n.id === noteId);
+      if (note) {
+        await invoke('log_message', { 
+          level: 'info', 
+          message: `Note ${pinned ? 'pinned' : 'unpinned'}: ${note.title}` 
+        });
+      }
+    } catch (error) {
+      console.error('Failed to toggle pin note:', error);
+      await invoke('log_message', { level: 'error', message: `Failed to toggle pin note: ${error}` });
+    }
+  };
+
   const filteredNotes = notes.filter(note =>
     note.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -215,6 +233,7 @@ export function useNotes() {
     handleDeleteNote,
     handleOpenEditDialog,
     handleNoteSelect,
+    handleTogglePinNote,
     openSettings,
     closeSettings,
     handleUpdateTag,

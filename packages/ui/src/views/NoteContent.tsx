@@ -29,6 +29,7 @@ interface NoteContentProps {
   selectedNote: Note | null;
   handleEditNote: (note: Note) => void;
   handleDeleteNote: (id: string) => void;
+  handleTogglePinNote?: (noteId: string, pinned: boolean) => void;
   setShowSidebar: (v: boolean) => void;
   SIDEBAR_HEADER_HEIGHT: number;
   onEntryAdded?: () => void;
@@ -39,6 +40,7 @@ export function NoteContent({
   selectedNote,
   handleEditNote,
   handleDeleteNote,
+  handleTogglePinNote,
   setShowSidebar,
   SIDEBAR_HEADER_HEIGHT,
   onEntryAdded,
@@ -162,6 +164,7 @@ export function NoteContent({
           selectedNote={selectedNote}
           handleEditNote={handleEditNote}
           handleDeleteNote={handleDeleteNote}
+          handleTogglePinNote={handleTogglePinNote}
           setShowSidebar={setShowSidebar}
           isSearchActive={isSearchActive}
           setIsSearchActive={setIsSearchActive}

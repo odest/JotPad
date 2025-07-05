@@ -6,7 +6,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@repo/ui/components/context-menu";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Pin, PinOff } from "lucide-react";
 import { TagWithColor } from "@repo/ui/lib/database";
 
 export interface Note {
@@ -16,6 +16,7 @@ export interface Note {
   createdAt: Date;
   lastEntryText?: string | null;
   tags?: TagWithColor[];
+  pinned?: boolean;
 }
 
 interface NoteListProps {
@@ -24,6 +25,7 @@ interface NoteListProps {
   handleNoteSelect: (note: Note) => void;
   handleEditNote?: (note: Note) => void;
   handleDeleteNote?: (noteId: string) => void;
+  handleTogglePinNote?: (noteId: string, pinned: boolean) => void;
 }
 
 export const NoteList: React.FC<NoteListProps> = ({
@@ -32,6 +34,7 @@ export const NoteList: React.FC<NoteListProps> = ({
   handleNoteSelect,
   handleEditNote,
   handleDeleteNote,
+  handleTogglePinNote,
 }) => {
   const { t } = useTranslation();
   if (!filteredNotes || filteredNotes.length === 0) {
@@ -56,8 +59,15 @@ export const NoteList: React.FC<NoteListProps> = ({
                 }`}
                 onClick={() => handleNoteSelect(note)}
               >
-                <div className="w-10 h-10 rounded-full flex items-center justify-center border border-primary text-primary font-bold text-lg">
-                  {note.title.charAt(0).toUpperCase()}
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center border border-primary text-primary font-bold text-lg">
+                    {note.title.charAt(0).toUpperCase()}
+                  </div>
+                  {note.pinned && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                      <Pin className="w-2.5 h-2.5 text-primary-foreground" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                   <div className="flex items-center justify-between">
@@ -105,7 +115,22 @@ export const NoteList: React.FC<NoteListProps> = ({
             <ContextMenuContent className="w-48">
               <ContextMenuItem onSelect={() => handleEditNote && handleEditNote(note)}>
                 <Pencil className="mr-2 h-4 w-4" />
-                <span>{t('edit_note_title')}</span>
+                <span>{t('edit_title')}</span>
+              </ContextMenuItem>
+              <ContextMenuItem 
+                onSelect={() => handleTogglePinNote && handleTogglePinNote(note.id, !note.pinned)}
+              >
+                {note.pinned ? (
+                  <>
+                    <PinOff className="mr-2 h-4 w-4" />
+                    <span>{t('unpin_note')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Pin className="mr-2 h-4 w-4" />
+                    <span>{t('pin_note')}</span>
+                  </>
+                )}
               </ContextMenuItem>
               <ContextMenuItem
                 className="text-red-500 focus:text-red-500 focus:bg-red-500/10"
