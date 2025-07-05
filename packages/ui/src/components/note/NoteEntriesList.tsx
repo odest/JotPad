@@ -17,6 +17,7 @@ interface NoteEntriesListProps {
   handleDeleteEntry: (entryId: string) => void;
   setEditingEntry: (entry: NoteEntry | null) => void;
   noteEntries: NoteEntry[];
+  handleTogglePinEntry?: (entryId: string, pinned: boolean) => void;
 }
 
 export function NoteEntriesList({
@@ -31,7 +32,8 @@ export function NoteEntriesList({
   handleSaveEdit,
   handleDeleteEntry,
   setEditingEntry,
-  noteEntries
+  noteEntries,
+  handleTogglePinEntry
 }: NoteEntriesListProps) {
   const { t } = useTranslation();
   if (selectedNote.content && noteEntries.length === 0 && !searchQuery && !isSearchActive) {
@@ -88,6 +90,7 @@ export function NoteEntriesList({
               handleSaveEdit={handleSaveEdit}
               handleDeleteEntry={handleDeleteEntry}
               setEditingEntry={setEditingEntry}
+              handleTogglePinEntry={handleTogglePinEntry}
             />
           </React.Fragment>
         );

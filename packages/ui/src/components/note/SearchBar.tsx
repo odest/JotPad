@@ -36,7 +36,7 @@ export function SearchBar({
   };
 
   return (
-    <div className="sticky top-0 z-10 p-2 mb-3 bg-primary/5 backdrop-blur-md rounded-lg shadow-sm">
+    <div className="sticky top-0 z-10 p-2 mb-3 bg-background border rounded-lg shadow-sm">
       <div className="flex items-center gap-2 px-1">
         <Input
           ref={searchInputRef}

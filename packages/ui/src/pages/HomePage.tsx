@@ -38,6 +38,7 @@ export function HomePage() {
     handleDeleteNote,
     handleOpenEditDialog,
     handleNoteSelect,
+    handleTogglePinNote,
     openSettings,
     closeSettings,
     handleUpdateTag,
@@ -92,6 +93,7 @@ export function HomePage() {
           createdAt: new Date(note.created_at),
           lastEntryText: note.lastEntryText,
           tags: note.tags || [],
+          pinned: note.pinned || false,
         }))}
         selectedNote={selectedNote ? {
           id: selectedNote.id,
@@ -100,6 +102,7 @@ export function HomePage() {
           createdAt: new Date(selectedNote.created_at),
           lastEntryText: selectedNote.lastEntryText,
           tags: selectedNote.tags || [],
+          pinned: selectedNote.pinned || false,
         } : null}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -122,6 +125,7 @@ export function HomePage() {
           }
         }}
         handleDeleteNote={(id) => setNoteIdToDelete(id)}
+        handleTogglePinNote={handleTogglePinNote}
         onToggleSettings={openSettings}
         isEdit={!!editId}
         tags={tags}
@@ -139,6 +143,7 @@ export function HomePage() {
           selectedNote={selectedNote}
           handleEditNote={handleOpenEditDialog}
           handleDeleteNote={(id) => setNoteIdToDelete(id)}
+          handleTogglePinNote={handleTogglePinNote}
           setShowSidebar={setShowSidebar}
           SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}
           onEntryAdded={loadNotes}

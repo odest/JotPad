@@ -12,6 +12,7 @@ export interface Note {
   created_at: string;
   updated_at: string;
   tags?: TagWithColor[];
+  pinned?: boolean;
 }
 
 export interface NoteEntry {
@@ -19,6 +20,7 @@ export interface NoteEntry {
   note_id: string;
   text: string;
   timestamp: string;
+  pinned?: boolean;
 }
 
 class DatabaseService {
@@ -38,10 +40,11 @@ class DatabaseService {
 
   async getNotes(): Promise<Note[]> {
     const db = await this.initialize();
-    const result = await db.select<any[]>('SELECT * FROM notes ORDER BY created_at DESC');
+    const result = await db.select<any[]>('SELECT * FROM notes ORDER BY pinned DESC, created_at DESC');
     return result.map(note => ({
       ...note,
       tags: note.tags ? JSON.parse(note.tags) : [],
+      pinned: Boolean(note.pinned),
     }));
   }
 
@@ -51,8 +54,8 @@ class DatabaseService {
     const now = new Date().toISOString();
     
     await db.execute(
-      'INSERT INTO notes (id, title, content, created_at, updated_at, tags) VALUES (?, ?, ?, ?, ?, ?)',
-      [id, title, content || null, now, now, JSON.stringify(tags)]
+      'INSERT INTO notes (id, title, content, created_at, updated_at, tags, pinned) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [id, title, content || null, now, now, JSON.stringify(tags), 0]
     );
 
     return {
@@ -62,6 +65,7 @@ class DatabaseService {
       created_at: now,
       updated_at: now,
       tags,
+      pinned: false,
     };
   }
 
@@ -82,11 +86,26 @@ class DatabaseService {
 
   async getNoteEntries(noteId: string): Promise<NoteEntry[]> {
     const db = await this.initialize();
-    const result = await db.select<NoteEntry[]>(
+    const result = await db.select<any[]>(
       'SELECT * FROM note_entries WHERE note_id = ? ORDER BY timestamp ASC',
       [noteId]
     );
-    return result;
+    return result.map(entry => ({
+      ...entry,
+      pinned: Boolean(entry.pinned),
+    }));
+  }
+
+  async getPinnedEntries(noteId: string): Promise<NoteEntry[]> {
+    const db = await this.initialize();
+    const result = await db.select<any[]>(
+      'SELECT * FROM note_entries WHERE note_id = ? AND pinned = 1 ORDER BY timestamp ASC',
+      [noteId]
+    );
+    return result.map(entry => ({
+      ...entry,
+      pinned: Boolean(entry.pinned),
+    }));
   }
 
   async addNoteEntry(noteId: string, text: string): Promise<NoteEntry> {
@@ -95,15 +114,16 @@ class DatabaseService {
     const now = new Date().toISOString();
     
     await db.execute(
-      'INSERT INTO note_entries (id, note_id, text, timestamp) VALUES (?, ?, ?, ?)',
-      [id, noteId, text, now]
+      'INSERT INTO note_entries (id, note_id, text, timestamp, pinned) VALUES (?, ?, ?, ?, ?)',
+      [id, noteId, text, now, 0]
     );
 
     return {
       id,
       note_id: noteId,
       text,
-      timestamp: now
+      timestamp: now,
+      pinned: false,
     };
   }
 
@@ -174,6 +194,24 @@ class DatabaseService {
         }
       }
     }
+  }
+
+  async togglePinNote(id: string, pinned: boolean): Promise<void> {
+    const db = await this.initialize();
+    const now = new Date().toISOString();
+    
+    await db.execute(
+      'UPDATE notes SET pinned = ?, updated_at = ? WHERE id = ?',
+      [pinned ? 1 : 0, now, id]
+    );
+  }
+
+  async togglePinEntry(entryId: string, pinned: boolean): Promise<void> {
+    const db = await this.initialize();
+    await db.execute(
+      'UPDATE note_entries SET pinned = ? WHERE id = ?',
+      [pinned ? 1 : 0, entryId]
+    );
   }
 }
 

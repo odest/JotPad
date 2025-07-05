@@ -7,7 +7,7 @@ import {
 } from "@repo/ui/components/context-menu";
 import { Input } from "@repo/ui/components/input";
 import { Button } from "@repo/ui/components/button";
-import { Pencil, Trash } from "lucide-react";
+import { Pencil, Pin, PinOff, Trash } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkToc from "remark-toc";
@@ -34,6 +34,7 @@ interface NoteEntryItemProps {
   handleSaveEdit: () => void;
   handleDeleteEntry: (entryId: string) => void;
   setEditingEntry: (entry: NoteEntry | null) => void;
+  handleTogglePinEntry?: (entryId: string, pinned: boolean) => void;
 }
 
 export function NoteEntryItem({
@@ -45,7 +46,8 @@ export function NoteEntryItem({
   handleEditEntry,
   handleSaveEdit,
   handleDeleteEntry,
-  setEditingEntry
+  setEditingEntry,
+  handleTogglePinEntry
 }: NoteEntryItemProps) {
   const { t } = useTranslation();
   const isEditing = editingEntry?.id === entry.id;
@@ -90,10 +92,10 @@ export function NoteEntryItem({
           </ContextMenuTrigger>
         ) : (
           <ContextMenuTrigger asChild>
-            <div
-              className="bg-muted p-3 rounded-xl shadow-sm inline-block max-w-[85%] md:max-w-[70%] text-left"
-              style={{ wordBreak: 'break-word', minWidth: '70px'}}
-            >
+            <div className="relative bg-muted p-3 rounded-xl shadow-sm inline-block max-w-[85%] md:max-w-[70%] text-left" style={{ wordBreak: 'break-word', minWidth: '70px'}} id={`entry-${entry.id}`}>
+              {entry.pinned && (
+                <Pin className="absolute left-3 bottom-3 w-4 h-4 text-primary" />
+              )}
               {searchQuery ? (
                 <p className="text-[15px] md:text-sm whitespace-pre-wrap leading-relaxed">
                   {highlightText(entry.text, searchQuery)}
@@ -153,6 +155,17 @@ export function NoteEntryItem({
             <Pencil className="w-4 h-4 mr-2" />
             {t('edit')}
           </ContextMenuItem>
+          {entry.pinned ? (
+            <ContextMenuItem onClick={() => handleTogglePinEntry && handleTogglePinEntry(entry.id, false)}>
+              <PinOff className="w-4 h-4 mr-2" />
+              {t('unpin')}
+            </ContextMenuItem>
+          ) : (
+            <ContextMenuItem onClick={() => handleTogglePinEntry && handleTogglePinEntry(entry.id, true)}>
+              <Pin className="w-4 h-4 mr-2" />
+              {t('pin')}
+            </ContextMenuItem>
+          )}
           <ContextMenuItem
             className="text-red-500 focus:text-red-500 focus:bg-red-500/10"
             onClick={() => handleDeleteEntry(entry.id)}
