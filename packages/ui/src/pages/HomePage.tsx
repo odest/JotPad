@@ -15,6 +15,7 @@ import { Settings } from "@repo/ui/views/Settings";
 import { NoteContent } from "@repo/ui/views/NoteContent";
 import { useNotes } from "@repo/ui/hooks/useNotes";
 import { useSettings } from "@repo/ui/hooks/useSettings";
+import { TagEditDialog } from "@repo/ui/components/note/TagEditDialog";
 import { compareVersions, checkOnline, fetchLatestGithubVersion } from '@repo/ui/lib/utils';
 
 export function HomePage() {
@@ -30,6 +31,8 @@ export function HomePage() {
     showSettings,
     noteIdToDelete, setNoteIdToDelete,
     duplicateTitleDialogOpen, setDuplicateTitleDialogOpen,
+    tagManagerOpen, setTagManagerOpen,
+    allGlobalTags,
     loadNotes,
     handleCreateNote,
     handleDeleteNote,
@@ -37,6 +40,8 @@ export function HomePage() {
     handleNoteSelect,
     openSettings,
     closeSettings,
+    handleUpdateTag,
+    handleDeleteTag,
     filteredNotes,
     SIDEBAR_HEADER_HEIGHT,
     handleDialogOpenChange,
@@ -121,6 +126,8 @@ export function HomePage() {
         isEdit={!!editId}
         tags={tags}
         setTags={setTags}
+        allGlobalTags={allGlobalTags}
+        onOpenTagManager={() => setTagManagerOpen(true)}
       />
       {showSettings ? (
         <Settings
@@ -175,6 +182,13 @@ export function HomePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <TagEditDialog
+        open={tagManagerOpen}
+        onOpenChange={setTagManagerOpen}
+        tags={allGlobalTags}
+        onUpdateTag={handleUpdateTag}
+        onDeleteTag={handleDeleteTag}
+      />
     </div>
   );
 }

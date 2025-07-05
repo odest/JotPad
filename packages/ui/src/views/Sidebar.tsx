@@ -5,6 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuContent,
+  DropdownMenuSeparator,
 } from "@repo/ui/components/dropdown-menu";
 import {
   X,
@@ -16,6 +17,7 @@ import {
   Check,
   Search,
   Settings,
+  Settings2,
   ArrowUpAZ,
   ArrowDownAZ,
   ArrowDownUp,
@@ -48,6 +50,8 @@ interface SidebarProps {
   isEdit: boolean;
   tags: TagWithColor[];
   setTags: (tags: TagWithColor[]) => void;
+  allGlobalTags: TagWithColor[];
+  onOpenTagManager?: () => void;
 }
 
 export function Sidebar({
@@ -68,6 +72,8 @@ export function Sidebar({
   isEdit,
   tags,
   setTags,
+  allGlobalTags,
+  onOpenTagManager,
 }: SidebarProps) {
   const { t } = useTranslation();
   const { appliedTheme } = useTheme();
@@ -210,6 +216,13 @@ export function Sidebar({
                     </DropdownMenuItem>
                   );
                 })}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={onOpenTagManager}
+                >
+                  <Settings2 className="w-4 h-4 mr-2" />
+                  {t('manage_tags')}
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <DropdownMenu>
@@ -268,6 +281,8 @@ export function Sidebar({
             isEdit={isEdit}
             tags={tags}
             setTags={setTags}
+            allGlobalTags={allGlobalTags}
+            onOpenTagManager={onOpenTagManager}
             trigger={
               <Button 
                 className="h-12 px-6 shadow-lg w-full" 

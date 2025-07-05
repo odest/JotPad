@@ -12,9 +12,10 @@ import {
 import { Badge } from "@repo/ui/components/badge";
 import { Input } from "@repo/ui/components/input";
 import { Button } from "@repo/ui/components/button";
-import { CircleX, Tag, Plus } from "lucide-react";
+import { CircleX, Tag, Plus, Settings2 } from "lucide-react";
 import { TagWithColor } from "@repo/ui/lib/database";
 import { ColorPicker } from "@repo/ui/components/note/ColorPicker";
+import { TagSuggestions } from "@repo/ui/components/note/TagSuggestions";
 
 interface NoteDialogProps {
   open: boolean;
@@ -26,6 +27,8 @@ interface NoteDialogProps {
   isEdit?: boolean;
   tags: TagWithColor[];
   setTags: (tags: TagWithColor[]) => void;
+  allGlobalTags: TagWithColor[];
+  onOpenTagManager?: () => void;
 }
 
 export function NoteDialog({
@@ -38,21 +41,29 @@ export function NoteDialog({
   isEdit = false,
   tags,
   setTags,
+  allGlobalTags,
+  onOpenTagManager,
 }: NoteDialogProps) {
   const { t } = useTranslation();
   const [tagInput, setTagInput] = useState("");
   const [selectedColor, setSelectedColor] = useState("#3b82f6");
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const handleAddTag = () => {
     const newTagName = tagInput.trim();
     if (newTagName && !tags.some(tag => tag.name === newTagName)) {
+      const existingTag = allGlobalTags.find(tag => 
+        tag.name.toLowerCase() === newTagName.toLowerCase()
+      );
+
       const newTag: TagWithColor = {
         name: newTagName,
-        color: selectedColor
+        color: existingTag ? existingTag.color : selectedColor
       };
       setTags([...tags, newTag]);
     }
     setTagInput("");
+    setShowSuggestions(false);
   };
 
   const handleTagInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -65,10 +76,25 @@ export function NoteDialog({
     }
   };
 
+  const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setTagInput(value);
+    setShowSuggestions(value.trim().length > 0);
+  };
+
+  const handleSelectSuggestion = (tag: TagWithColor) => {
+    if (!tags.some(existingTag => existingTag.name === tag.name)) {
+      setTags([...tags, tag]);
+    }
+    setTagInput("");
+    setShowSuggestions(false);
+  };
+
   useEffect(() => {
     if (!open) {
       setTagInput("");
       setSelectedColor("#3b82f6");
+      setShowSuggestions(false);
     }
   }, [open]);
 
@@ -124,13 +150,31 @@ export function NoteDialog({
                   placeholder={t('enter_tags')}
                   className="pl-10"
                   value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
+                  onChange={handleTagInputChange}
                   onKeyDown={handleTagInputKeyDown}
+                  onFocus={() => setShowSuggestions(tagInput.trim().length > 0)}
+                />
+                <TagSuggestions
+                  inputValue={tagInput}
+                  allTags={allGlobalTags}
+                  onSelectTag={handleSelectSuggestion}
+                  visible={showSuggestions}
+                  onClose={() => setShowSuggestions(false)}
                 />
               </div>
               <Button type="button" size="icon" onClick={handleAddTag} disabled={!tagInput.trim()}>
                 <Plus className="h-5 w-5" />
               </Button>
+              {onOpenTagManager && (
+                <Button 
+                  type="button" 
+                  size="icon" 
+                  variant="outline"
+                  onClick={onOpenTagManager}
+                >
+                  <Settings2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
@@ -165,7 +209,6 @@ export function NoteDialog({
             )}
           </div>
         </div>
-        
         <DialogFooter className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t('cancel')}

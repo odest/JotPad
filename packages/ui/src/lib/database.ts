@@ -135,6 +135,46 @@ class DatabaseService {
       [content, now, noteId]
     );
   }
+
+  async updateTagColor(tagName: string, newColor: string): Promise<void> {
+    const db = await this.initialize();
+    const notes = await this.getNotes();
+
+    for (const note of notes) {
+      if (note.tags && note.tags.length > 0) {
+        const updatedTags = note.tags.map(tag => 
+          tag.name.toLowerCase() === tagName.toLowerCase() 
+            ? { ...tag, color: newColor }
+            : tag
+        );
+        if (JSON.stringify(note.tags) !== JSON.stringify(updatedTags)) {
+          await db.execute(
+            'UPDATE notes SET tags = ?, updated_at = ? WHERE id = ?',
+            [JSON.stringify(updatedTags), new Date().toISOString(), note.id]
+          );
+        }
+      }
+    }
+  }
+
+  async removeTagFromAllNotes(tagName: string): Promise<void> {
+    const db = await this.initialize();
+    const notes = await this.getNotes();
+
+    for (const note of notes) {
+      if (note.tags && note.tags.length > 0) {
+        const updatedTags = note.tags.filter(tag => 
+          tag.name.toLowerCase() !== tagName.toLowerCase()
+        );
+        if (updatedTags.length !== note.tags.length) {
+          await db.execute(
+            'UPDATE notes SET tags = ?, updated_at = ? WHERE id = ?',
+            [JSON.stringify(updatedTags), new Date().toISOString(), note.id]
+          );
+        }
+      }
+    }
+  }
 }
 
 export const db = new DatabaseService(); 
