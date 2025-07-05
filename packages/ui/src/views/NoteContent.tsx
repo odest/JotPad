@@ -18,6 +18,7 @@ import { AddEntryInput } from "@repo/ui/components/note/AddEntryInput";
 import { NoteEntriesList } from "@repo/ui/components/note/NoteEntriesList";
 import { useTheme } from "@repo/ui/providers/theme-provider";
 import { useNoteEntries } from "@repo/ui/hooks/useNoteEntries";
+import { PinnedEntriesList } from "@repo/ui/components/note/PinnedEntriesList";
 
 declare global {
   interface Window {
@@ -62,7 +63,9 @@ export function NoteContent({
     noteEntries,
     addEntry,
     editEntry,
-    deleteEntry
+    deleteEntry,
+    pinnedEntries,
+    togglePinEntry
   } = useNoteEntries(selectedNote, onEntryAdded);
 
   const {
@@ -186,7 +189,15 @@ export function NoteContent({
                 handleNavigateMatch={handleNavigateMatch}
               />
             )}
-
+            <PinnedEntriesList
+              pinnedEntries={pinnedEntries}
+              onUnpin={(entryId) => togglePinEntry(entryId, false)}
+              onGoToEntry={(entryId) => {
+                const el = document.getElementById(`entry-${entryId}`);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
+              isSearchActive={isSearchActive}
+            />
             <NoteEntriesList
               selectedNote={selectedNote}
               filteredEntries={filteredEntries}
@@ -200,8 +211,8 @@ export function NoteContent({
               handleDeleteEntry={handleDeleteEntry}
               setEditingEntry={setEditingEntry}
               noteEntries={noteEntries}
+              handleTogglePinEntry={togglePinEntry}
             />
-
             <div ref={entriesEndRef} style={{ height: '1px' }} />
           </div>
         </div>

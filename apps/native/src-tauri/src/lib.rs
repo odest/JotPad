@@ -37,6 +37,12 @@ pub fn run() {
         description: "add pinned column to notes table",
         sql: "ALTER TABLE notes ADD COLUMN pinned INTEGER DEFAULT 0;",
         kind: MigrationKind::Up,
+    },
+    Migration {
+        version: 4,
+        description: "add pinned column to note_entries table",
+        sql: "ALTER TABLE note_entries ADD COLUMN pinned INTEGER DEFAULT 0;",
+        kind: MigrationKind::Up,
     }];
 
     tauri::Builder::default()

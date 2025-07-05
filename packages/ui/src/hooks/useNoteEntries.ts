@@ -4,10 +4,12 @@ import { db, Note, NoteEntry } from "@repo/ui/lib/database";
 
 export function useNoteEntries(selectedNote: Note | null, onEntryAdded?: () => void) {
   const [noteEntries, setNoteEntries] = useState<NoteEntry[]>([]);
+  const [pinnedEntries, setPinnedEntries] = useState<NoteEntry[]>([]);
 
   useEffect(() => {
     if (selectedNote) {
       loadNoteEntries();
+      loadPinnedEntries();
     }
   }, [selectedNote?.id]);
 
@@ -19,6 +21,17 @@ export function useNoteEntries(selectedNote: Note | null, onEntryAdded?: () => v
     } catch (error) {
       console.error('Failed to load note entries:', error);
       await invoke('log_message', { level: 'error', message: `Failed to load note entries: ${error}` });
+    }
+  };
+
+  const loadPinnedEntries = async () => {
+    if (!selectedNote) return;
+    try {
+      const entries = await db.getPinnedEntries(selectedNote.id);
+      setPinnedEntries(entries);
+    } catch (error) {
+      console.error('Failed to load pinned entries:', error);
+      await invoke('log_message', { level: 'error', message: `Failed to load pinned entries: ${error}` });
     }
   };
 
@@ -51,6 +64,11 @@ export function useNoteEntries(selectedNote: Note | null, onEntryAdded?: () => v
           entry.id === entryId ? { ...entry, text: newText } : entry
         )
       );
+      setPinnedEntries(prevEntries =>
+        prevEntries.map(entry =>
+          entry.id === entryId ? { ...entry, text: newText } : entry
+        )
+      );
       await invoke('log_message', { level: 'info', message: `Entry edited in note: ${selectedNote.title}` });
       const isLastEntry = noteEntries[noteEntries.length - 1]?.id === entryId;
       if (isLastEntry && typeof onEntryAdded === 'function') onEntryAdded();
@@ -67,6 +85,7 @@ export function useNoteEntries(selectedNote: Note | null, onEntryAdded?: () => v
     try {
       await db.deleteNoteEntry(entryId);
       setNoteEntries(prevEntries => prevEntries.filter(entry => entry.id !== entryId));
+      setPinnedEntries(prevEntries => prevEntries.filter(entry => entry.id !== entryId));
       await invoke('log_message', { level: 'info', message: `Entry deleted from note: ${selectedNote.title}` });
       const isLastEntry = noteEntries[noteEntries.length - 1]?.id === entryId;
       if (isLastEntry && typeof onEntryAdded === 'function') onEntryAdded();
@@ -78,12 +97,29 @@ export function useNoteEntries(selectedNote: Note | null, onEntryAdded?: () => v
     }
   };
 
+  const togglePinEntry = async (entryId: string, pinned: boolean): Promise<void> => {
+    if (!selectedNote) return;
+    try {
+      await db.togglePinEntry(entryId, pinned);
+      await loadNoteEntries();
+      await loadPinnedEntries();
+      await invoke('log_message', { level: 'info', message: `Entry ${pinned ? 'pinned' : 'unpinned'} in note: ${selectedNote.title}` });
+    } catch (error) {
+      console.error('Failed to toggle pin entry:', error);
+      await invoke('log_message', { level: 'error', message: `Failed to toggle pin entry: ${error}` });
+    }
+  };
+
   return {
     noteEntries,
     setNoteEntries,
+    pinnedEntries,
+    setPinnedEntries,
     loadNoteEntries,
+    loadPinnedEntries,
     addEntry,
     editEntry,
-    deleteEntry
+    deleteEntry,
+    togglePinEntry,
   };
 }
