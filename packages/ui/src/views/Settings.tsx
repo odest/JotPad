@@ -52,12 +52,6 @@ import { useState, useEffect } from "react";
 import { getVersion } from "@tauri-apps/api/app";
 import { projectLinks } from "@repo/ui/lib/projectLinks";
 
-declare global {
-  interface Window {
-    androidBackCallback?: () => boolean;
-  }
-}
-
 interface SettingsProps {
   onClose: () => void;
   SIDEBAR_HEADER_HEIGHT: number;
@@ -107,17 +101,6 @@ export function Settings({ onClose, SIDEBAR_HEADER_HEIGHT }: SettingsProps) {
   useEffect(() => {
     getVersion().then(setAppVersion).catch(() => setAppVersion("-"));
   }, []);
-
-  useEffect(() => {
-    window.androidBackCallback = (): boolean => {
-      onClose();
-      return false;
-    };
-
-    return () => {
-      window.androidBackCallback = undefined;
-    };
-  }, [onClose]);
 
   const getCurrentThemeDisplay = () => {
     switch (themeSetting) {

@@ -35,6 +35,8 @@ interface NoteHeaderProps {
   setIsSearchActive: (v: boolean) => void;
   setSearchQuery: (query: string) => void;
   SIDEBAR_HEADER_HEIGHT: number;
+  isExportDialogOpen: boolean;
+  setIsExportDialogOpen: (open: boolean) => void;
 }
 
 export function NoteHeader({
@@ -46,10 +48,11 @@ export function NoteHeader({
   isSearchActive,
   setIsSearchActive,
   setSearchQuery,
-  SIDEBAR_HEADER_HEIGHT
+  SIDEBAR_HEADER_HEIGHT,
+  isExportDialogOpen,
+  setIsExportDialogOpen
 }: NoteHeaderProps) {
   const { t } = useTranslation();
-  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const { selectedExportFormat } = useSettings();
 
   const toggleHeaderSearchIcon = () => {
@@ -69,13 +72,13 @@ export function NoteHeader({
       const result = await exportSingleNote(note, format);
       if (result === "success") {
         invoke('log_message', { level: 'info', message: `Notes successfully exported. Format: ${format}`});
-        toast.success("Note exported successfully.");
+        toast.success(t('notes_exported_successfully'));
       } else if (result === "error") {
-        toast.error("Export failed. Please try again.");
+        toast.error(t('export_failed'));
       }
     } catch (error: any) {
       invoke('log_message', { level: 'error', message: `Export failed for notes with format ${format}:`, error});
-      toast.error("Export failed. Please try again.");
+      toast.error(t('export_failed'));
     }
   };
 
