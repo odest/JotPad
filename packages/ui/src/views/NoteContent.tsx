@@ -52,6 +52,7 @@ export function NoteContent({
   const [editingEntry, setEditingEntry] = useState<NoteEntry | null>(null);
   const [editText, setEditText] = useState("");
   const [entryIdToDelete, setEntryIdToDelete] = useState<string | null>(null);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
   const entriesEndRef = useRef<null | HTMLDivElement>(null);
   const searchResultsContainerRef = useRef<null | HTMLDivElement>(null);
@@ -89,17 +90,24 @@ export function NoteContent({
 
   useEffect(() => {
     window.androidBackCallback = (): boolean => {
+      if (entryIdToDelete) {
+        setEntryIdToDelete(null);
+        return false;
+      }
+      if (isExportDialogOpen) {
+        setIsExportDialogOpen(false);
+        return false;
+      }
       if (showSidebar) {
         return true;
       }
       setShowSidebar(true);
       return false;
     };
-
     return () => {
       window.androidBackCallback = undefined;
     };
-  }, [showSidebar, setShowSidebar]);
+  }, [entryIdToDelete, isExportDialogOpen, showSidebar, setShowSidebar]);
 
   const handleAddEntry = async () => {
     if (!selectedNote || !newEntryText.trim()) return;
@@ -173,6 +181,8 @@ export function NoteContent({
           setIsSearchActive={setIsSearchActive}
           setSearchQuery={setSearchQuery}
           SIDEBAR_HEADER_HEIGHT={SIDEBAR_HEADER_HEIGHT}
+          isExportDialogOpen={isExportDialogOpen}
+          setIsExportDialogOpen={setIsExportDialogOpen}
         />
 
         <div

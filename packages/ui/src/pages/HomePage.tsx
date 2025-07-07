@@ -18,6 +18,12 @@ import { useSettings } from "@repo/ui/hooks/useSettings";
 import { TagEditDialog } from "@repo/ui/components/note/TagEditDialog";
 import { compareVersions, checkOnline, fetchLatestGithubVersion } from '@repo/ui/lib/utils';
 
+declare global {
+  interface Window {
+    androidBackCallback?: () => boolean;
+  }
+}
+
 export function HomePage() {
   const { t } = useTranslation();
   const {
@@ -82,6 +88,44 @@ export function HomePage() {
       })();
     }
   }, [autoCheckUpdates, appVersion]);
+
+  useEffect(() => {
+    window.androidBackCallback = (): boolean => {
+      if (tagManagerOpen) {
+        setTagManagerOpen(false);
+        return false;
+      }
+      if (duplicateTitleDialogOpen) {
+        setDuplicateTitleDialogOpen(false);
+        return false;
+      }
+      if (noteIdToDelete) {
+        setNoteIdToDelete(null);
+        return false;
+      }
+      if (open) {
+        handleDialogOpenChange(false);
+        return false;
+      }
+      if (showSettings) {
+        closeSettings();
+        return false;
+      }
+      if (!showSidebar) {
+        setShowSidebar(true);
+        return false;
+      }
+      return true;
+    };
+    return () => {
+      window.androidBackCallback = undefined;
+    };
+  }, [tagManagerOpen, setTagManagerOpen,
+      duplicateTitleDialogOpen, setDuplicateTitleDialogOpen,
+      noteIdToDelete, setNoteIdToDelete,
+      open, handleDialogOpenChange,
+      showSettings, closeSettings,
+      showSidebar, setShowSidebar]);
 
   return (
     <div className="min-h-screen w-full flex">
