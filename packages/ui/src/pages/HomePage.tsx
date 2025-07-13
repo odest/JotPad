@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogFooter,
   DialogContent,
+  DialogDescription,
 } from "@repo/ui/components/dialog";
 import { Button } from "@repo/ui/components/button";
 import { Sidebar } from "@repo/ui/views/Sidebar";
@@ -198,8 +199,8 @@ export function HomePage() {
         <DialogContent className="max-w-[calc(100vw-2rem)] rounded-lg sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{t('delete_note')}</DialogTitle>
+            <DialogDescription>{t('delete_note_confirm')}</DialogDescription>
           </DialogHeader>
-          <div>{t('delete_note_confirm')}</div>
           <DialogFooter className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
             <Button variant="outline" onClick={() => setNoteIdToDelete(null)}>
               {t('cancel')}
@@ -222,8 +223,8 @@ export function HomePage() {
         <DialogContent className="max-w-[calc(100vw-2rem)] rounded-lg sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{t('duplicate_note_title')}</DialogTitle>
+            <DialogDescription>{t('duplicate_note_title_desc')}</DialogDescription>
           </DialogHeader>
-          <div>{t('duplicate_note_title_desc')}</div>
           <DialogFooter className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
             <Button onClick={() => setDuplicateTitleDialogOpen(false)} autoFocus>
               {t('close')}
