@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import Database from '@tauri-apps/plugin-sql';
 
 export interface TagWithColor {
@@ -50,7 +51,7 @@ class DatabaseService {
 
   async createNote(title: string, content?: string, tags: TagWithColor[] = []): Promise<Note> {
     const db = await this.initialize();
-    const id = crypto.randomUUID();
+    const id = uuidv4();
     const now = new Date().toISOString();
     
     await db.execute(
@@ -110,7 +111,7 @@ class DatabaseService {
 
   async addNoteEntry(noteId: string, text: string): Promise<NoteEntry> {
     const db = await this.initialize();
-    const id = crypto.randomUUID();
+    const id = uuidv4();
     const now = new Date().toISOString();
     
     await db.execute(

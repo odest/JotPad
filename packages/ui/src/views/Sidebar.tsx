@@ -91,7 +91,6 @@ export function Sidebar({
         note.tags.forEach(tag => tagSet.add(tag.name));
       }
     });
-    console.log(tagSet);
     return Array.from(tagSet);
   }, [filteredNotes]);
 
@@ -187,7 +186,7 @@ export function Sidebar({
                   <SlidersHorizontal className='w-5 h-5' />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuContent align="end" className="w-40 custom-scrollbar">
                 <DropdownMenuItem
                   onClick={() => setSelectedTag(null)}
                   className={!selectedTag ? 'bg-accent' : ''}
@@ -237,7 +236,7 @@ export function Sidebar({
                   <ArrowDownUp className="w-5 h-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuContent align="end" className="w-40 custom-scrollbar">
                 <DropdownMenuItem onClick={() => setSortType('az')} className={sortType === 'az' ? 'bg-accent' : ''}>
                   <ArrowDownAZ className="w-4 h-4 mr-2" />{sortLabels.az}
                   {sortType === 'az' && <Check className="w-4 h-4 ml-auto" />}
