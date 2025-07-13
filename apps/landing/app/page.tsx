@@ -122,7 +122,7 @@ export default function Home() {
                     preset="blur"
                     delay={0.3}
                     className="mx-auto mt-8 max-w-2xl text-balance text-lg">
-                      JotPad is an open-source, cross-platform note-taking app that lets you message yourself—just like a chat. Capture ideas, organize thoughts, and access your notes anywhere: web, desktop, or mobile.
+                      JotPad is an open-source, cross-platform note-taking app that lets you message yourself in the same way as a chat. Capture ideas, organize thoughts, and access your notes anywhere: web, desktop, or mobile.
                   </TextEffect>
                 </AnimatedGroup>
 
@@ -325,7 +325,7 @@ const FeaturesSection = () => {
               area="md:[grid-area:1/1/2/7] xl:[grid-area:1/1/2/5]"
               icon={<MessageCircle className="h-4 w-4 text-black dark:text-neutral-400" />}
               title="Chat-like Interface"
-              description="Message yourself naturally. No complex interface—just type and go."
+              description="Message yourself naturally. No complex interface: just type and go."
             />
 
             <GridItem
