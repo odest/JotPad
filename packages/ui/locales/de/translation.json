@@ -39,6 +39,7 @@
     "duplicate_note_title": "Doppelter Notiztitel",
     "duplicate_note_title_desc": "Eine Notiz mit demselben Titel existiert bereits. Bitte geben Sie einen anderen Titel ein.",
     "edit": "Bearbeiten",
+    "edit_note_entry": "Notizeintrag bearbeiten...",
     "edit_note_title": "Notiztitel bearbeiten",
     "edit_note_title_desc": "Bearbeiten Sie den Titel Ihrer Notiz und klicken Sie auf die Schaltfläche \"Speichern\".",
     "edit_title": "Titel bearbeiten",

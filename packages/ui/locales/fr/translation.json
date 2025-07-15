@@ -39,6 +39,7 @@
     "duplicate_note_title": "Titre de note en doublon",
     "duplicate_note_title_desc": "Une note avec le même titre existe déjà. Veuillez entrer un titre différent.",
     "edit": "Modifier",
+    "edit_note_entry": "Modifier l'entrée de note...",
     "edit_note_title": "Modifier le titre de la note",
     "edit_note_title_desc": "Modifiez le titre de votre note et cliquez sur le bouton « Enregistrer ».",
     "edit_title": "Modifier le titre",

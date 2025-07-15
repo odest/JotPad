@@ -50,7 +50,6 @@ export function NoteContent({
   const { t } = useTranslation();
   const [newEntryText, setNewEntryText] = useState("");
   const [editingEntry, setEditingEntry] = useState<NoteEntry | null>(null);
-  const [editText, setEditText] = useState("");
   const [entryIdToDelete, setEntryIdToDelete] = useState<string | null>(null);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
@@ -109,27 +108,33 @@ export function NoteContent({
     };
   }, [entryIdToDelete, isExportDialogOpen, showSidebar, setShowSidebar]);
 
-  const handleAddEntry = async () => {
-    if (!selectedNote || !newEntryText.trim()) return;
-    const success = await addEntry(newEntryText.trim());
-    if (success) {
-      setNewEntryText("");
-      setTimeout(() => newEntryInputRef.current?.focus(), 0);
+  const handleAddOrEditEntry = async () => {
+    if (editingEntry) {
+      if (!editingEntry || !newEntryText.trim()) return;
+      const success = await editEntry(editingEntry.id, newEntryText.trim());
+      if (success) {
+        setEditingEntry(null);
+        setNewEntryText("");
+      }
+    } else {
+      if (!selectedNote || !newEntryText.trim()) return;
+      const success = await addEntry(newEntryText.trim());
+      if (success) {
+        setNewEntryText("");
+        setTimeout(() => newEntryInputRef.current?.focus(), 0);
+      }
     }
   };
 
-  const handleEditEntry = async (entry: NoteEntry) => {
+  const handleEditEntry = (entry: NoteEntry) => {
     setEditingEntry(entry);
-    setEditText(entry.text);
+    setNewEntryText(entry.text);
+    setTimeout(() => newEntryInputRef.current?.focus(), 0);
   };
 
-  const handleSaveEdit = async () => {
-    if (!editingEntry || !editText.trim()) return;
-    const success = await editEntry(editingEntry.id, editText.trim());
-    if (success) {
-      setEditingEntry(null);
-      setEditText("");
-    }
+  const handleCancelEdit = () => {
+    setEditingEntry(null);
+    setNewEntryText("");
   };
 
   const handleDeleteEntry = (entryId: string) => {
@@ -139,7 +144,7 @@ export function NoteContent({
   const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
-      handleAddEntry();
+      handleAddOrEditEntry();
     }
   };
 
@@ -214,10 +219,10 @@ export function NoteContent({
               searchQuery={searchQuery}
               isSearchActive={isSearchActive}
               editingEntry={editingEntry}
-              editText={editText}
-              setEditText={setEditText}
+              editText={newEntryText}
+              setEditText={setNewEntryText}
               handleEditEntry={handleEditEntry}
-              handleSaveEdit={handleSaveEdit}
+              handleSaveEdit={handleAddOrEditEntry}
               handleDeleteEntry={handleDeleteEntry}
               setEditingEntry={setEditingEntry}
               noteEntries={noteEntries}
@@ -233,8 +238,10 @@ export function NoteContent({
               newEntryText={newEntryText}
               setNewEntryText={setNewEntryText}
               handleKeyPress={handleKeyPress}
-              handleAddEntry={handleAddEntry}
+              handleAddEntry={handleAddOrEditEntry}
               newEntryInputRef={newEntryInputRef}
+              isEditing={!!editingEntry}
+              onCancelEdit={handleCancelEdit}
             />
           </div>
         </div>

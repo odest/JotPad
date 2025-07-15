@@ -39,6 +39,7 @@
   "duplicate_note_title": "重複したノートタイトル",
   "duplicate_note_title_desc": "同じタイトルのノートが既に存在します。別のタイトルを入力してください。",
   "edit": "編集",
+  "edit_note_entry": "ノートエントリを編集...",
   "edit_note_title": "ノートタイトルを編集",
   "edit_note_title_desc": "ノートのタイトルを編集し、「保存」ボタンをクリックしてください。",
   "edit_title": "タイトルを編集",
