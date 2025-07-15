@@ -5,8 +5,6 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@repo/ui/components/context-menu";
-import { Input } from "@repo/ui/components/input";
-import { Button } from "@repo/ui/components/button";
 import { Pencil, Pin, PinOff, Trash } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -41,12 +39,8 @@ export function NoteEntryItem({
   entry,
   searchQuery,
   editingEntry,
-  editText,
-  setEditText,
   handleEditEntry,
-  handleSaveEdit,
   handleDeleteEntry,
-  setEditingEntry,
   handleTogglePinEntry
 }: NoteEntryItemProps) {
   const { t } = useTranslation();
@@ -57,99 +51,64 @@ export function NoteEntryItem({
   return (
     <div className="flex flex-col items-end w-full mb-5">
       <ContextMenu>
-        {isEditing ? (
-          <ContextMenuTrigger asChild>
-            <div className="bg-muted p-4 rounded-2xl shadow-sm block max-w-[90%] md:max-w-[70%] min-w-[280px] md:min-w-[320px]">
-              <Input
-                value={editText}
-                onChange={(e) => setEditText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSaveEdit();
+        <ContextMenuTrigger asChild>
+          <div className={`relative bg-muted p-3 rounded-xl shadow-sm inline-block max-w-[85%] md:max-w-[70%] text-left${isEditing ? ' ring-2 ring-primary' : ''}`} style={{ wordBreak: 'break-word', minWidth: '70px'}} id={`entry-${entry.id}`}>
+            {entry.pinned && (
+              <Pin className="absolute left-3 bottom-3 w-4 h-4 text-primary" />
+            )}
+            {searchQuery ? (
+              <p className="text-[15px] md:text-sm whitespace-pre-wrap leading-relaxed">
+                {highlightText(entry.text, searchQuery)}
+              </p>
+            ) : (
+              <div className="prose prose-neutral dark:prose-invert prose-pre:bg-transparent prose-pre:m-0 prose-pre:p-0 max-w-none text-[15px] md:text-sm leading-relaxed">
+                {linkPreviewEnabled && (() => {
+                  const urlRegex = /(https?:\/\/[\w\-._~:/?#[\]@!$&'()*+,;=%]+)/gi;
+                  const match = entry.text.match(urlRegex);
+                  if (match && match[0]) {
+                    return <LinkPreview url={match[0]} />;
                   }
-                }}
-                className="mb-4 text-lg border-2 border-primary bg-background/80 shadow focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
-                style={{ minWidth: '100%' }}
-                autoFocus
-              />
-              <div className="flex justify-end gap-2 w-full">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setEditingEntry(null);
-                    setEditText("");
+                  return null;
+                })()}
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkBreaks, remarkToc]}
+                  rehypePlugins={[
+                    rehypeSlug,
+                    rehypeSanitize,
+                    rehypeRaw,
+                    [rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] }]
+                  ]}
+                  components={{
+                    code({node, className, children, ...props}) {
+                      const match = /language-(\w+)/.exec(className || "");
+                      const { ref, ...rest } = props;
+                      return match ? (
+                        <SyntaxHighlighter
+                          style={appliedTheme === 'dark' ? oneDark : oneLight as any}
+                          language={match[1]}
+                          wrapLongLines={true}
+                          PreTag="div"
+                          {...rest}
+                        >
+                          {String(children).replace(/\n$/, "")}
+                        </SyntaxHighlighter>
+                      ) : (
+                        <code className={className} {...rest}>
+                          {children}
+                        </code>
+                      );
+                    }
                   }}
                 >
-                  {t('cancel')}
-                </Button>
-                <Button size="sm" onClick={handleSaveEdit}>
-                  {t('save')}
-                </Button>
+                  {entry.text}
+                </ReactMarkdown>
               </div>
-            </div>
-          </ContextMenuTrigger>
-        ) : (
-          <ContextMenuTrigger asChild>
-            <div className="relative bg-muted p-3 rounded-xl shadow-sm inline-block max-w-[85%] md:max-w-[70%] text-left" style={{ wordBreak: 'break-word', minWidth: '70px'}} id={`entry-${entry.id}`}>
-              {entry.pinned && (
-                <Pin className="absolute left-3 bottom-3 w-4 h-4 text-primary" />
-              )}
-              {searchQuery ? (
-                <p className="text-[15px] md:text-sm whitespace-pre-wrap leading-relaxed">
-                  {highlightText(entry.text, searchQuery)}
-                </p>
-              ) : (
-                <div className="prose prose-neutral dark:prose-invert prose-pre:bg-transparent prose-pre:m-0 prose-pre:p-0 max-w-none text-[15px] md:text-sm leading-relaxed">
-                  {linkPreviewEnabled && (() => {
-                    const urlRegex = /(https?:\/\/[\w\-._~:/?#[\]@!$&'()*+,;=%]+)/gi;
-                    const match = entry.text.match(urlRegex);
-                    if (match && match[0]) {
-                      return <LinkPreview url={match[0]} />;
-                    }
-                    return null;
-                  })()}
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm, remarkBreaks, remarkToc]}
-                    rehypePlugins={[
-                      rehypeSlug,
-                      rehypeSanitize,
-                      rehypeRaw,
-                      [rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] }]
-                    ]}
-                    components={{
-                      code({node, className, children, ...props}) {
-                        const match = /language-(\w+)/.exec(className || "");
-                        const { ref, ...rest } = props;
-                        return match ? (
-                          <SyntaxHighlighter
-                            style={appliedTheme === 'dark' ? oneDark : oneLight as any}
-                            language={match[1]}
-                            wrapLongLines={true}
-                            PreTag="div"
-                            {...rest}
-                          >
-                            {String(children).replace(/\n$/, "")}
-                          </SyntaxHighlighter>
-                        ) : (
-                          <code className={className} {...rest}>
-                            {children}
-                          </code>
-                        );
-                      }
-                    }}
-                  >
-                    {entry.text}
-                  </ReactMarkdown>
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground mt-1 text-right">
-                {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
-            </div>
-          </ContextMenuTrigger>
-        )}
+            )}
+            <p className="text-xs text-muted-foreground mt-1 text-right">
+              {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          </div>
+        </ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuItem onClick={() => handleEditEntry(entry)}>
             <Pencil className="w-4 h-4 mr-2" />

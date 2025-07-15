@@ -39,6 +39,7 @@
     "duplicate_note_title": "Duplicate Note Title",
     "duplicate_note_title_desc": "A note with the same title already exists. Please enter a different title.",
     "edit": "Edit",
+    "edit_note_entry": "Edit note entry...",
     "edit_note_title": "Edit Note Title",
     "edit_note_title_desc": "Edit the title of your note and click the \"Save\" button.",
     "edit_title": "Edit Title",

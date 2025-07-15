@@ -39,6 +39,7 @@
   "duplicate_note_title": "重复的笔记标题",
   "duplicate_note_title_desc": "具有相同标题的笔记已存在。请输入不同的标题。",
   "edit": "编辑",
+  "edit_note_entry": "编辑笔记条目...",
   "edit_note_title": "编辑笔记标题",
   "edit_note_title_desc": "编辑笔记标题，然后点击“保存”按钮。",
   "edit_title": "编辑标题",
