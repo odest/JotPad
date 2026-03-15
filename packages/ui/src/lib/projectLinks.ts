@@ -36,8 +36,8 @@ export const projectLinks: ProjectLink[] = [
   {
     icon: Globe,
     label: "project_website",
-    value: "jotpad.odest.tech",
-    href: "https://jotpad.odest.tech/",
+    value: "jotpad.odest.dev",
+    href: "https://jotpad.odest.dev/",
   },
 ];
 

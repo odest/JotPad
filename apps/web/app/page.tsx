@@ -19,7 +19,7 @@ export default function Home() {
       </p>
 
       <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 animate-fade-in-up delay-500">
-        <Link href="https://jotpad.odest.tech/">
+        <Link href="https://jotpad.odest.dev/">
           <Button size="lg" className="gap-2 bg-white text-black px-6 py-5 text-lg shadow-xl border border-white hover:bg-black hover:text-white hover:scale-105 hover:shadow-2xl transition-transform duration-200">
             <ChevronLeft className="w-5 h-5" /> Go Back Home
           </Button>

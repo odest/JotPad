@@ -7,7 +7,7 @@
   
   [![License: GPL-3.0](https://img.shields.io/badge/License-GPL%203.0-green.svg)](https://opensource.org/licenses/GPL-3.0)
   [![Version](https://img.shields.io/github/v/release/odest/JotPad?label=Version&-orange.svg)](https://github.com/odest/JotPad/releases/latest)
-  [![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20Desktop%20%7C%20Mobile-blue.svg)](https://jotpad.odest.tech)
+  [![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20Desktop%20%7C%20Mobile-blue.svg)](https://jotpad.odest.dev)
   [![Made with](https://img.shields.io/badge/Made%20with-Tauri%20%7C%20React%20%7C%20Rust-red.svg)](https://tauri.app)
 </div>
 
