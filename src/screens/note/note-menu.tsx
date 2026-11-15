@@ -4,6 +4,7 @@ import { type Note } from '@/data/notes-store';
 
 export type NoteMenuProps = {
   note: Note;
+  onSearch: () => void;
   onTogglePin: () => void;
   onTags: () => void;
   onRename: () => void;
@@ -11,10 +12,20 @@ export type NoteMenuProps = {
 };
 
 /** The note's actions behind a "more" button in the header: the system menu on iOS. */
-export function NoteMenu({ note, onTogglePin, onTags, onRename, onDelete }: NoteMenuProps) {
+export function NoteMenu({
+  note,
+  onSearch,
+  onTogglePin,
+  onTags,
+  onRename,
+  onDelete,
+}: NoteMenuProps) {
   return (
     <Stack.Toolbar placement="right">
       <Stack.Toolbar.Menu icon="ellipsis" accessibilityLabel="More options">
+        <Stack.Toolbar.MenuAction icon="magnifyingglass" onPress={onSearch}>
+          Search
+        </Stack.Toolbar.MenuAction>
         <Stack.Toolbar.MenuAction icon={note.pinned ? 'pin.slash' : 'pin'} onPress={onTogglePin}>
           {note.pinned ? 'Unpin note' : 'Pin note'}
         </Stack.Toolbar.MenuAction>

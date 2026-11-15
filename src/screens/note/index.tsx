@@ -6,7 +6,7 @@ import Edit from '@expo/material-symbols/edit.xml';
 import Keep from '@expo/material-symbols/keep.xml';
 import KeepOff from '@expo/material-symbols/keep_off.xml';
 import * as Clipboard from 'expo-clipboard';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, Keyboard, KeyboardAvoidingView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -33,7 +33,9 @@ import { isSameDay } from '@/utils/format-time';
 import { Composer } from './composer';
 import { EntryBubble, type EntryItem } from './entry-bubble';
 import { NoteMenu } from './note-menu';
+import { NoteSearchBar, searchHeaderOptions } from './note-search-bar';
 import { PinnedBar } from './pinned-bar';
+import { SearchNav } from './search-nav';
 
 /** Entries sent within this window of each other are shown as one group. */
 const GROUP_WINDOW_MS = 2 * 60 * 1000;
@@ -113,13 +115,53 @@ export function NoteChat({ noteId }: { noteId: string }) {
     return () => clearTimeout(timer);
   }, [highlighted]);
 
-  const jumpTo = (entry: Entry) => {
+  const scrollTo = (entry: Entry) => {
     const index = items.findIndex((item) => item.entry.id === entry.id);
-    if (index < 0) return;
-    list.current?.scrollToIndex({ index, viewPosition: 0.5 });
+    if (index >= 0) list.current?.scrollToIndex({ index, viewPosition: 0.5 });
+  };
+
+  const jumpTo = (entry: Entry) => {
+    scrollTo(entry);
     setHighlighted(entry.id);
     setPinStep(pinIndex + 1);
   };
+
+  // Search mode: the header becomes a search field and the composer a match navigator.
+  const [searching, setSearching] = useState(false);
+  const [query, setQuery] = useState('');
+  const needle = query.trim().toLocaleLowerCase();
+  const matches = needle
+    ? entries.filter((entry) => entry.body.toLocaleLowerCase().includes(needle))
+    : [];
+  // Index into `matches` (oldest first); null follows the newest match as the query changes.
+  const [matchStep, setMatchStep] = useState<number | null>(null);
+  const matchIndex =
+    matches.length === 0 ? 0 : Math.min(matchStep ?? matches.length - 1, matches.length - 1);
+  const currentMatch = matches[matchIndex];
+
+  const changeQuery = (text: string) => {
+    setQuery(text);
+    setMatchStep(null);
+  };
+
+  const closeSearch = useCallback(() => {
+    setSearching(false);
+    setQuery('');
+    setMatchStep(null);
+  }, []);
+
+  const searchProps = { query, onChangeQuery: changeQuery, onClose: closeSearch };
+  const searchOptions = searchHeaderOptions(searchProps);
+
+  // Keep the current match in view as it changes.
+  const currentMatchId = currentMatch?.id;
+  useEffect(() => {
+    if (!currentMatchId) return;
+    const index = items.findIndex((item) => item.entry.id === currentMatchId);
+    if (index >= 0) list.current?.scrollToIndex({ index, viewPosition: 0.5 });
+    // Only a new match should move the list, not every render of `items`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentMatchId]);
 
   const actions: SheetAction[] = selected
     ? [
@@ -147,10 +189,19 @@ export function NoteChat({ noteId }: { noteId: string }) {
 
   return (
     <>
-      <Stack.Screen options={{ title: note?.title ?? '' }} />
-      {note && (
+      <Stack.Screen
+        options={{
+          title: note?.title ?? '',
+          // Set every time, so leaving search mode restores the normal header.
+          headerShown: true,
+          headerSearchBarOptions: undefined,
+          ...(searching && searchOptions),
+        }}
+      />
+      {note && !searching && (
         <NoteMenu
           note={note}
+          onSearch={() => setSearching(true)}
           onTogglePin={() => setNotePinned(note.id, !note.pinned)}
           onTags={() => setTaggingNote(true)}
           onRename={() => setRenamingNote(true)}
@@ -159,7 +210,8 @@ export function NoteChat({ noteId }: { noteId: string }) {
       )}
       <KeyboardAvoidingView
         behavior="padding"
-        keyboardVerticalOffset={headerHeight}
+        // Without the stack header, the search bar is inside this view and needs no offset.
+        keyboardVerticalOffset={searching && searchOptions.headerShown === false ? 0 : headerHeight}
         // Closed, the composer clears the system navigation bar; open, the keyboard covers it.
         style={{
           flex: 1,
@@ -167,7 +219,11 @@ export function NoteChat({ noteId }: { noteId: string }) {
           paddingBottom: keyboardOpen ? 0 : insets.bottom,
         }}
       >
-        <PinnedBar pinned={pinned} index={pinIndex} onPress={jumpTo} />
+        {searching ? (
+          <NoteSearchBar {...searchProps} />
+        ) : (
+          <PinnedBar pinned={pinned} index={pinIndex} onPress={jumpTo} />
+        )}
         {entries.length === 0 ? (
           <EmptyState
             icon={{ ios: 'text.bubble', android: 'chat_bubble' }}
@@ -183,7 +239,10 @@ export function NoteChat({ noteId }: { noteId: string }) {
             renderItem={({ item }) => (
               <EntryBubble
                 item={item}
-                highlighted={item.entry.id === highlighted}
+                highlighted={
+                  item.entry.id === highlighted || (searching && item.entry.id === currentMatchId)
+                }
+                query={searching ? query : ''}
                 onLongPress={setSelected}
               />
             )}
@@ -198,20 +257,30 @@ export function NoteChat({ noteId }: { noteId: string }) {
             contentContainerClassName="px-3 py-2"
           />
         )}
-        <Composer
-          // Remounts for each edited entry so the draft starts from its text.
-          key={editing?.id ?? 'new'}
-          editingBody={editing?.body}
-          onCancelEdit={() => setEditing(null)}
-          onSubmit={(body) => {
-            if (editing) {
-              updateEntry(editing, body);
-              setEditing(null);
-            } else {
-              addEntry(noteId, body);
-            }
-          }}
-        />
+        {searching ? (
+          <SearchNav
+            query={query}
+            count={matches.length}
+            index={matchIndex}
+            onOlder={() => setMatchStep(Math.max(0, matchIndex - 1))}
+            onNewer={() => setMatchStep(Math.min(matches.length - 1, matchIndex + 1))}
+          />
+        ) : (
+          <Composer
+            // Remounts for each edited entry so the draft starts from its text.
+            key={editing?.id ?? 'new'}
+            editingBody={editing?.body}
+            onCancelEdit={() => setEditing(null)}
+            onSubmit={(body) => {
+              if (editing) {
+                updateEntry(editing, body);
+                setEditing(null);
+              } else {
+                addEntry(noteId, body);
+              }
+            }}
+          />
+        )}
       </KeyboardAvoidingView>
       <ActionSheet
         isPresented={selected !== null}

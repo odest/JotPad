@@ -17,14 +17,33 @@ export type EntryItem = {
 
 const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
 
+/** Splits `body` around each case-insensitive occurrence of `query`. */
+function splitMatches(body: string, query: string): { text: string; match: boolean }[] {
+  const needle = query.trim().toLocaleLowerCase();
+  if (!needle) return [{ text: body, match: false }];
+  const haystack = body.toLocaleLowerCase();
+  const parts: { text: string; match: boolean }[] = [];
+  let from = 0;
+  for (let at = haystack.indexOf(needle); at !== -1; at = haystack.indexOf(needle, from)) {
+    if (at > from) parts.push({ text: body.slice(from, at), match: false });
+    parts.push({ text: body.slice(at, at + needle.length), match: true });
+    from = at + needle.length;
+  }
+  if (from < body.length) parts.push({ text: body.slice(from), match: false });
+  return parts;
+}
+
 export function EntryBubble({
   item,
   highlighted,
+  query = '',
   onLongPress,
 }: {
   item: EntryItem;
-  /** Briefly true after a jump to this entry, so the eye finds it. */
+  /** True after a jump to this entry, so the eye finds it. */
   highlighted: boolean;
+  /** Search text to mark inside the message. */
+  query?: string;
   onLongPress: (entry: Entry) => void;
 }) {
   const { entry, startsDay, joinsPrevious, joinsNext } = item;
@@ -69,7 +88,20 @@ export function EntryBubble({
           onLongPress={() => onLongPress(entry)}
           className={`max-w-[80%] rounded-xl bg-primary-container px-4 py-2 active:opacity-80 ${corners}`}
         >
-          <Text className="text-body text-on-primary-container">{entry.body}</Text>
+          <Text className="text-body text-on-primary-container">
+            {splitMatches(entry.body, query).map((part, i) =>
+              part.match ? (
+                <Text
+                  key={i}
+                  style={{ backgroundColor: palette.primary, color: palette['on-primary'] }}
+                >
+                  {part.text}
+                </Text>
+              ) : (
+                part.text
+              ),
+            )}
+          </Text>
         </Pressable>
       </View>
       {!joinsNext && (

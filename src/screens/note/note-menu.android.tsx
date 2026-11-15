@@ -4,6 +4,7 @@ import Keep from '@expo/material-symbols/keep.xml';
 import KeepOff from '@expo/material-symbols/keep_off.xml';
 import Label from '@expo/material-symbols/label.xml';
 import MoreVert from '@expo/material-symbols/more_vert.xml';
+import Search from '@expo/material-symbols/search.xml';
 import { DropdownMenu, DropdownMenuItem, Icon, IconButton, Text } from '@expo/ui/jetpack-compose';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
@@ -19,7 +20,7 @@ export function NoteMenu(props: NoteMenuProps) {
   return <Stack.Screen options={{ headerRight: () => <MoreMenu {...props} /> }} />;
 }
 
-function MoreMenu({ note, onTogglePin, onTags, onRename, onDelete }: NoteMenuProps) {
+function MoreMenu({ note, onSearch, onTogglePin, onTags, onRename, onDelete }: NoteMenuProps) {
   const palette = usePalette();
   const [open, setOpen] = useState(false);
 
@@ -29,6 +30,7 @@ function MoreMenu({ note, onTogglePin, onTags, onRename, onDelete }: NoteMenuPro
     destructive?: boolean;
     onPress: () => void;
   }[] = [
+    { label: 'Search', icon: Search, onPress: onSearch },
     note.pinned
       ? { label: 'Unpin note', icon: KeepOff, onPress: onTogglePin }
       : { label: 'Pin note', icon: Keep, onPress: onTogglePin },
