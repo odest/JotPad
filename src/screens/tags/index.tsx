@@ -9,6 +9,8 @@ import { ActionSheet, type SheetAction } from '@/components/action-sheet';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { EmptyState } from '@/components/empty-state';
 import { Fab } from '@/components/fab';
+import { groupPosition } from '@/components/group-position';
+import { GroupedRow } from '@/components/grouped-row';
 import { useFabExpanded } from '@/components/use-fab-expanded';
 import { Icon } from '@/components/icon';
 import { ItemAvatar } from '@/components/item-avatar';
@@ -45,37 +47,39 @@ export function Tags() {
       <FlatList
         className="bg-surface"
         // Leaves room for the FAB below the last row on Android.
-        contentContainerClassName="grow android:pb-16"
+        contentContainerClassName="grow android:pt-2 android:pb-16"
         contentInsetAdjustmentBehavior="automatic"
         data={tags}
         onScroll={fab.onScroll}
         scrollEventThrottle={16}
         keyExtractor={(tag) => tag.id}
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           const count = countFor(item);
           return (
-            <Link href={{ pathname: '/tags/[id]', params: { id: item.id } }} asChild>
-              <Pressable
-                onLongPress={() => {
-                  longPressFeedback();
-                  setSelected(item);
-                }}
-                android_ripple={{ color: palette['surface-container-highest'] }}
-                className="ios:active:bg-surface-container-high min-h-14 flex-row items-center gap-4 px-4"
-              >
-                {process.env.EXPO_OS === 'android' ? (
-                  <ItemAvatar id={item.id} size={40} icon={{ ios: 'tag', android: 'label' }} />
-                ) : (
-                  <Icon name={{ ios: 'tag', android: 'label' }} color="on-surface-variant" />
-                )}
-                <Text numberOfLines={1} className="flex-1 text-body text-on-surface">
-                  {item.name}
-                </Text>
-                <Text className="text-subhead text-on-surface-variant">
-                  {count === 1 ? '1 note' : `${count} notes`}
-                </Text>
-              </Pressable>
-            </Link>
+            <GroupedRow position={groupPosition(index, tags.length)}>
+              <Link href={{ pathname: '/tags/[id]', params: { id: item.id } }} asChild>
+                <Pressable
+                  onLongPress={() => {
+                    longPressFeedback();
+                    setSelected(item);
+                  }}
+                  android_ripple={{ color: palette['surface-container-highest'] }}
+                  className="ios:active:bg-surface-container-high android:py-2 min-h-14 flex-row items-center gap-4 px-4"
+                >
+                  {process.env.EXPO_OS === 'android' ? (
+                    <ItemAvatar id={item.id} size={40} icon={{ ios: 'tag', android: 'label' }} />
+                  ) : (
+                    <Icon name={{ ios: 'tag', android: 'label' }} color="on-surface-variant" />
+                  )}
+                  <Text numberOfLines={1} className="flex-1 text-body text-on-surface">
+                    {item.name}
+                  </Text>
+                  <Text className="text-subhead text-on-surface-variant">
+                    {count === 1 ? '1 note' : `${count} notes`}
+                  </Text>
+                </Pressable>
+              </Link>
+            </GroupedRow>
           );
         }}
         ListEmptyComponent={

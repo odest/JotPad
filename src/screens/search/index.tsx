@@ -4,6 +4,8 @@ import { FlatList, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/empty-state';
+import { groupPosition } from '@/components/group-position';
+import { GroupedRow } from '@/components/grouped-row';
 import { useAllEntries, useNotes, type Note } from '@/data/notes-store';
 import { NoteRow } from '@/screens/notes/note-row';
 
@@ -56,13 +58,17 @@ export function Search() {
       )}
       <FlatList
         className="bg-surface"
-        contentContainerClassName="grow"
+        contentContainerClassName="grow android:pt-2"
         contentInsetAdjustmentBehavior="automatic"
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         data={results}
         keyExtractor={(result) => result.note.id}
-        renderItem={({ item }) => <NoteRow note={item.note} preview={item.preview} />}
+        renderItem={({ item, index }) => (
+          <GroupedRow position={groupPosition(index, results.length)}>
+            <NoteRow note={item.note} preview={item.preview} />
+          </GroupedRow>
+        )}
         ListEmptyComponent={
           needle ? (
             <EmptyState

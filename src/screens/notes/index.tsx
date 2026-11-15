@@ -13,6 +13,8 @@ import { ConfirmDialog } from '@/components/confirm-dialog';
 import { EmptyState } from '@/components/empty-state';
 import { ExportSheet } from '@/components/export-sheet';
 import { Fab } from '@/components/fab';
+import { groupPosition } from '@/components/group-position';
+import { GroupedRow } from '@/components/grouped-row';
 import { useFabExpanded } from '@/components/use-fab-expanded';
 import { NameSheet } from '@/components/name-sheet';
 import { NoteTagsSheet } from '@/components/note-tags-sheet';
@@ -57,6 +59,7 @@ export function Notes() {
   };
 
   const ordered = sortNotes(notes, sort);
+  const pinnedCount = ordered.filter((note) => note.pinned).length;
 
   const actions: SheetAction[] = selected
     ? [
@@ -75,13 +78,28 @@ export function Notes() {
       <FlatList
         className="bg-surface"
         // Leaves room for the FAB below the last row on Android.
-        contentContainerClassName="grow android:pb-16"
+        contentContainerClassName="grow android:pt-2 android:pb-16"
         contentInsetAdjustmentBehavior="automatic"
         data={ordered}
         onScroll={fab.onScroll}
         scrollEventThrottle={16}
         keyExtractor={(note) => note.id}
-        renderItem={({ item }) => <NoteRow note={item} onLongPress={setSelected} />}
+        renderItem={({ item, index }) => {
+          // Pinned notes and the others form two groups.
+          const inPinned = index < pinnedCount;
+          const start = inPinned ? 0 : pinnedCount;
+          const length = inPinned ? pinnedCount : ordered.length - pinnedCount;
+          return (
+            <GroupedRow
+              position={groupPosition(index - start, length)}
+              label={
+                pinnedCount > 0 && index === start ? (inPinned ? 'Pinned' : 'Others') : undefined
+              }
+            >
+              <NoteRow note={item} onLongPress={setSelected} />
+            </GroupedRow>
+          );
+        }}
         ListEmptyComponent={
           <EmptyState
             icon={{ ios: 'bubble.left.and.bubble.right', android: 'forum' }}
