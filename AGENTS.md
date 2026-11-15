@@ -1,41 +1,94 @@
-This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
+# JotPad
 
-## Expo has changed — do not trust your training data
+JotPad is a note-taking app where each note is a conversation with yourself: you open a note and send it messages ("entries"). This repository is the mobile app, built with Expo SDK 58, React Native and TypeScript for Android and iOS. Development is Android-first, but every choice must also work on iOS.
 
-Expo ships breaking changes every SDK release. APIs you remember are likely renamed, moved, or removed. Before writing any code that touches an Expo, EAS, or React Native API:
+The app is local-first. There is no backend and no sync.
 
-1. Read the major version of the `expo` package in `package.json`.
-2. Fetch the matching versioned docs: `https://docs.expo.dev/versions/v<major>.0.0/`
-3. For anything else, fetch https://docs.expo.dev/llms.txt — an index of all Expo docs with corrections to common LLM misconceptions. Follow its links to the specific page you need; never answer from memory.
+## Product rules
+
+- **It must feel like a native app of each platform.** Android follows Material 3 Expressive, iOS follows the system design (Liquid Glass on iOS 26). Never give one platform the other's patterns: no FAB on iOS, no hand-built iOS chrome on Android.
+- **Prefer real native components over imitations.** Use `@expo/ui` (Jetpack Compose on Android, SwiftUI on iOS) for sheets, dialogs, menus, form rows and buttons before building them from views.
+- **Do not add features that were not asked for.** The feature set is: notes, entries, pinning, tags, search, theme. Ask before adding anything else.
+- An older Tauri desktop app lives on `master`. Use it only to see which features exist. Do not port its code, data model or UI.
+
+## Current state
+
+- Data lives in an in-memory store, `src/data/notes-store.ts`. It is lost when the app reloads. SQLite with Drizzle is planned; keep the store's hooks and actions as the interface that persistence will replace.
+- All UI strings are English literals. Turkish and English localisation is planned.
+- Only Android has been run. The iOS code paths exist but are untested.
+- There are no automated tests yet.
 
 ## Commands
 
-Use `bunx` instead of `npx` if the project uses bun (`bun.lock` present).
-
 ```bash
-npx expo install <package>  # ALWAYS use instead of npm/yarn/pnpm/bun add — resolves SDK-compatible versions
-npx expo start              # start the dev server
+npx expo install <package>  # always use this to add a package, so the version matches the SDK
+npx expo start --go         # start the dev server for Expo Go
 npx expo lint               # lint
 npx tsc --noEmit            # typecheck
+npx prettier --write src    # format (sorts Tailwind classes)
 npx expo-doctor             # diagnose dependency and config issues
-npx expo install --fix      # fix incompatible package versions
 ```
 
-Run lint and typecheck before declaring any task done.
+Run typecheck and lint before calling a task done.
 
-## Navigation & Routing
+## Running the app
 
-- Use **Expo Router** for all navigation. Routes live in `src/app/` — every file there is a screen, `_layout.tsx` files define navigators. Keep non-route code (components, hooks, utils) outside `src/app/`.
-- Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
-- Docs: https://docs.expo.dev/router/introduction.md
+The app is developed in **Expo Go**. Start the dev server and open `exp://<computer LAN IP>:8081` in Expo Go on a phone on the same Wi-Fi.
 
-## Building with EAS
+- Only add libraries whose native code is bundled in Expo Go. A library that needs a development build cannot be tested right now.
+- A local Android build (`npx expo run:android`) does not work on the current Windows machine: the C++ build of Reanimated exceeds the Windows path length limit from the project's folder. Do not work around this with machine-level changes without asking.
+- Typecheck and lint passing does not show that a screen works. Check the change on a device, and do not report a visual bug as fixed until it has been seen fixed there.
 
-Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submit`) and to ship over-the-air updates (`eas update`) — no local Xcode or Android Studio required. Run EAS CLI as `bunx eas-cli <command>` in Bun projects, or `npx eas-cli@latest <command>` otherwise; substitute that for bare `eas` in docs examples.
-Docs: https://docs.expo.dev/eas/index.md
+## Project layout
 
-## Rules
+```
+src/
+  app/          Expo Router routes only. Each file is a screen; keep them thin.
+    (tabs)/     Four native tabs: (notes), tags, settings, search. Each tab owns a stack.
+    note/[id]   The conversation screen, pushed above the tabs.
+  screens/      Screen bodies and their private components, one folder per screen.
+  components/   UI shared by more than one screen.
+  navigation/   Stack options and the tab swipe gesture.
+  data/         The store: types, hooks and actions.
+  theme/        Design tokens and the theme provider.
+  utils/        Small standalone helpers.
+```
 
-- If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
-- Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
-- Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+- File names are kebab-case. Import with the `@/` alias (`@/components/icon`).
+- Route files only read params and render a screen from `src/screens/`.
+- For platform differences use platform files (`fab.tsx` + `fab.android.tsx`, `action-sheet.tsx` + `action-sheet.ios.tsx`) with identical props. Platform files are not allowed inside `src/app/`.
+
+## Styling and theme
+
+- Style with NativeWind class names. Use `ios:` and `android:` variants for small platform differences.
+- Colors and text sizes are design tokens, not literals. `tailwind.config.js` maps them to CSS variables that `ThemeProvider` fills per platform and color scheme: Material 3 dynamic colors on Android, system colors on iOS. Use the role names (`bg-surface`, `text-on-surface-variant`, `bg-primary-container`) and the text styles (`text-title`, `text-body`, `text-subhead`, `text-caption`).
+- Where a class name cannot be used (native props such as `placeholderTextColor`, or `@expo/ui` props), read the color from `usePalette()`.
+- Do not put a text-size class on a `TextInput`; set `fontSize` from `typeRamp` in `style`. A fixed line height misaligns native inputs.
+- Icons go through `src/components/icon.tsx`, which draws SF Symbols on iOS and Material Symbols on Android. Give every icon both names.
+
+## Native components
+
+- Wrap every `@expo/ui` tree in `NativeHost` (`src/components/native-host.tsx`), not in `Host` directly. It passes the app's color scheme on, so native components follow the theme chosen in Settings.
+- `@expo/ui/jetpack-compose` is Android-only and `@expo/ui/swift-ui` is iOS-only. Import them only from a platform file.
+- Material Symbols for Compose come from `@expo/material-symbols/<name>.xml`. In development they download on first use, so an icon can be blank the first time it is shown.
+- Reusable pieces that already exist: `ActionSheet` (actions for one item), `ConfirmDialog` (confirm a destructive action), `NameSheet` (one text field, for create and rename), `Fab`, `EmptyState`.
+
+## Known pitfalls
+
+- **Do not use Expo Router's `presentation: 'formSheet'`.** On Android it rendered nothing and broke the window's edge-to-edge insets (opaque status bar, doubled header padding). Use the `@expo/ui` `BottomSheet` inside the screen instead.
+- **Do not add `react-native-keyboard-controller`.** Its `KeyboardProvider` inset the whole app below the status bar here. The conversation screen follows the keyboard with React Native's `KeyboardAvoidingView`.
+- React Native's `Alert` shows an old-style light dialog on Android. Use `ConfirmDialog`.
+- Focusing a text input while a sheet is still closing leaves the keyboard hidden on Android. Focus after the sheet has closed (see `src/screens/note/composer.tsx`).
+- The tab bar is the system's own (`NativeTabs`). It cannot be measured, and it does not support content that tracks a swipe; the swipe gesture in `src/navigation/tab-swipe.tsx` only switches tabs when the swipe ends.
+
+## Expo APIs change between SDKs
+
+Do not rely on memory for Expo, EAS or React Native APIs. Read the `expo` version in `package.json` and use the matching docs at `https://docs.expo.dev/versions/v<major>.0.0/`. For `@expo/ui`, the installed `.d.ts` files in `node_modules/@expo/ui/build` are the most reliable reference.
+
+`ios/` and `android/` are generated and git-ignored. Never edit them by hand; configure native behavior in `app.json`.
+
+## Git
+
+- Work on a feature branch and merge it into `expo` when the feature is done and verified. `expo` is the working branch for this app; `master` holds the old desktop app.
+- One feature per commit. Messages are English conventional commits (`feat: …`, `fix: …`), title only unless a body is really needed.
+- Do not add AI co-author or attribution lines to commits.
