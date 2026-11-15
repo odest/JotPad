@@ -21,6 +21,8 @@ const colorRoles = [
   'on-primary-container',
   'secondary-container',
   'on-secondary-container',
+  'tertiary-container',
+  'on-tertiary-container',
   'error',
   'on-error',
 ];

@@ -5,6 +5,8 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 import { Icon } from '@/components/icon';
 import { typeRamp, usePalette } from '@/theme';
 
+import { SendButton } from './send-button';
+
 /**
  * Message field. With `editingBody` set it edits that text instead of writing a new
  * entry; give it a `key` per edited entry so the draft starts from the entry's text.
@@ -75,25 +77,7 @@ export function Composer({
           style={{ fontSize: typeRamp.body.size }}
           className="max-h-40 ios:border-hairline ios:border-outline-variant ios:bg-surface min-h-12 flex-1 rounded-2xl bg-surface-container-high px-4 py-3 text-on-surface"
         />
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={isEditing ? 'Save' : 'Send'}
-          accessibilityState={{ disabled: !canSubmit }}
-          disabled={!canSubmit}
-          onPress={submit}
-          android_ripple={{ color: palette['on-primary'], foreground: true }}
-          className={`ios:active:opacity-70 h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-primary ${canSubmit ? '' : 'opacity-40'}`}
-        >
-          <Icon
-            name={
-              isEditing
-                ? { ios: 'checkmark', android: 'check' }
-                : { ios: 'arrow.up', android: 'send' }
-            }
-            size={22}
-            color="on-primary"
-          />
-        </Pressable>
+        <SendButton isEditing={isEditing} enabled={canSubmit} onPress={submit} />
       </View>
     </View>
   );

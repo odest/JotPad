@@ -18,6 +18,8 @@ export type ColorRole =
   | 'on-primary-container'
   | 'secondary-container'
   | 'on-secondary-container'
+  | 'tertiary-container'
+  | 'on-tertiary-container'
   | 'error'
   | 'on-error';
 
@@ -45,6 +47,8 @@ const ios: Record<ColorScheme, Palette> = {
     'on-primary-container': '#FFFFFF',
     'secondary-container': '#E9E9EB',
     'on-secondary-container': '#000000',
+    'tertiary-container': '#E9E9EB',
+    'on-tertiary-container': '#000000',
     error: '#FF3B30',
     'on-error': '#FFFFFF',
   },
@@ -64,6 +68,8 @@ const ios: Record<ColorScheme, Palette> = {
     'on-primary-container': '#FFFFFF',
     'secondary-container': '#262629',
     'on-secondary-container': '#FFFFFF',
+    'tertiary-container': '#262629',
+    'on-tertiary-container': '#FFFFFF',
     error: '#FF453A',
     'on-error': '#FFFFFF',
   },
@@ -92,6 +98,8 @@ function androidPalette(): Palette {
     'on-primary-container': m3.onPrimaryContainer,
     'secondary-container': m3.secondaryContainer,
     'on-secondary-container': m3.onSecondaryContainer,
+    'tertiary-container': m3.tertiaryContainer,
+    'on-tertiary-container': m3.onTertiaryContainer,
     error: m3.error,
     'on-error': m3.onError,
   } as unknown as Palette;

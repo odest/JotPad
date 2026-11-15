@@ -3,16 +3,23 @@ import Delete from '@expo/material-symbols/delete.xml';
 import Edit from '@expo/material-symbols/edit.xml';
 import { Link, Stack } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { ActionSheet, type SheetAction } from '@/components/action-sheet';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { EmptyState } from '@/components/empty-state';
 import { Fab } from '@/components/fab';
+import { groupPosition } from '@/components/group-position';
+import { GroupedRow } from '@/components/grouped-row';
+import { listItemLayout } from '@/components/list-motion';
+import { useFabExpanded } from '@/components/use-fab-expanded';
 import { Icon } from '@/components/icon';
+import { ItemAvatar } from '@/components/item-avatar';
 import { NameSheet } from '@/components/name-sheet';
 import { createTag, deleteTag, renameTag, useNotes, useTags, type Tag } from '@/data/notes-store';
 import { usePalette } from '@/theme';
+import { longPressFeedback } from '@/utils/haptics';
 
 export function Tags() {
   const palette = usePalette();
@@ -28,6 +35,8 @@ export function Tags() {
   const startNewTag = () => setIsCreating(true);
   const countFor = (tag: Tag) => notes.filter((note) => note.tagIds.includes(tag.id)).length;
 
+  const fab = useFabExpanded();
+
   const actions: SheetAction[] = selected
     ? [
         { label: 'Rename', icon: Edit, onPress: () => setRenaming(selected) },
@@ -37,31 +46,47 @@ export function Tags() {
 
   return (
     <>
-      <FlatList
-        className="bg-surface"
+      <Animated.FlatList
+        style={{ flex: 1, backgroundColor: palette.surface }}
         // Leaves room for the FAB below the last row on Android.
-        contentContainerClassName="grow android:pb-16"
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: process.env.EXPO_OS === 'android' ? 8 : 0,
+          paddingBottom: process.env.EXPO_OS === 'android' ? 64 : 0,
+        }}
+        itemLayoutAnimation={listItemLayout}
         contentInsetAdjustmentBehavior="automatic"
         data={tags}
+        onScroll={fab.onScroll}
+        scrollEventThrottle={16}
         keyExtractor={(tag) => tag.id}
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           const count = countFor(item);
           return (
-            <Link href={{ pathname: '/tags/[id]', params: { id: item.id } }} asChild>
-              <Pressable
-                onLongPress={() => setSelected(item)}
-                android_ripple={{ color: palette['surface-container-highest'] }}
-                className="ios:active:bg-surface-container-high min-h-14 flex-row items-center gap-4 px-4"
-              >
-                <Icon name={{ ios: 'tag', android: 'label' }} color="on-surface-variant" />
-                <Text numberOfLines={1} className="flex-1 text-body text-on-surface">
-                  {item.name}
-                </Text>
-                <Text className="text-subhead text-on-surface-variant">
-                  {count === 1 ? '1 note' : `${count} notes`}
-                </Text>
-              </Pressable>
-            </Link>
+            <GroupedRow position={groupPosition(index, tags.length)}>
+              <Link href={{ pathname: '/tags/[id]', params: { id: item.id } }} asChild>
+                <Pressable
+                  onLongPress={() => {
+                    longPressFeedback();
+                    setSelected(item);
+                  }}
+                  android_ripple={{ color: palette['surface-container-highest'] }}
+                  className="ios:active:bg-surface-container-high android:py-2 min-h-14 flex-row items-center gap-4 px-4"
+                >
+                  {process.env.EXPO_OS === 'android' ? (
+                    <ItemAvatar id={item.id} size={40} icon={{ ios: 'tag', android: 'label' }} />
+                  ) : (
+                    <Icon name={{ ios: 'tag', android: 'label' }} color="on-surface-variant" />
+                  )}
+                  <Text numberOfLines={1} className="flex-1 text-body text-on-surface">
+                    {item.name}
+                  </Text>
+                  <Text className="text-subhead text-on-surface-variant">
+                    {count === 1 ? '1 note' : `${count} notes`}
+                  </Text>
+                </Pressable>
+              </Link>
+            </GroupedRow>
           );
         }}
         ListEmptyComponent={
@@ -79,7 +104,7 @@ export function Tags() {
           <Stack.Toolbar.Button icon="plus" onPress={startNewTag} />
         </Stack.Toolbar>
       )}
-      <Fab label="New tag" icon={Add} onPress={startNewTag} />
+      <Fab label="New tag" icon={Add} expanded={fab.expanded} onPress={startNewTag} />
       <NameSheet
         isPresented={isCreating}
         heading="New tag"

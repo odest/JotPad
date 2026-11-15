@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, Keyboard, KeyboardAvoidingView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ActionSheet, type SheetAction } from '@/components/action-sheet';
+import { type SheetAction } from '@/components/action-sheet';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { EmptyState } from '@/components/empty-state';
 import { ExportSheet } from '@/components/export-sheet';
@@ -33,9 +33,11 @@ import { usePalette } from '@/theme';
 import { isSameDay } from '@/utils/format-time';
 
 import { Composer } from './composer';
+import { EntryActions } from './entry-actions';
 import { EntryBubble, type EntryItem } from './entry-bubble';
 import { NoteMenu } from './note-menu';
 import { NoteSearchBar, searchHeaderOptions } from './note-search-bar';
+import { NoteTitle } from './note-title';
 import { PinnedBar } from './pinned-bar';
 import { SearchNav } from './search-nav';
 
@@ -101,6 +103,7 @@ export function NoteChat({ noteId }: { noteId: string }) {
   const [editing, setEditing] = useState<Entry | null>(null);
 
   const [deleting, setDeleting] = useState<Entry | null>(null);
+  const clearSelection = useCallback(() => setSelected(null), []);
 
   const items = toItems(entries);
   const list = useRef<FlatList<EntryItem>>(null);
@@ -196,6 +199,8 @@ export function NoteChat({ noteId }: { noteId: string }) {
       <Stack.Screen
         options={{
           title: note?.title ?? '',
+          ...(process.env.EXPO_OS === 'android' &&
+            note && { headerTitle: () => <NoteTitle note={note} /> }),
           // Set every time, so leaving search mode restores the normal header.
           headerShown: true,
           headerSearchBarOptions: undefined,
@@ -245,7 +250,9 @@ export function NoteChat({ noteId }: { noteId: string }) {
               <EntryBubble
                 item={item}
                 highlighted={
-                  item.entry.id === highlighted || (searching && item.entry.id === currentMatchId)
+                  item.entry.id === highlighted ||
+                  item.entry.id === selected?.id ||
+                  (searching && item.entry.id === currentMatchId)
                 }
                 query={searching ? query : ''}
                 onLongPress={setSelected}
@@ -286,12 +293,12 @@ export function NoteChat({ noteId }: { noteId: string }) {
             }}
           />
         )}
+        <EntryActions
+          isPresented={selected !== null}
+          onDismiss={clearSelection}
+          actions={actions}
+        />
       </KeyboardAvoidingView>
-      <ActionSheet
-        isPresented={selected !== null}
-        onDismiss={() => setSelected(null)}
-        actions={actions}
-      />
       <ConfirmDialog
         isPresented={deleting !== null}
         title="Delete message?"
