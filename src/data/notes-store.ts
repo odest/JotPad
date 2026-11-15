@@ -5,6 +5,12 @@ export type Note = {
   title: string;
   createdAt: number;
   pinned: boolean;
+  tagIds: string[];
+};
+
+export type Tag = {
+  id: string;
+  name: string;
 };
 
 export type Entry = {
@@ -18,13 +24,14 @@ type State = {
   notes: Note[];
   /** Entries per note id, oldest first. */
   entries: Record<string, Entry[]>;
+  tags: Tag[];
 };
 
 /**
  * In-memory store. It holds the data for the lifetime of the process only; the
  * persistence layer replaces this module while keeping the same hooks and actions.
  */
-let state: State = { notes: [], entries: {} };
+let state: State = { notes: [], entries: {}, tags: [] };
 let nextId = 1;
 
 const listeners = new Set<() => void>();
@@ -44,6 +51,14 @@ function useStore<T>(selector: (state: State) => T): T {
 }
 
 const NO_ENTRIES: Entry[] = [];
+
+export function useTags(): Tag[] {
+  return useStore((s) => s.tags);
+}
+
+export function useTag(id: string): Tag | undefined {
+  return useStore((s) => s.tags.find((tag) => tag.id === id));
+}
 
 export function useNotes(): Note[] {
   return useStore((s) => s.notes);
@@ -72,6 +87,7 @@ export function createNote(title: string): Note {
     title: title.trim(),
     createdAt: Date.now(),
     pinned: false,
+    tagIds: [],
   };
   setState({ ...state, notes: [note, ...state.notes] });
   return note;
@@ -81,6 +97,7 @@ export function addEntry(noteId: string, body: string): Entry {
   const entry: Entry = { id: String(nextId++), noteId, body: body.trim(), createdAt: Date.now() };
   const note = state.notes.find((n) => n.id === noteId);
   setState({
+    ...state,
     // The note with the newest entry moves to the top, like a conversation list.
     notes: note ? [note, ...state.notes.filter((n) => n.id !== noteId)] : state.notes,
     entries: { ...state.entries, [noteId]: [...(state.entries[noteId] ?? NO_ENTRIES), entry] },
@@ -105,7 +122,37 @@ export function setNotePinned(id: string, pinned: boolean) {
 
 export function deleteNote(id: string) {
   const { [id]: _removed, ...entries } = state.entries;
-  setState({ notes: state.notes.filter((note) => note.id !== id), entries });
+  setState({ ...state, notes: state.notes.filter((note) => note.id !== id), entries });
+}
+
+export function setNoteTags(id: string, tagIds: string[]) {
+  updateNote(id, { tagIds });
+}
+
+export function createTag(name: string): Tag {
+  const tag: Tag = { id: String(nextId++), name: name.trim() };
+  setState({ ...state, tags: [...state.tags, tag] });
+  return tag;
+}
+
+export function renameTag(id: string, name: string) {
+  setState({
+    ...state,
+    tags: state.tags.map((tag) => (tag.id === id ? { ...tag, name: name.trim() } : tag)),
+  });
+}
+
+/** Deletes the tag and takes it off every note that had it. */
+export function deleteTag(id: string) {
+  setState({
+    ...state,
+    tags: state.tags.filter((tag) => tag.id !== id),
+    notes: state.notes.map((note) =>
+      note.tagIds.includes(id)
+        ? { ...note, tagIds: note.tagIds.filter((tagId) => tagId !== id) }
+        : note,
+    ),
+  });
 }
 
 export function updateEntry(entry: Entry, body: string) {

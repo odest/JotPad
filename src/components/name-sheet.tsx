@@ -1,38 +1,40 @@
 import { BottomSheet, Button, Column, Text, TextInput } from '@expo/ui';
 import { useRef, useState } from 'react';
 
-import { NativeHost } from '@/components/native-host';
+import { NativeHost } from './native-host';
 import { typeRamp, usePalette } from '@/theme';
 
 /**
- * Sheet with a single title field, used to create and to rename a note. Built from
+ * Sheet with a single name field, used to create and to rename notes and tags. Built from
  * @expo/ui so it is the platform's own sheet, text field and button: Material 3 on
  * Android, SwiftUI on iOS.
  *
- * The field starts from `initialTitle`; give the sheet a `key` per note when renaming.
+ * The field starts from `initialValue`; give the sheet a `key` per item when renaming.
  */
-export function NoteTitleSheet({
+export function NameSheet({
   isPresented,
   heading,
   submitLabel,
-  initialTitle = '',
+  initialValue = '',
+  placeholder,
   onDismiss,
   onSubmit,
 }: {
   isPresented: boolean;
   heading: string;
   submitLabel: string;
-  initialTitle?: string;
+  initialValue?: string;
   onDismiss: () => void;
-  onSubmit: (title: string) => void;
+  placeholder: string;
+  onSubmit: (name: string) => void;
 }) {
-  const title = useRef(initialTitle);
-  const [canSubmit, setCanSubmit] = useState(initialTitle.trim().length > 0);
+  const title = useRef(initialValue);
+  const [canSubmit, setCanSubmit] = useState(initialValue.trim().length > 0);
   const palette = usePalette();
 
   const reset = () => {
-    title.current = initialTitle;
-    setCanSubmit(initialTitle.trim().length > 0);
+    title.current = initialValue;
+    setCanSubmit(initialValue.trim().length > 0);
   };
 
   const submit = () => {
@@ -57,10 +59,10 @@ export function NoteTitleSheet({
           </Text>
           <TextInput
             autoFocus
-            defaultValue={initialTitle}
-            // Renaming usually replaces the whole title.
-            selectTextOnFocus={initialTitle.length > 0}
-            placeholder="Title"
+            defaultValue={initialValue}
+            // Renaming usually replaces the whole name.
+            selectTextOnFocus={initialValue.length > 0}
+            placeholder={placeholder}
             maxLength={80}
             returnKeyType="done"
             placeholderTextColor={palette['on-surface-variant']}

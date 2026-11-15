@@ -2,6 +2,7 @@ import Delete from '@expo/material-symbols/delete.xml';
 import Edit from '@expo/material-symbols/edit.xml';
 import Keep from '@expo/material-symbols/keep.xml';
 import KeepOff from '@expo/material-symbols/keep_off.xml';
+import Label from '@expo/material-symbols/label.xml';
 import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { FlatList } from 'react-native';
@@ -10,6 +11,7 @@ import { ActionSheet, type SheetAction } from '@/components/action-sheet';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { EmptyState } from '@/components/empty-state';
 import { Fab } from '@/components/fab';
+import { NameSheet } from '@/components/name-sheet';
 import {
   createNote,
   deleteNote,
@@ -20,7 +22,7 @@ import {
 } from '@/data/notes-store';
 
 import { NoteRow } from './note-row';
-import { NoteTitleSheet } from './note-title-sheet';
+import { NoteTagsSheet } from './note-tags-sheet';
 
 export function Notes() {
   const notes = useNotes();
@@ -31,6 +33,7 @@ export function Notes() {
   const [selected, setSelected] = useState<Note | null>(null);
   const [renaming, setRenaming] = useState<Note | null>(null);
   const [deleting, setDeleting] = useState<Note | null>(null);
+  const [tagging, setTagging] = useState<string | null>(null);
 
   const startNewNote = () => setIsCreating(true);
 
@@ -48,6 +51,7 @@ export function Notes() {
         selected.pinned
           ? { label: 'Unpin', icon: KeepOff, onPress: () => setNotePinned(selected.id, false) }
           : { label: 'Pin', icon: Keep, onPress: () => setNotePinned(selected.id, true) },
+        { label: 'Tags', icon: Label, onPress: () => setTagging(selected.id) },
         { label: 'Rename', icon: Edit, onPress: () => setRenaming(selected) },
         { label: 'Delete', icon: Delete, destructive: true, onPress: () => setDeleting(selected) },
       ]
@@ -76,27 +80,30 @@ export function Notes() {
           <Stack.Toolbar.Button icon="square.and.pencil" onPress={startNewNote} />
         </Stack.Toolbar>
       )}
-      <Fab label="New note" onPress={startNewNote} />
-      <NoteTitleSheet
+      <Fab label="New note" icon={Edit} onPress={startNewNote} />
+      <NameSheet
         isPresented={isCreating}
         heading="New note"
+        placeholder="Title"
         submitLabel="Create"
         onDismiss={() => setIsCreating(false)}
         onSubmit={openNewNote}
       />
-      <NoteTitleSheet
+      <NameSheet
         // Remounts per note so the field starts from that note's title.
         key={renaming?.id ?? 'rename'}
         isPresented={renaming !== null}
         heading="Rename note"
+        placeholder="Title"
         submitLabel="Save"
-        initialTitle={renaming?.title}
+        initialValue={renaming?.title}
         onDismiss={() => setRenaming(null)}
         onSubmit={(title) => {
           if (renaming) renameNote(renaming.id, title);
           setRenaming(null);
         }}
       />
+      <NoteTagsSheet noteId={tagging} onDismiss={() => setTagging(null)} />
       <ActionSheet
         isPresented={selected !== null}
         onDismiss={() => setSelected(null)}

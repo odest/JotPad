@@ -1,5 +1,9 @@
+import { type ImageSourcePropType } from 'react-native';
+
 export type FabProps = {
   label: string;
+  /** Material Symbols drawable. */
+  icon: ImageSourcePropType;
   onPress: () => void;
 };
 
