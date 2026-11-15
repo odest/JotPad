@@ -18,7 +18,7 @@ The app is local-first. There is no backend and no sync.
 - Components read strings with `const t = useT()` (and `useLocale()` for dates), so they re-render when the language changes. Helpers that run while rendering take the strings as a parameter (`formatDay(ts, { t, locale })`, `sortOptions(t)`); never keep strings in module-level constants. Code that runs on a tap, such as an export, may call `strings()`.
 - Message bodies are Markdown, rendered with `react-native-marked` in `src/screens/note/message-body.tsx`. Each line break stays a break (`withLineBreaks`), a message with no Markdown characters is shown as plain text, and while searching the raw text is shown so matches can be highlighted. One-line previews (note list, pinned bar) go through `stripMarkdown` (`src/utils/markdown.ts`). Links open on a tap and pass a long press on to the message.
 - Only Android has been run. The iOS code paths exist but are untested.
-- There are no automated tests yet.
+- Unit tests (Jest with `jest-expo`) cover the pure logic: Markdown helpers, export, date formatting, note sorting, group positions and the string tables. There are no component or end-to-end tests, and the store and database are not tested.
 
 ## Commands
 
@@ -26,13 +26,14 @@ The app is local-first. There is no backend and no sync.
 npx expo install <package>  # always use this to add a package, so the version matches the SDK
 npx expo start --go         # start the dev server for Expo Go
 npx expo lint               # lint
+npm test                    # unit tests (Jest); tests sit next to the code as *.test.ts
 npx tsc --noEmit            # typecheck
 npx prettier --write src    # format (sorts Tailwind classes)
 npx expo-doctor             # diagnose dependency and config issues
 npx drizzle-kit generate --name <what_changed>  # create a migration after changing src/data/schema.ts
 ```
 
-Run typecheck and lint before calling a task done.
+Run typecheck, lint and the tests before calling a task done. Add or update a test when you change logic that has one. Tests import with the `@/` alias like the app, and mock native modules (`expo-file-system`, `expo-sharing`, `@/i18n`) rather than loading them; see `src/utils/export-notes.test.ts`. TypeScript 6 includes no `@types/*` by default, so a new type package must be added to `types` in `tsconfig.json`.
 
 ## Running the app
 
