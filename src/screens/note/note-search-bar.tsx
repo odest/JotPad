@@ -1,4 +1,5 @@
 import { type NativeStackNavigationOptions } from 'expo-router';
+import { t } from '@/i18n';
 
 export type NoteSearchBarProps = {
   query: string;
@@ -16,7 +17,7 @@ export function searchHeaderOptions({
 }: NoteSearchBarProps): NativeStackNavigationOptions {
   return {
     headerSearchBarOptions: {
-      placeholder: 'Search in note',
+      placeholder: t.note.searchInNote,
       autoCapitalize: 'none',
       autoFocus: true,
       hideWhenScrolling: false,

@@ -2,6 +2,7 @@ import { Pressable, TextInput, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { typeRamp, usePalette } from '@/theme';
+import { t } from '@/i18n';
 
 /**
  * Always-visible search bar in the Material 3 shape. Used on Android, where the stack
@@ -36,7 +37,7 @@ export function SearchField({
       {value.length > 0 && (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Clear search"
+          accessibilityLabel={t.common.clearSearch}
           onPress={() => onChangeText('')}
           android_ripple={{ color: palette['surface-container-highest'], borderless: true }}
           className="h-12 w-12 items-center justify-center"

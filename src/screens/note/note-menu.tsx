@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 
 import { type Note } from '@/data/notes-store';
+import { t } from '@/i18n';
 
 export type NoteMenuProps = {
   note: Note;
@@ -24,24 +25,24 @@ export function NoteMenu({
 }: NoteMenuProps) {
   return (
     <Stack.Toolbar placement="right">
-      <Stack.Toolbar.Menu icon="ellipsis" accessibilityLabel="More options">
+      <Stack.Toolbar.Menu icon="ellipsis" accessibilityLabel={t.common.moreOptions}>
         <Stack.Toolbar.MenuAction icon="magnifyingglass" onPress={onSearch}>
-          Search
+          {t.common.search}
         </Stack.Toolbar.MenuAction>
         <Stack.Toolbar.MenuAction icon={note.pinned ? 'pin.slash' : 'pin'} onPress={onTogglePin}>
-          {note.pinned ? 'Unpin note' : 'Pin note'}
+          {note.pinned ? t.notes.unpinNote : t.notes.pinNote}
         </Stack.Toolbar.MenuAction>
         <Stack.Toolbar.MenuAction icon="tag" onPress={onTags}>
-          Tags
+          {t.common.tags}
         </Stack.Toolbar.MenuAction>
         <Stack.Toolbar.MenuAction icon="pencil" onPress={onRename}>
-          Rename
+          {t.common.rename}
         </Stack.Toolbar.MenuAction>
         <Stack.Toolbar.MenuAction icon="square.and.arrow.up" onPress={onExport}>
-          Export
+          {t.common.export}
         </Stack.Toolbar.MenuAction>
         <Stack.Toolbar.MenuAction icon="trash" destructive onPress={onDelete}>
-          Delete note
+          {t.notes.deleteNote}
         </Stack.Toolbar.MenuAction>
       </Stack.Toolbar.Menu>
     </Stack.Toolbar>

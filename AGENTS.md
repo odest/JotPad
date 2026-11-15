@@ -14,7 +14,7 @@ The app is local-first. There is no backend and no sync.
 ## Current state
 
 - Data is stored in SQLite (`expo-sqlite`) through Drizzle. `src/data/notes-store.ts` keeps an in-memory copy so screens read synchronously: it loads once at startup, and every action writes to the database first, then updates the copy. Screens use only the store's hooks and actions, never `db` directly.
-- All UI strings are English literals. Turkish and English localisation is planned.
+- The UI is in English and Turkish and follows the device language (English otherwise). Every UI string, accessibility labels included, lives in `src/i18n/en.ts` and `tr.ts` and is read as `t.section.key`; strings with a number or name are functions. Never write a UI string as a literal. Format dates with the `locale` from `@/i18n`.
 - Only Android has been run. The iOS code paths exist but are untested.
 - There are no automated tests yet.
 
@@ -51,6 +51,7 @@ src/
   components/   UI shared by more than one screen.
   navigation/   Stack options and the tab navigators (`app-tabs`).
   data/         The store (types, hooks, actions), the Drizzle schema and its migrations.
+  i18n/         UI strings per language (`t`) and the matching `locale`.
   theme/        Design tokens and the theme provider.
   utils/        Small standalone helpers.
 ```

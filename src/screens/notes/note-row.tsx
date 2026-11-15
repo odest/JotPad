@@ -7,6 +7,7 @@ import { useLastEntry, useTags, type Note } from '@/data/notes-store';
 import { usePalette, useTagTone } from '@/theme';
 import { formatListStamp } from '@/utils/format-time';
 import { longPressFeedback } from '@/utils/haptics';
+import { t } from '@/i18n';
 
 /** A note in a list. `preview` replaces the last entry as the second line (search results). */
 export function NoteRow({
@@ -59,7 +60,7 @@ export function NoteRow({
             </Text>
           </View>
           <Text numberOfLines={1} className="text-subhead text-on-surface-variant">
-            {preview ?? lastEntry?.body ?? 'No messages yet'}
+            {preview ?? lastEntry?.body ?? t.notes.noMessages}
           </Text>
           {tags.length > 0 && (
             <View className="mt-1 flex-row items-center gap-2">

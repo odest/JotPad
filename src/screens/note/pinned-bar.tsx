@@ -4,6 +4,7 @@ import { Icon } from '@/components/icon';
 import { ShapedBadge } from '@/components/shaped-badge';
 import { type Entry } from '@/data/notes-store';
 import { usePalette } from '@/theme';
+import { t } from '@/i18n';
 
 /**
  * The pinned messages of a note, one at a time, below the header. Tapping it jumps to
@@ -25,7 +26,9 @@ export function PinnedBar({
   if (!entry) return null;
 
   const label =
-    pinned.length > 1 ? `Pinned message ${index + 1} of ${pinned.length}` : 'Pinned message';
+    pinned.length > 1
+      ? t.note.pinnedMessagePosition(index + 1, pinned.length)
+      : t.note.pinnedMessage;
 
   return (
     <Pressable
@@ -33,7 +36,7 @@ export function PinnedBar({
       android_ripple={{ color: palette['surface-container-highest'] }}
       accessibilityRole="button"
       accessibilityLabel={`${label}: ${entry.body}`}
-      accessibilityHint="Shows the message in the conversation"
+      accessibilityHint={t.note.pinnedMessageHint}
       className="ios:active:bg-surface-container-high ios:border-b ios:border-outline-variant android:mx-3 android:mb-1 android:overflow-hidden android:rounded-xl android:bg-surface-container-high android:pr-2 min-h-14 flex-row items-center gap-3 bg-surface-container px-4 py-2"
     >
       {/* One segment per pinned message; the one shown is filled. */}

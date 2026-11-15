@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Alert } from 'react-native';
+import { t } from '@/i18n';
 
 export type ErrorDialogProps = {
   isPresented: boolean;
@@ -18,11 +19,11 @@ export function ErrorDialog({ isPresented, title, message, onRetry, onDismiss }:
   useEffect(() => {
     if (!isPresented) return;
     Alert.alert(title, message, [
-      { text: onRetry ? 'Cancel' : 'OK', style: 'cancel', onPress: onDismiss },
+      { text: onRetry ? t.common.cancel : t.common.ok, style: 'cancel', onPress: onDismiss },
       ...(onRetry
         ? [
             {
-              text: 'Try again',
+              text: t.common.tryAgain,
               onPress: () => {
                 onDismiss();
                 onRetry();

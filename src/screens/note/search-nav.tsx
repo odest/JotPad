@@ -2,6 +2,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { Icon, type IconName } from '@/components/icon';
 import { usePalette } from '@/theme';
+import { t } from '@/i18n';
 
 /**
  * Takes the composer's place while searching: how many messages match, and arrows that
@@ -22,10 +23,10 @@ export function SearchNav({
   onNewer: () => void;
 }) {
   const label = !query.trim()
-    ? 'Type to search messages'
+    ? t.note.typeToSearch
     : count === 0
-      ? 'No messages found'
-      : `${index + 1} of ${count}`;
+      ? t.note.noMatches
+      : t.note.matchPosition(index + 1, count);
 
   return (
     <View className="ios:border-t ios:border-outline-variant min-h-16 flex-row items-center bg-surface-container pl-5 pr-2">
@@ -37,13 +38,13 @@ export function SearchNav({
       </Text>
       <NavButton
         icon={{ ios: 'chevron.up', android: 'keyboard_arrow_up' }}
-        label="Older match"
+        label={t.note.olderMatch}
         disabled={count === 0 || index === 0}
         onPress={onOlder}
       />
       <NavButton
         icon={{ ios: 'chevron.down', android: 'keyboard_arrow_down' }}
-        label="Newer match"
+        label={t.note.newerMatch}
         disabled={count === 0 || index === count - 1}
         onPress={onNewer}
       />

@@ -28,6 +28,7 @@ import {
 } from '@/data/notes-store';
 import { usePalette, useTagTone, type TagColor } from '@/theme';
 import { longPressFeedback } from '@/utils/haptics';
+import { t } from '@/i18n';
 
 export function Tags() {
   const palette = usePalette();
@@ -57,8 +58,13 @@ export function Tags() {
 
   const actions: SheetAction[] = selected
     ? [
-        { label: 'Edit', icon: Edit, onPress: () => startEditing(selected) },
-        { label: 'Delete', icon: Delete, destructive: true, onPress: () => setDeleting(selected) },
+        { label: t.common.edit, icon: Edit, onPress: () => startEditing(selected) },
+        {
+          label: t.common.delete,
+          icon: Delete,
+          destructive: true,
+          onPress: () => setDeleting(selected),
+        },
       ]
     : [];
 
@@ -108,7 +114,7 @@ export function Tags() {
                     {item.name}
                   </Text>
                   <Text className="text-subhead text-on-surface-variant">
-                    {count === 1 ? '1 note' : `${count} notes`}
+                    {t.tags.noteCount(count)}
                   </Text>
                 </Pressable>
               </Link>
@@ -119,8 +125,8 @@ export function Tags() {
           <View className="flex-1">
             <EmptyState
               icon={{ ios: 'tag', android: 'label' }}
-              title="No tags yet"
-              message="Create tags to group your notes."
+              title={t.tags.emptyTitle}
+              message={t.tags.emptyMessage}
             />
           </View>
         }
@@ -130,12 +136,12 @@ export function Tags() {
           <Stack.Toolbar.Button icon="plus" onPress={startNewTag} />
         </Stack.Toolbar>
       )}
-      <Fab label="New tag" icon={Add} expanded={fab.expanded} onPress={startNewTag} />
+      <Fab label={t.tags.newTag} icon={Add} expanded={fab.expanded} onPress={startNewTag} />
       <NameSheet
         isPresented={isCreating}
-        heading="New tag"
-        placeholder="Name"
-        submitLabel="Create"
+        heading={t.tags.newTag}
+        placeholder={t.common.name}
+        submitLabel={t.common.create}
         color={{ value: draftColor, onChange: setDraftColor }}
         onDismiss={() => setIsCreating(false)}
         onSubmit={(name) => {
@@ -147,9 +153,9 @@ export function Tags() {
         // Remounts per tag so the field starts from that tag's name.
         key={renaming?.id ?? 'rename'}
         isPresented={renaming !== null}
-        heading="Edit tag"
-        placeholder="Name"
-        submitLabel="Save"
+        heading={t.tags.editTag}
+        placeholder={t.common.name}
+        submitLabel={t.common.save}
         initialValue={renaming?.name}
         color={{ value: draftColor, onChange: setDraftColor }}
         onDismiss={() => setRenaming(null)}
@@ -165,9 +171,9 @@ export function Tags() {
       />
       <ConfirmDialog
         isPresented={deleting !== null}
-        title="Delete tag?"
-        message={`"${deleting?.name ?? ''}" will be removed from every note. The notes are kept.`}
-        confirmLabel="Delete"
+        title={t.tags.deleteTitle}
+        message={t.tags.deleteMessage(deleting?.name ?? '')}
+        confirmLabel={t.common.delete}
         destructive
         onConfirm={() => deleting && deleteTag(deleting.id)}
         onDismiss={() => setDeleting(null)}

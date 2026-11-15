@@ -6,6 +6,7 @@ import { Icon } from '@/components/icon';
 import { typeRamp, usePalette } from '@/theme';
 
 import { SendButton } from './send-button';
+import { t } from '@/i18n';
 
 /**
  * Message field. With `editingBody` set it edits that text instead of writing a new
@@ -51,10 +52,12 @@ export function Composer({
       {isEditing && (
         <View className="flex-row items-center gap-3 pl-5 pr-2 pt-2">
           <Icon name={{ ios: 'pencil', android: 'edit' }} size={18} color="primary" />
-          <Text className="flex-1 text-subhead font-medium text-primary">Editing message</Text>
+          <Text className="flex-1 text-subhead font-medium text-primary">
+            {t.note.editingMessage}
+          </Text>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Cancel editing"
+            accessibilityLabel={t.note.cancelEditing}
             onPress={onCancelEdit}
             hitSlop={8}
             android_ripple={{ color: palette['surface-container-highest'], borderless: true }}
@@ -70,7 +73,7 @@ export function Composer({
           ref={input}
           value={draft}
           onChangeText={setDraft}
-          placeholder="Message"
+          placeholder={t.note.messagePlaceholder}
           placeholderTextColor={palette['on-surface-variant']}
           cursorColor={palette.primary}
           selectionColor={palette.primary}

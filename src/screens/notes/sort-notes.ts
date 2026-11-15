@@ -1,12 +1,13 @@
 import { type Note } from '@/data/notes-store';
 import { type NoteSort } from '@/data/preferences';
+import { t } from '@/i18n';
 
 export const SORT_OPTIONS: { sort: NoteSort; label: string }[] = [
-  { sort: 'activity', label: 'Recent activity' },
-  { sort: 'newest', label: 'Newest first' },
-  { sort: 'oldest', label: 'Oldest first' },
-  { sort: 'title-asc', label: 'Title A–Z' },
-  { sort: 'title-desc', label: 'Title Z–A' },
+  { sort: 'activity', label: t.notes.sortActivity },
+  { sort: 'newest', label: t.notes.sortNewest },
+  { sort: 'oldest', label: t.notes.sortOldest },
+  { sort: 'title-asc', label: t.notes.sortTitleAsc },
+  { sort: 'title-desc', label: t.notes.sortTitleDesc },
 ];
 
 const byTitle = (a: Note, b: Note) =>

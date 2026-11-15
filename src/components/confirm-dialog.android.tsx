@@ -6,6 +6,7 @@ import { NativeHost } from '@/components/native-host';
 import { usePalette } from '@/theme';
 
 import { type ConfirmDialogProps } from './confirm-dialog';
+import { t } from '@/i18n';
 
 /**
  * A Material 3 dialog. A destructive one leads with a trash icon on an Expressive shape,
@@ -48,7 +49,7 @@ export function ConfirmDialog({
         </AlertDialog.Text>
         <AlertDialog.DismissButton>
           <TextButton onClick={onDismiss}>
-            <Text>Cancel</Text>
+            <Text>{t.common.cancel}</Text>
           </TextButton>
         </AlertDialog.DismissButton>
         <AlertDialog.ConfirmButton>

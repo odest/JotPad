@@ -10,6 +10,7 @@ import { usePalette } from '@/theme';
 
 import { type NotesHeaderProps } from './notes-header';
 import { SORT_OPTIONS } from './sort-notes';
+import { t } from '@/i18n';
 
 /**
  * The notes list's header items on Android: a sort menu. New notes come from the FAB,
@@ -32,7 +33,11 @@ function SortMenu({ sort }: { sort: NoteSort }) {
       >
         <DropdownMenu.Trigger>
           <IconButton onClick={() => setOpen(true)}>
-            <Icon source={Sort} contentDescription="Sort notes" tint={palette['on-surface']} />
+            <Icon
+              source={Sort}
+              contentDescription={t.notes.sortNotes}
+              tint={palette['on-surface']}
+            />
           </IconButton>
         </DropdownMenu.Trigger>
         <DropdownMenu.Items>
