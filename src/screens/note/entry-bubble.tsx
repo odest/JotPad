@@ -78,9 +78,12 @@ export function EntryBubble({
         }}
       />
       {startsDay && (
-        <Text className="pb-3 text-center text-footnote font-medium text-on-surface-variant">
-          {formatDay(entry.createdAt)}
-        </Text>
+        <View className="items-center pb-3">
+          {/* Android sets the day on a tonal pill, as Material chat apps do. */}
+          <Text className="android:rounded-full android:bg-surface-container-high android:px-3 android:py-1 text-center text-footnote font-medium text-on-surface-variant">
+            {formatDay(entry.createdAt)}
+          </Text>
+        </View>
       )}
       <View className="gap-1.5 flex-row items-center justify-end">
         {entry.pinnedAt !== null && (
