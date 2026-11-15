@@ -4,6 +4,7 @@ import { BottomSheet, Column, Icon, ListItem, Text } from '@expo/ui';
 import { NativeHost } from './native-host';
 import { setNoteTags, useNote, useTags } from '@/data/notes-store';
 import { typeRamp, usePalette, useTagTone } from '@/theme';
+import { t } from '@/i18n';
 
 /** Sheet that toggles which tags a note has. Pass the note's id to present it. */
 export function NoteTagsSheet({
@@ -35,14 +36,14 @@ export function NoteTagsSheet({
             style={{ paddingHorizontal: 16, paddingBottom: 8 }}
             textStyle={{ fontSize: typeRamp.title.size, lineHeight: typeRamp.title.leading }}
           >
-            Tags
+            {t.common.tags}
           </Text>
           {tags.length === 0 ? (
             <Text
               style={{ paddingHorizontal: 16, paddingVertical: 16 }}
               textStyle={{ color: palette['on-surface-variant'] }}
             >
-              No tags yet. Create one in the Tags tab.
+              {t.tags.sheetEmpty}
             </Text>
           ) : (
             tags.map((tag) => (

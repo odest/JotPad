@@ -10,6 +10,7 @@ import { useAllEntries, useNotes, type Note } from '@/data/notes-store';
 import { NoteRow } from '@/screens/notes/note-row';
 
 import { SearchField } from './search-field';
+import { t } from '@/i18n';
 
 type Result = { note: Note; preview?: string };
 
@@ -41,14 +42,14 @@ export function Search() {
         <>
           <Stack.Screen options={{ headerShown: false }} />
           <View className="bg-surface px-4 pb-2" style={{ paddingTop: insets.top + 8 }}>
-            <SearchField value={query} onChangeText={setQuery} placeholder="Search notes" />
+            <SearchField value={query} onChangeText={setQuery} placeholder={t.search.placeholder} />
           </View>
         </>
       ) : (
         <Stack.Screen
           options={{
             headerSearchBarOptions: {
-              placeholder: 'Search notes',
+              placeholder: t.search.placeholder,
               autoCapitalize: 'none',
               onChangeText: (event) => setQuery(event.nativeEvent.text),
               onCancelButtonPress: () => setQuery(''),
@@ -73,14 +74,14 @@ export function Search() {
           needle ? (
             <EmptyState
               icon={{ ios: 'magnifyingglass', android: 'search_off' }}
-              title="No results"
-              message={`Nothing matches "${query.trim()}".`}
+              title={t.search.noResultsTitle}
+              message={t.search.noResultsMessage(query.trim())}
             />
           ) : (
             <EmptyState
               icon={{ ios: 'magnifyingglass', android: 'search' }}
-              title="Search your notes"
-              message="Find a note by its title or by anything you wrote in it."
+              title={t.search.emptyTitle}
+              message={t.search.emptyMessage}
             />
           )
         }

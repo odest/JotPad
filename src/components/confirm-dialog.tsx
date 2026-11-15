@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Alert } from 'react-native';
+import { t } from '@/i18n';
 
 export type ConfirmDialogProps = {
   isPresented: boolean;
@@ -27,7 +28,7 @@ export function ConfirmDialog({
   useEffect(() => {
     if (!isPresented) return;
     Alert.alert(title, message, [
-      { text: 'Cancel', style: 'cancel', onPress: onDismiss },
+      { text: t.common.cancel, style: 'cancel', onPress: onDismiss },
       {
         text: confirmLabel,
         style: destructive ? 'destructive' : 'default',

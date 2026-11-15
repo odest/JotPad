@@ -40,6 +40,7 @@ import { NoteSearchBar, searchHeaderOptions } from './note-search-bar';
 import { NoteTitle } from './note-title';
 import { PinnedBar } from './pinned-bar';
 import { SearchNav } from './search-nav';
+import { t } from '@/i18n';
 
 /** Entries sent within this window of each other are shown as one group. */
 const GROUP_WINDOW_MS = 2 * 60 * 1000;
@@ -173,9 +174,9 @@ export function NoteChat({ noteId }: { noteId: string }) {
   const actions: SheetAction[] = selected
     ? [
         selected.pinnedAt !== null
-          ? { label: 'Unpin', icon: KeepOff, onPress: () => setEntryPinned(selected, false) }
+          ? { label: t.common.unpin, icon: KeepOff, onPress: () => setEntryPinned(selected, false) }
           : {
-              label: 'Pin',
+              label: t.common.pin,
               icon: Keep,
               onPress: () => {
                 setEntryPinned(selected, true);
@@ -183,10 +184,14 @@ export function NoteChat({ noteId }: { noteId: string }) {
                 setPinStep(0);
               },
             },
-        { label: 'Copy', icon: Copy, onPress: () => Clipboard.setStringAsync(selected.body) },
-        { label: 'Edit', icon: Edit, onPress: () => setEditing(selected) },
         {
-          label: 'Delete',
+          label: t.common.copy,
+          icon: Copy,
+          onPress: () => Clipboard.setStringAsync(selected.body),
+        },
+        { label: t.common.edit, icon: Edit, onPress: () => setEditing(selected) },
+        {
+          label: t.common.delete,
           icon: Delete,
           destructive: true,
           onPress: () => setDeleting(selected),
@@ -237,8 +242,8 @@ export function NoteChat({ noteId }: { noteId: string }) {
         {entries.length === 0 ? (
           <EmptyState
             icon={{ ios: 'text.bubble', android: 'chat_bubble' }}
-            title="Nothing here yet"
-            message="Write your first message below."
+            title={t.note.emptyTitle}
+            message={t.note.emptyMessage}
           />
         ) : (
           <FlatList
@@ -301,9 +306,9 @@ export function NoteChat({ noteId }: { noteId: string }) {
       </KeyboardAvoidingView>
       <ConfirmDialog
         isPresented={deleting !== null}
-        title="Delete message?"
-        message="This message will be removed from the note."
-        confirmLabel="Delete"
+        title={t.note.deleteMessageTitle}
+        message={t.note.deleteMessageMessage}
+        confirmLabel={t.common.delete}
         destructive
         onConfirm={() => deleting && deleteEntry(deleting)}
         onDismiss={() => setDeleting(null)}
@@ -312,9 +317,9 @@ export function NoteChat({ noteId }: { noteId: string }) {
         // Remounts after a rename so the field starts from the current title.
         key={note?.title}
         isPresented={renamingNote}
-        heading="Rename note"
-        placeholder="Title"
-        submitLabel="Save"
+        heading={t.notes.renameNote}
+        placeholder={t.common.title}
+        submitLabel={t.common.save}
         initialValue={note?.title}
         onDismiss={() => setRenamingNote(false)}
         onSubmit={(title) => {
@@ -333,9 +338,9 @@ export function NoteChat({ noteId }: { noteId: string }) {
       <NoteTagsSheet noteId={taggingNote ? noteId : null} onDismiss={() => setTaggingNote(false)} />
       <ConfirmDialog
         isPresented={deletingNote}
-        title="Delete note?"
-        message={`"${note?.title ?? ''}" and all of its messages will be deleted.`}
-        confirmLabel="Delete"
+        title={t.notes.deleteTitle}
+        message={t.notes.deleteMessage(note?.title ?? '')}
+        confirmLabel={t.common.delete}
         destructive
         onConfirm={() => {
           // Leave first, so the screen never renders a note that no longer exists.

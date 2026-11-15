@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { ActionSheetIOS } from 'react-native';
 
 import { type ActionSheetProps } from './action-sheet';
+import { t } from '@/i18n';
 
 export function ActionSheet({ isPresented, onDismiss, actions }: ActionSheetProps) {
   useEffect(() => {
@@ -9,7 +10,7 @@ export function ActionSheet({ isPresented, onDismiss, actions }: ActionSheetProp
     const destructive = actions.flatMap((action, index) => (action.destructive ? [index] : []));
     ActionSheetIOS.showActionSheetWithOptions(
       {
-        options: [...actions.map((action) => action.label), 'Cancel'],
+        options: [...actions.map((action) => action.label), t.common.cancel],
         cancelButtonIndex: actions.length,
         destructiveButtonIndex: destructive,
       },

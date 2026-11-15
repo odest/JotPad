@@ -6,6 +6,7 @@ import { NativeHost } from '@/components/native-host';
 import { usePalette } from '@/theme';
 
 import { type ErrorDialogProps } from './error-dialog';
+import { t } from '@/i18n';
 
 /** A Material 3 dialog led by an error icon on the same Expressive shape as delete. */
 export function ErrorDialog({ isPresented, title, message, onRetry, onDismiss }: ErrorDialogProps) {
@@ -37,7 +38,7 @@ export function ErrorDialog({ isPresented, title, message, onRetry, onDismiss }:
           <>
             <AlertDialog.DismissButton>
               <TextButton onClick={onDismiss}>
-                <Text>Cancel</Text>
+                <Text>{t.common.cancel}</Text>
               </TextButton>
             </AlertDialog.DismissButton>
             <AlertDialog.ConfirmButton>
@@ -47,14 +48,14 @@ export function ErrorDialog({ isPresented, title, message, onRetry, onDismiss }:
                   onRetry();
                 }}
               >
-                <Text>Try again</Text>
+                <Text>{t.common.tryAgain}</Text>
               </TextButton>
             </AlertDialog.ConfirmButton>
           </>
         ) : (
           <AlertDialog.ConfirmButton>
             <TextButton onClick={onDismiss}>
-              <Text>OK</Text>
+              <Text>{t.common.ok}</Text>
             </TextButton>
           </AlertDialog.ConfirmButton>
         )}

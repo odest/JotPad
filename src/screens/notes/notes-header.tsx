@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { setNoteSort, type NoteSort } from '@/data/preferences';
 
 import { SORT_OPTIONS } from './sort-notes';
+import { t } from '@/i18n';
 
 export type NotesHeaderProps = {
   sort: NoteSort;
@@ -13,7 +14,7 @@ export type NotesHeaderProps = {
 export function NotesHeader({ sort, onNewNote }: NotesHeaderProps) {
   return (
     <Stack.Toolbar placement="right">
-      <Stack.Toolbar.Menu icon="arrow.up.arrow.down" accessibilityLabel="Sort notes">
+      <Stack.Toolbar.Menu icon="arrow.up.arrow.down" accessibilityLabel={t.notes.sortNotes}>
         {SORT_OPTIONS.map((option) => (
           <Stack.Toolbar.MenuAction
             key={option.sort}

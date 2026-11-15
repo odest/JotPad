@@ -2,6 +2,7 @@ import { Pressable } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { usePalette } from '@/theme';
+import { t } from '@/i18n';
 
 export type SendButtonProps = {
   /** Shows a check mark instead of the send icon. */
@@ -19,7 +20,7 @@ export function SendButton({ isEditing, enabled, onPress }: SendButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={isEditing ? 'Save' : 'Send'}
+      accessibilityLabel={isEditing ? t.common.save : t.note.send}
       accessibilityState={{ disabled: !enabled }}
       disabled={!enabled}
       onPress={onPress}

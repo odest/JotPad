@@ -7,6 +7,7 @@ import { type ExportData, type ExportFormat, shareExport } from '@/utils/export-
 
 import { ActionSheet } from './action-sheet';
 import { ErrorDialog } from './error-dialog';
+import { t } from '@/i18n';
 
 /**
  * Asks for a file format, then hands the export to the system share sheet. Used for one
@@ -41,15 +42,15 @@ export function ExportSheet({
         isPresented={isPresented}
         onDismiss={onDismiss}
         actions={[
-          { label: 'Markdown (.md)', icon: Description, onPress: () => share('markdown') },
-          { label: 'Plain text (.txt)', icon: Notes, onPress: () => share('text') },
-          { label: 'JSON (.json)', icon: DataObject, onPress: () => share('json') },
+          { label: t.export.markdown, icon: Description, onPress: () => share('markdown') },
+          { label: t.export.text, icon: Notes, onPress: () => share('text') },
+          { label: t.export.json, icon: DataObject, onPress: () => share('json') },
         ]}
       />
       <ErrorDialog
         isPresented={failed !== null}
-        title="Couldn't export"
-        message="The file could not be created or shared. Check that there is free space on the device and try again."
+        title={t.export.failedTitle}
+        message={t.export.failedMessage}
         onRetry={() => failed && share(failed)}
         onDismiss={() => setFailed(null)}
       />

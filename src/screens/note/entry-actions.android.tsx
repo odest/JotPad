@@ -7,6 +7,7 @@ import { NativeHost } from '@/components/native-host';
 import { usePalette } from '@/theme';
 
 import { type EntryActionsProps } from './entry-actions';
+import { t } from '@/i18n';
 
 /**
  * A floating toolbar with the selected message's actions, floating above the composer.
@@ -35,7 +36,7 @@ export function EntryActions({ isPresented, onDismiss, actions }: EntryActionsPr
       <NativeHost matchContents>
         <HorizontalFloatingToolbar variant="standard">
           <IconButton onClick={onDismiss}>
-            <Icon source={Close} contentDescription="Clear selection" />
+            <Icon source={Close} contentDescription={t.note.clearSelection} />
           </IconButton>
           {actions.map((action) => (
             <IconButton

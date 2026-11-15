@@ -2,6 +2,7 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 
 import { type Entry, type Note, type Tag } from '@/data/notes-store';
+import { t } from '@/i18n';
 
 export type ExportFormat = 'markdown' | 'text' | 'json';
 
@@ -59,7 +60,8 @@ function toMarkdown({ notes, entries, tags }: ExportData): string {
     .map((note) => {
       const lines = [`# ${escapeMarkdown(note.title)}`];
       const names = tagNames(note, tags);
-      if (names.length > 0) lines.push('', `Tags: ${names.map(escapeMarkdown).join(', ')}`);
+      if (names.length > 0)
+        lines.push('', `${t.export.tagsLine}: ${names.map(escapeMarkdown).join(', ')}`);
       for (const [day, list] of byDay(entries[note.id] ?? [])) {
         lines.push('', `## ${day}`, '');
         for (const entry of list) {
@@ -88,11 +90,11 @@ function toText({ notes, entries, tags }: ExportData): string {
     .map((note) => {
       const lines = [note.title, '='.repeat(Math.max(note.title.length, 3))];
       const names = tagNames(note, tags);
-      if (names.length > 0) lines.push(`Tags: ${names.join(', ')}`);
+      if (names.length > 0) lines.push(`${t.export.tagsLine}: ${names.join(', ')}`);
       for (const [day, list] of byDay(entries[note.id] ?? [])) {
         lines.push('', day);
         for (const entry of list) {
-          const pin = entry.pinnedAt !== null ? ' (pinned)' : '';
+          const pin = entry.pinnedAt !== null ? ` (${t.export.pinnedMark})` : '';
           const body = entry.body.replace(/\n/g, '\n        ');
           lines.push(`  ${clock(entry.createdAt)}${pin}  ${body}`);
         }
@@ -155,10 +157,10 @@ export async function shareExport(data: ExportData, format: ExportFormat, name: 
   const file = new File(Paths.cache, `${safeFileName(name)}.${extension}`);
   file.create({ overwrite: true });
   file.write(RENDERERS[format](data));
-  await Sharing.shareAsync(file.uri, { mimeType, UTI, dialogTitle: `Export ${name}` });
+  await Sharing.shareAsync(file.uri, { mimeType, UTI, dialogTitle: t.export.shareTitle(name) });
 }
 
 /** File name for an export of every note, dated so repeated exports do not collide. */
 export function allNotesFileName(now = Date.now()): string {
-  return `JotPad notes ${isoDay(now)}`;
+  return `${t.export.allNotesFile} ${isoDay(now)}`;
 }

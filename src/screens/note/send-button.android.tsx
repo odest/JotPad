@@ -5,6 +5,7 @@ import { Icon } from '@/components/icon';
 import { ShapedBadge } from '@/components/shaped-badge';
 
 import { type SendButtonProps } from './send-button';
+import { t } from '@/i18n';
 
 const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
 const SIZE = 48;
@@ -17,7 +18,7 @@ export function SendButton({ isEditing, enabled, onPress }: SendButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={isEditing ? 'Save' : 'Send'}
+      accessibilityLabel={isEditing ? t.common.save : t.note.send}
       accessibilityState={{ disabled: !enabled }}
       disabled={!enabled}
       onPress={onPress}

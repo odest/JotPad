@@ -15,6 +15,7 @@ import { NativeHost } from '@/components/native-host';
 import { usePalette } from '@/theme';
 
 import { type NoteMenuProps } from './note-menu';
+import { t } from '@/i18n';
 
 /** The note's actions behind a "more" button in the header: a Material 3 menu on Android. */
 export function NoteMenu(props: NoteMenuProps) {
@@ -39,14 +40,14 @@ function MoreMenu({
     destructive?: boolean;
     onPress: () => void;
   }[] = [
-    { label: 'Search', icon: Search, onPress: onSearch },
+    { label: t.common.search, icon: Search, onPress: onSearch },
     note.pinned
-      ? { label: 'Unpin note', icon: KeepOff, onPress: onTogglePin }
-      : { label: 'Pin note', icon: Keep, onPress: onTogglePin },
-    { label: 'Tags', icon: Label, onPress: onTags },
-    { label: 'Rename', icon: Edit, onPress: onRename },
-    { label: 'Export', icon: IosShare, onPress: onExport },
-    { label: 'Delete note', icon: Delete, destructive: true, onPress: onDelete },
+      ? { label: t.notes.unpinNote, icon: KeepOff, onPress: onTogglePin }
+      : { label: t.notes.pinNote, icon: Keep, onPress: onTogglePin },
+    { label: t.common.tags, icon: Label, onPress: onTags },
+    { label: t.common.rename, icon: Edit, onPress: onRename },
+    { label: t.common.export, icon: IosShare, onPress: onExport },
+    { label: t.notes.deleteNote, icon: Delete, destructive: true, onPress: onDelete },
   ];
 
   return (
@@ -60,7 +61,7 @@ function MoreMenu({
           <IconButton onClick={() => setOpen(true)}>
             <Icon
               source={MoreVert}
-              contentDescription="More options"
+              contentDescription={t.common.moreOptions}
               tint={palette['on-surface']}
             />
           </IconButton>

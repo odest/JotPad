@@ -1,6 +1,7 @@
 import { NativeTabs } from 'expo-router/native-tabs';
 
 import { usePalette } from '@/theme';
+import { t } from '@/i18n';
 
 /** The system tab bar, untouched so it keeps Liquid Glass on iOS 26. */
 export function AppTabs() {
@@ -15,19 +16,19 @@ export function AppTabs() {
             selected: 'bubble.left.and.bubble.right.fill',
           }}
         />
-        <NativeTabs.Trigger.Label>Notes</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t.tabs.notes}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="search" role="search">
         <NativeTabs.Trigger.Icon sf="magnifyingglass" />
-        <NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t.tabs.search}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="tags">
         <NativeTabs.Trigger.Icon sf={{ default: 'tag', selected: 'tag.fill' }} />
-        <NativeTabs.Trigger.Label>Tags</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t.tabs.tags}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="settings">
         <NativeTabs.Trigger.Icon sf={{ default: 'gearshape', selected: 'gearshape.fill' }} />
-        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{t.tabs.settings}</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );

@@ -6,6 +6,7 @@ import { groupPosition } from '@/components/group-position';
 import { GroupedRow } from '@/components/grouped-row';
 import { useNotes, useTag } from '@/data/notes-store';
 import { NoteRow } from '@/screens/notes/note-row';
+import { t } from '@/i18n';
 
 /** The notes that carry one tag. */
 export function TagNotes({ tagId }: { tagId: string }) {
@@ -29,8 +30,8 @@ export function TagNotes({ tagId }: { tagId: string }) {
         ListEmptyComponent={
           <EmptyState
             icon={{ ios: 'tag', android: 'label' }}
-            title="No notes with this tag"
-            message="Long-press a note and choose Tags to add it here."
+            title={t.tags.tagEmptyTitle}
+            message={t.tags.tagEmptyMessage}
           />
         }
       />

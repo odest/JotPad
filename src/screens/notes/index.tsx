@@ -35,6 +35,7 @@ import { usePalette } from '@/theme';
 import { NoteRow } from './note-row';
 import { NotesHeader } from './notes-header';
 import { sortNotes } from './sort-notes';
+import { t } from '@/i18n';
 
 export function Notes() {
   const notes = useNotes();
@@ -67,12 +68,21 @@ export function Notes() {
   const actions: SheetAction[] = selected
     ? [
         selected.pinned
-          ? { label: 'Unpin', icon: KeepOff, onPress: () => setNotePinned(selected.id, false) }
-          : { label: 'Pin', icon: Keep, onPress: () => setNotePinned(selected.id, true) },
-        { label: 'Tags', icon: Label, onPress: () => setTagging(selected.id) },
-        { label: 'Rename', icon: Edit, onPress: () => setRenaming(selected) },
-        { label: 'Export', icon: IosShare, onPress: () => setExporting(selected) },
-        { label: 'Delete', icon: Delete, destructive: true, onPress: () => setDeleting(selected) },
+          ? {
+              label: t.common.unpin,
+              icon: KeepOff,
+              onPress: () => setNotePinned(selected.id, false),
+            }
+          : { label: t.common.pin, icon: Keep, onPress: () => setNotePinned(selected.id, true) },
+        { label: t.common.tags, icon: Label, onPress: () => setTagging(selected.id) },
+        { label: t.common.rename, icon: Edit, onPress: () => setRenaming(selected) },
+        { label: t.common.export, icon: IosShare, onPress: () => setExporting(selected) },
+        {
+          label: t.common.delete,
+          icon: Delete,
+          destructive: true,
+          onPress: () => setDeleting(selected),
+        },
       ]
     : [];
 
@@ -101,7 +111,11 @@ export function Notes() {
             <GroupedRow
               position={groupPosition(index - start, length)}
               label={
-                pinnedCount > 0 && index === start ? (inPinned ? 'Pinned' : 'Others') : undefined
+                pinnedCount > 0 && index === start
+                  ? inPinned
+                    ? t.notes.pinned
+                    : t.notes.others
+                  : undefined
               }
             >
               <NoteRow note={item} onLongPress={setSelected} />
@@ -111,18 +125,18 @@ export function Notes() {
         ListEmptyComponent={
           <EmptyState
             icon={{ ios: 'bubble.left.and.bubble.right', android: 'forum' }}
-            title="No notes yet"
-            message="Create a note and jot things down like you are messaging yourself."
+            title={t.notes.emptyTitle}
+            message={t.notes.emptyMessage}
           />
         }
       />
       <NotesHeader sort={sort} onNewNote={startNewNote} />
-      <Fab label="New note" icon={Edit} expanded={fab.expanded} onPress={startNewNote} />
+      <Fab label={t.notes.newNote} icon={Edit} expanded={fab.expanded} onPress={startNewNote} />
       <NameSheet
         isPresented={isCreating}
-        heading="New note"
-        placeholder="Title"
-        submitLabel="Create"
+        heading={t.notes.newNote}
+        placeholder={t.common.title}
+        submitLabel={t.common.create}
         onDismiss={() => setIsCreating(false)}
         onSubmit={openNewNote}
       />
@@ -130,9 +144,9 @@ export function Notes() {
         // Remounts per note so the field starts from that note's title.
         key={renaming?.id ?? 'rename'}
         isPresented={renaming !== null}
-        heading="Rename note"
-        placeholder="Title"
-        submitLabel="Save"
+        heading={t.notes.renameNote}
+        placeholder={t.common.title}
+        submitLabel={t.common.save}
         initialValue={renaming?.title}
         onDismiss={() => setRenaming(null)}
         onSubmit={(title) => {
@@ -158,9 +172,9 @@ export function Notes() {
       />
       <ConfirmDialog
         isPresented={deleting !== null}
-        title="Delete note?"
-        message={`"${deleting?.title ?? ''}" and all of its messages will be deleted.`}
-        confirmLabel="Delete"
+        title={t.notes.deleteTitle}
+        message={t.notes.deleteMessage(deleting?.title ?? '')}
+        confirmLabel={t.common.delete}
         destructive
         onConfirm={() => deleting && deleteNote(deleting.id)}
         onDismiss={() => setDeleting(null)}

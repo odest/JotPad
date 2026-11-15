@@ -7,6 +7,7 @@ import { Icon } from '@/components/icon';
 import { typeRamp, usePalette } from '@/theme';
 
 import { type NoteSearchBarProps } from './note-search-bar';
+import { t } from '@/i18n';
 
 /** Header options for search mode: the stack header steps aside for the search bar. */
 export function searchHeaderOptions(_props: NoteSearchBarProps): NativeStackNavigationOptions {
@@ -52,7 +53,7 @@ export function NoteSearchBar({ query, onChangeQuery, onClose }: NoteSearchBarPr
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Close search"
+        accessibilityLabel={t.note.closeSearch}
         onPress={onClose}
         android_ripple={{ color: palette['surface-container-highest'], borderless: true }}
         className="h-12 w-12 items-center justify-center"
@@ -63,7 +64,7 @@ export function NoteSearchBar({ query, onChangeQuery, onClose }: NoteSearchBarPr
         ref={input}
         value={query}
         onChangeText={onChangeQuery}
-        placeholder="Search in note"
+        placeholder={t.note.searchInNote}
         placeholderTextColor={palette['on-surface-variant']}
         cursorColor={palette.primary}
         selectionColor={palette.primary}
@@ -75,7 +76,7 @@ export function NoteSearchBar({ query, onChangeQuery, onClose }: NoteSearchBarPr
       {query.length > 0 && (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Clear search"
+          accessibilityLabel={t.common.clearSearch}
           onPress={() => onChangeQuery('')}
           android_ripple={{ color: palette['surface-container-highest'], borderless: true }}
           className="h-12 w-12 items-center justify-center"

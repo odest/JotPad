@@ -11,6 +11,7 @@ import { usePalette } from '@/theme';
 import { allNotesFileName } from '@/utils/export-notes';
 
 import { ThemePicker } from './theme-picker';
+import { t } from '@/i18n';
 
 /**
  * Settings are the platform's own grouped form (@expo/ui): Material list items on
@@ -29,16 +30,14 @@ export function Settings() {
     <View style={{ flex: 1, backgroundColor: palette.surface }}>
       <NativeHost style={{ flex: 1 }}>
         <FieldGroup>
-          <FieldGroup.Section title="Theme">
+          <FieldGroup.Section title={t.settings.theme}>
             <ThemePicker theme={theme} onChange={setThemeMode} />
           </FieldGroup.Section>
-          <FieldGroup.Section title="Data">
+          <FieldGroup.Section title={t.settings.data}>
             <ListItem
               onPress={notes.length > 0 ? () => setExporting(true) : undefined}
               supportingText={
-                notes.length > 0
-                  ? 'Save or send every note as Markdown, plain text or JSON.'
-                  : 'There are no notes to export yet.'
+                notes.length > 0 ? t.settings.exportAllHint : t.settings.nothingToExport
               }
               leading={
                 <Icon
@@ -47,7 +46,7 @@ export function Settings() {
                 />
               }
             >
-              Export all notes
+              {t.settings.exportAll}
             </ListItem>
           </FieldGroup.Section>
         </FieldGroup>

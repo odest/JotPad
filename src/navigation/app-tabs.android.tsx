@@ -15,6 +15,7 @@ import { type ImageSourcePropType, View } from 'react-native';
 
 import { NativeHost } from '@/components/native-host';
 import { usePalette } from '@/theme';
+import { t } from '@/i18n';
 
 type TabOptions = { title?: string; icon?: ImageSourcePropType };
 type TabEvents = { tabPress: { data: undefined; canPreventDefault: true } };
@@ -159,10 +160,10 @@ const Tabs = createStandardRouterNavigator(PagerTabs, TabRouter, {
 export function AppTabs() {
   return (
     <Tabs>
-      <Tabs.Screen name="(notes)" options={{ title: 'Notes', icon: Chat }} />
-      <Tabs.Screen name="search" options={{ title: 'Search', icon: Search }} />
-      <Tabs.Screen name="tags" options={{ title: 'Tags', icon: Sell }} />
-      <Tabs.Screen name="settings" options={{ title: 'Settings', icon: Settings }} />
+      <Tabs.Screen name="(notes)" options={{ title: t.tabs.notes, icon: Chat }} />
+      <Tabs.Screen name="search" options={{ title: t.tabs.search, icon: Search }} />
+      <Tabs.Screen name="tags" options={{ title: t.tabs.tags, icon: Sell }} />
+      <Tabs.Screen name="settings" options={{ title: t.tabs.settings, icon: Settings }} />
     </Tabs>
   );
 }
