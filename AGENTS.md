@@ -13,7 +13,7 @@ The app is local-first. There is no backend and no sync.
 
 ## Current state
 
-- Data lives in an in-memory store, `src/data/notes-store.ts`. It is lost when the app reloads. SQLite with Drizzle is planned; keep the store's hooks and actions as the interface that persistence will replace.
+- Data is stored in SQLite (`expo-sqlite`) through Drizzle. `src/data/notes-store.ts` keeps an in-memory copy so screens read synchronously: it loads once at startup, and every action writes to the database first, then updates the copy. Screens use only the store's hooks and actions, never `db` directly.
 - All UI strings are English literals. Turkish and English localisation is planned.
 - Only Android has been run. The iOS code paths exist but are untested.
 - There are no automated tests yet.
@@ -27,6 +27,7 @@ npx expo lint               # lint
 npx tsc --noEmit            # typecheck
 npx prettier --write src    # format (sorts Tailwind classes)
 npx expo-doctor             # diagnose dependency and config issues
+npx drizzle-kit generate    # create a migration after changing src/data/schema.ts
 ```
 
 Run typecheck and lint before calling a task done.
@@ -49,7 +50,7 @@ src/
   screens/      Screen bodies and their private components, one folder per screen.
   components/   UI shared by more than one screen.
   navigation/   Stack options and the tab navigators (`app-tabs`).
-  data/         The store: types, hooks and actions.
+  data/         The store (types, hooks, actions), the Drizzle schema and its migrations.
   theme/        Design tokens and the theme provider.
   utils/        Small standalone helpers.
 ```
@@ -74,6 +75,8 @@ src/
 - Reusable pieces that already exist: `ActionSheet` (actions for one item), `ConfirmDialog` (confirm a destructive action), `NameSheet` (one text field, for create and rename), `Fab`, `EmptyState`.
 
 ## Known pitfalls
+
+- Change the database only through `src/data/schema.ts` and a generated migration (`npx drizzle-kit generate`). Never edit files in `src/data/migrations/` by hand. Migrations run at startup before the first screen renders.
 
 - **Do not use Expo Router's `presentation: 'formSheet'`.** On Android it rendered nothing and broke the window's edge-to-edge insets (opaque status bar, doubled header padding). Use the `@expo/ui` `BottomSheet` inside the screen instead.
 - **Do not add `react-native-keyboard-controller`.** Its `KeyboardProvider` inset the whole app below the status bar here. The conversation screen follows the keyboard with React Native's `KeyboardAvoidingView`.
