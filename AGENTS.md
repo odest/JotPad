@@ -82,7 +82,7 @@ src/
 - **Do not add `react-native-keyboard-controller`.** Its `KeyboardProvider` inset the whole app below the status bar here. The conversation screen follows the keyboard with React Native's `KeyboardAvoidingView`.
 - On Android, `Stack.Toolbar.Menu` needs a native view (`DropdownMenuGroupView`) that Expo Go 58.0.5 does not include, and the screen crashes with "Can't find ViewManager". Header menus use it on iOS only; Android uses the Compose `DropdownMenu` in `headerRight` (see `src/screens/note/note-menu.android.tsx`).
 - React Native's `Alert` shows an old-style light dialog on Android. Use `ConfirmDialog`.
-- Focusing a text input while a sheet is still closing leaves the keyboard hidden on Android. Focus after the sheet has closed (see `src/screens/note/composer.tsx`).
+- Focusing a text input while a sheet or menu is still closing leaves the keyboard hidden on Android, and `autoFocus` has the same problem. Focus after it has closed (see `src/screens/note/composer.tsx`); after a Compose dropdown menu, retry until `Keyboard.isVisible()` (see `src/screens/note/note-search-bar.android.tsx`).
 - Tabs differ per platform (`src/navigation/app-tabs.tsx`). iOS uses the system `NativeTabs`. Android uses a custom navigator: a Compose pager whose pages follow the finger, with a Material 3 `NavigationBar`. Expo Router's `TabRouter` only holds visited tabs, so the Android navigator adds placeholder routes for the others and preloads them, as `NativeTabs` does internally.
 
 ## Expo APIs change between SDKs
