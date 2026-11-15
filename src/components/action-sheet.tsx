@@ -1,6 +1,7 @@
-import { BottomSheet, Column, Host, Icon, ListItem } from '@expo/ui';
+import { BottomSheet, Column, Icon, ListItem } from '@expo/ui';
 import { type ImageSourcePropType } from 'react-native';
 
+import { NativeHost } from '@/components/native-host';
 import { usePalette } from '@/theme';
 
 export type SheetAction = {
@@ -25,7 +26,7 @@ export function ActionSheet({ isPresented, onDismiss, actions }: ActionSheetProp
   const palette = usePalette();
 
   return (
-    <Host matchContents>
+    <NativeHost matchContents>
       <BottomSheet isPresented={isPresented} onDismiss={onDismiss} contentPadding={0}>
         <Column style={{ paddingBottom: 16 }}>
           {actions.map((action) => {
@@ -46,6 +47,6 @@ export function ActionSheet({ isPresented, onDismiss, actions }: ActionSheetProp
           })}
         </Column>
       </BottomSheet>
-    </Host>
+    </NativeHost>
   );
 }

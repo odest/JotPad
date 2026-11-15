@@ -1,6 +1,7 @@
-import { BottomSheet, Button, Column, Host, Text, TextInput } from '@expo/ui';
+import { BottomSheet, Button, Column, Text, TextInput } from '@expo/ui';
 import { useRef, useState } from 'react';
 
+import { NativeHost } from '@/components/native-host';
 import { typeRamp, usePalette } from '@/theme';
 
 /**
@@ -42,7 +43,7 @@ export function NoteTitleSheet({
   };
 
   return (
-    <Host matchContents>
+    <NativeHost matchContents>
       <BottomSheet
         isPresented={isPresented}
         onDismiss={() => {
@@ -79,6 +80,6 @@ export function NoteTitleSheet({
           <Button label={submitLabel} variant="filled" disabled={!canSubmit} onPress={submit} />
         </Column>
       </BottomSheet>
-    </Host>
+    </NativeHost>
   );
 }

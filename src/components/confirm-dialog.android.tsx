@@ -1,6 +1,6 @@
-import { Host } from '@expo/ui';
 import { AlertDialog, Text, TextButton } from '@expo/ui/jetpack-compose';
 
+import { NativeHost } from '@/components/native-host';
 import { usePalette } from '@/theme';
 
 import { type ConfirmDialogProps } from './confirm-dialog';
@@ -18,7 +18,7 @@ export function ConfirmDialog({
   if (!isPresented) return null;
 
   return (
-    <Host matchContents>
+    <NativeHost matchContents>
       <AlertDialog onDismissRequest={onDismiss}>
         <AlertDialog.Title>
           <Text style={{ typography: 'headlineSmall' }}>{title}</Text>
@@ -42,6 +42,6 @@ export function ConfirmDialog({
           </TextButton>
         </AlertDialog.ConfirmButton>
       </AlertDialog>
-    </Host>
+    </NativeHost>
   );
 }
