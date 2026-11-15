@@ -4,10 +4,15 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { useDatabase } from '@/data/use-database';
 import { useStackOptions } from '@/navigation/use-stack-options';
 import { ThemeProvider } from '@/theme';
 
 export default function RootLayout() {
+  // The splash screen stays up until the first render with content.
+  const ready = useDatabase();
+  if (!ready) return null;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider>

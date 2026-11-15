@@ -13,6 +13,7 @@
   "dependencies": {
     "@expo/material-symbols": "^0.1.1",
     "@expo/ui": "~58.0.28",
+    "drizzle-orm": "^0.45.4",
     "expo": "~58.0.25",
     "expo-clipboard": "~58.0.4",
     "expo-constants": "~58.0.16",
@@ -22,6 +23,7 @@
     "expo-linking": "~58.0.17",
     "expo-router": "~58.0.31",
     "expo-splash-screen": "~58.0.14",
+    "expo-sqlite": "~58.0.17",
     "expo-status-bar": "~58.0.5",
     "expo-symbols": "~58.0.5",
     "expo-system-ui": "~58.0.7",
@@ -37,7 +39,9 @@
   },
   "devDependencies": {
     "@types/react": "~19.3.0",
+    "babel-plugin-inline-import": "^3.0.0",
     "babel-preset-expo": "~58.0.0",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~58.0.4",
     "prettier": "^3.10.1",

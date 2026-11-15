@@ -1,4 +1,8 @@
+import { asc, desc, eq } from 'drizzle-orm';
 import { useSyncExternalStore } from 'react';
+
+import { db } from './db';
+import * as schema from './schema';
 
 export type Note = {
   id: string;
@@ -28,11 +32,42 @@ type State = {
 };
 
 /**
- * In-memory store. It holds the data for the lifetime of the process only; the
- * persistence layer replaces this module while keeping the same hooks and actions.
+ * The data lives in SQLite. This module keeps a copy in memory so screens read it
+ * synchronously: `loadStore` fills it once at startup, and every action writes to the
+ * database first, then updates the copy.
  */
 let state: State = { notes: [], entries: {}, tags: [] };
-let nextId = 1;
+let loaded = false;
+
+function newId(): string {
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+}
+
+/** Reads everything from the database. Call once, after the migrations have run. */
+export function loadStore() {
+  const noteRows = db.select().from(schema.notes).orderBy(desc(schema.notes.activeAt)).all();
+  const entryRows = db.select().from(schema.entries).orderBy(asc(schema.entries.createdAt)).all();
+  const tagRows = db.select().from(schema.tags).orderBy(asc(schema.tags.createdAt)).all();
+  const links = db.select().from(schema.noteTags).all();
+
+  const entries: Record<string, Entry[]> = {};
+  for (const { id, noteId, body, createdAt } of entryRows) {
+    (entries[noteId] ??= []).push({ id, noteId, body, createdAt });
+  }
+
+  loaded = true;
+  setState({
+    notes: noteRows.map(({ id, title, createdAt, pinned }) => ({
+      id,
+      title,
+      createdAt,
+      pinned,
+      tagIds: links.filter((link) => link.noteId === id).map((link) => link.tagId),
+    })),
+    entries,
+    tags: tagRows.map(({ id, name }) => ({ id, name })),
+  });
+}
 
 const listeners = new Set<() => void>();
 
@@ -51,6 +86,11 @@ function useStore<T>(selector: (state: State) => T): T {
 }
 
 const NO_ENTRIES: Entry[] = [];
+
+/** True once `loadStore` has filled the store from the database. */
+export function useStoreLoaded(): boolean {
+  return useSyncExternalStore(subscribe, () => loaded);
+}
 
 export function useTags(): Tag[] {
   return useStore((s) => s.tags);
@@ -83,18 +123,28 @@ export function useLastEntry(noteId: string): Entry | undefined {
 
 export function createNote(title: string): Note {
   const note: Note = {
-    id: String(nextId++),
+    id: newId(),
     title: title.trim(),
     createdAt: Date.now(),
     pinned: false,
     tagIds: [],
   };
+  db.insert(schema.notes)
+    .values({ ...note, activeAt: note.createdAt })
+    .run();
   setState({ ...state, notes: [note, ...state.notes] });
   return note;
 }
 
 export function addEntry(noteId: string, body: string): Entry {
-  const entry: Entry = { id: String(nextId++), noteId, body: body.trim(), createdAt: Date.now() };
+  const entry: Entry = { id: newId(), noteId, body: body.trim(), createdAt: Date.now() };
+  db.transaction((tx) => {
+    tx.insert(schema.entries).values(entry).run();
+    tx.update(schema.notes)
+      .set({ activeAt: entry.createdAt })
+      .where(eq(schema.notes.id, noteId))
+      .run();
+  });
   const note = state.notes.find((n) => n.id === noteId);
   setState({
     ...state,
@@ -105,7 +155,8 @@ export function addEntry(noteId: string, body: string): Entry {
   return entry;
 }
 
-function updateNote(id: string, change: Partial<Note>) {
+function updateNote(id: string, change: Partial<Pick<Note, 'title' | 'pinned'>>) {
+  db.update(schema.notes).set(change).where(eq(schema.notes.id, id)).run();
   setState({
     ...state,
     notes: state.notes.map((note) => (note.id === id ? { ...note, ...change } : note)),
@@ -121,21 +172,38 @@ export function setNotePinned(id: string, pinned: boolean) {
 }
 
 export function deleteNote(id: string) {
+  // Its entries and tag links go with it (ON DELETE CASCADE).
+  db.delete(schema.notes).where(eq(schema.notes.id, id)).run();
   const { [id]: _removed, ...entries } = state.entries;
   setState({ ...state, notes: state.notes.filter((note) => note.id !== id), entries });
 }
 
 export function setNoteTags(id: string, tagIds: string[]) {
-  updateNote(id, { tagIds });
+  db.transaction((tx) => {
+    tx.delete(schema.noteTags).where(eq(schema.noteTags.noteId, id)).run();
+    if (tagIds.length > 0) {
+      tx.insert(schema.noteTags)
+        .values(tagIds.map((tagId) => ({ noteId: id, tagId })))
+        .run();
+    }
+  });
+  setState({
+    ...state,
+    notes: state.notes.map((note) => (note.id === id ? { ...note, tagIds } : note)),
+  });
 }
 
 export function createTag(name: string): Tag {
-  const tag: Tag = { id: String(nextId++), name: name.trim() };
+  const tag: Tag = { id: newId(), name: name.trim() };
+  db.insert(schema.tags)
+    .values({ ...tag, createdAt: Date.now() })
+    .run();
   setState({ ...state, tags: [...state.tags, tag] });
   return tag;
 }
 
 export function renameTag(id: string, name: string) {
+  db.update(schema.tags).set({ name: name.trim() }).where(eq(schema.tags.id, id)).run();
   setState({
     ...state,
     tags: state.tags.map((tag) => (tag.id === id ? { ...tag, name: name.trim() } : tag)),
@@ -144,6 +212,8 @@ export function renameTag(id: string, name: string) {
 
 /** Deletes the tag and takes it off every note that had it. */
 export function deleteTag(id: string) {
+  // Its links to notes go with it (ON DELETE CASCADE).
+  db.delete(schema.tags).where(eq(schema.tags.id, id)).run();
   setState({
     ...state,
     tags: state.tags.filter((tag) => tag.id !== id),
@@ -156,6 +226,7 @@ export function deleteTag(id: string) {
 }
 
 export function updateEntry(entry: Entry, body: string) {
+  db.update(schema.entries).set({ body: body.trim() }).where(eq(schema.entries.id, entry.id)).run();
   const list = state.entries[entry.noteId] ?? NO_ENTRIES;
   setState({
     ...state,
@@ -167,6 +238,7 @@ export function updateEntry(entry: Entry, body: string) {
 }
 
 export function deleteEntry(entry: Entry) {
+  db.delete(schema.entries).where(eq(schema.entries.id, entry.id)).run();
   const list = state.entries[entry.noteId] ?? NO_ENTRIES;
   setState({
     ...state,
