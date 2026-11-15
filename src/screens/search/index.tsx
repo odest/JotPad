@@ -1,15 +1,20 @@
 import { Stack } from 'expo-router';
 import { useState } from 'react';
-import { FlatList } from 'react-native';
+import { FlatList, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/empty-state';
 import { useAllEntries, useNotes, type Note } from '@/data/notes-store';
 import { NoteRow } from '@/screens/notes/note-row';
 
+import { SearchField } from './search-field';
+
 type Result = { note: Note; preview?: string };
 
 export function Search() {
   const [query, setQuery] = useState('');
+  const insets = useSafeAreaInsets();
+  const isAndroid = process.env.EXPO_OS === 'android';
   const notes = useNotes();
   const entries = useAllEntries();
 
@@ -29,17 +34,26 @@ export function Search() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerSearchBarOptions: {
-            placeholder: 'Search notes',
-            autoCapitalize: 'none',
-            onChangeText: (event) => setQuery(event.nativeEvent.text),
-            onCancelButtonPress: () => setQuery(''),
-            onClose: () => setQuery(''),
-          },
-        }}
-      />
+      {isAndroid ? (
+        // Material search bar in place of the top app bar.
+        <>
+          <Stack.Screen options={{ headerShown: false }} />
+          <View className="bg-surface px-4 pb-2" style={{ paddingTop: insets.top + 8 }}>
+            <SearchField value={query} onChangeText={setQuery} placeholder="Search notes" />
+          </View>
+        </>
+      ) : (
+        <Stack.Screen
+          options={{
+            headerSearchBarOptions: {
+              placeholder: 'Search notes',
+              autoCapitalize: 'none',
+              onChangeText: (event) => setQuery(event.nativeEvent.text),
+              onCancelButtonPress: () => setQuery(''),
+            },
+          }}
+        />
+      )}
       <FlatList
         className="bg-surface"
         contentContainerClassName="grow"
