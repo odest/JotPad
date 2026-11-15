@@ -76,7 +76,7 @@ src/
 
 ## Known pitfalls
 
-- Change the database only through `src/data/schema.ts` and a generated migration (`npx drizzle-kit generate`). Never edit files in `src/data/migrations/` by hand. Migrations run at startup before the first screen renders.
+- Change the database only through `src/data/schema.ts` and a generated migration (`npx drizzle-kit generate`). Never edit files in `src/data/migrations/` by hand. Migrations run at startup before the first screen renders. After generating one, restart Metro with `npx expo start --go --clear`: a running Metro can keep serving the old `migrations.js`, and the app then fails with errors such as "no column named …".
 
 - **Do not use Expo Router's `presentation: 'formSheet'`.** On Android it rendered nothing and broke the window's edge-to-edge insets (opaque status bar, doubled header padding). Use the `@expo/ui` `BottomSheet` inside the screen instead.
 - **Do not add `react-native-keyboard-controller`.** Its `KeyboardProvider` inset the whole app below the status bar here. The conversation screen follows the keyboard with React Native's `KeyboardAvoidingView`.
