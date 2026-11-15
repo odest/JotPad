@@ -74,7 +74,7 @@ src/
 - Wrap every `@expo/ui` tree in `NativeHost` (`src/components/native-host.tsx`), not in `Host` directly. It passes the app's color scheme on, so native components follow the theme chosen in Settings.
 - `@expo/ui/jetpack-compose` is Android-only and `@expo/ui/swift-ui` is iOS-only. Import them only from a platform file.
 - Material Symbols for Compose come from `@expo/material-symbols/<name>.xml`. In development they download on first use, so an icon can be blank the first time it is shown.
-- Reusable pieces that already exist: `ActionSheet` (actions for one item), `ConfirmDialog` (confirm a destructive action), `NameSheet` (one text field, for create and rename), `Fab` (extended; pair it with `useFabExpanded` on the list), `EmptyState`, `ShapedBadge` (a Material 3 Expressive shape on Android, a circle on iOS).
+- Reusable pieces that already exist: `ActionSheet` (actions for one item), `ConfirmDialog` (confirm a destructive action), `ErrorDialog` (report a failure, optionally with retry), `NameSheet` (one text field, for create and rename), `Fab` (extended; pair it with `useFabExpanded` on the list), `EmptyState`, `ShapedBadge` (a Material 3 Expressive shape on Android, a circle on iOS).
 
 ## Known pitfalls
 
