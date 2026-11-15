@@ -27,6 +27,8 @@ function RootStack() {
   return (
     <Stack screenOptions={useStackOptions()}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      {/* Opaque header: the inverted message list must not scroll under it. */}
+      <Stack.Screen name="note/[id]" options={{ headerTransparent: false }} />
     </Stack>
   );
 }
