@@ -7,10 +7,10 @@ import { useState } from 'react';
 import { NativeHost } from '@/components/native-host';
 import { setNoteSort, type NoteSort } from '@/data/preferences';
 import { usePalette } from '@/theme';
+import { useT } from '@/i18n';
 
 import { type NotesHeaderProps } from './notes-header';
-import { SORT_OPTIONS } from './sort-notes';
-import { t } from '@/i18n';
+import { sortOptions } from './sort-notes';
 
 /**
  * The notes list's header items on Android: a sort menu. New notes come from the FAB,
@@ -21,6 +21,7 @@ export function NotesHeader({ sort }: NotesHeaderProps) {
 }
 
 function SortMenu({ sort }: { sort: NoteSort }) {
+  const t = useT();
   const palette = usePalette();
   const [open, setOpen] = useState(false);
 
@@ -41,7 +42,7 @@ function SortMenu({ sort }: { sort: NoteSort }) {
           </IconButton>
         </DropdownMenu.Trigger>
         <DropdownMenu.Items>
-          {SORT_OPTIONS.map((option) => {
+          {sortOptions(t).map((option) => {
             const selected = sort === option.sort;
             return (
               <DropdownMenuItem

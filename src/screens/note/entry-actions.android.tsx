@@ -5,15 +5,16 @@ import { BackHandler, View } from 'react-native';
 
 import { NativeHost } from '@/components/native-host';
 import { usePalette } from '@/theme';
+import { useT } from '@/i18n';
 
 import { type EntryActionsProps } from './entry-actions';
-import { t } from '@/i18n';
 
 /**
  * A floating toolbar with the selected message's actions, floating above the composer.
  * Back or the close button clears the selection; an action clears it and then runs.
  */
 export function EntryActions({ isPresented, onDismiss, actions }: EntryActionsProps) {
+  const t = useT();
   const palette = usePalette();
 
   useEffect(() => {

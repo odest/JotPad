@@ -1,7 +1,12 @@
 import { getLocales } from 'expo-localization';
+import { useSyncExternalStore } from 'react';
+
+import { languageSetting, type LanguageSetting } from '@/data/preferences';
 
 import { en, type Strings } from './en';
 import { tr } from './tr';
+
+export type { Strings };
 
 const LANGUAGES = { en, tr } satisfies Record<string, Strings>;
 
@@ -11,21 +16,50 @@ function isLanguage(code: string | null): code is Language {
   return code !== null && code in LANGUAGES;
 }
 
-/** The first preferred device language the app has, with its locale; English otherwise. */
-function deviceLanguage(): { language: Language; locale: string } {
-  for (const { languageCode, languageTag } of getLocales()) {
-    if (isLanguage(languageCode)) return { language: languageCode, locale: languageTag };
+/** The language for a setting, with a locale for dates: the device's when it matches. */
+function resolve(setting: LanguageSetting): { language: Language; locale: string } {
+  const locales = getLocales();
+  if (setting === 'system') {
+    for (const { languageCode, languageTag } of locales) {
+      if (isLanguage(languageCode)) return { language: languageCode, locale: languageTag };
+    }
+    return { language: 'en', locale: 'en-US' };
   }
-  return { language: 'en', locale: 'en-US' };
+  const device = locales.find((candidate) => candidate.languageCode === setting);
+  return { language: setting, locale: device?.languageTag ?? setting };
 }
 
-const device = deviceLanguage();
+let current = resolve(languageSetting.get());
+const listeners = new Set<() => void>();
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
 
 /**
- * The UI strings in the device language, falling back to English. The language is read
- * once at startup; a change in the system settings applies from the next launch.
+ * The UI strings in the chosen language: the device language by default, English when
+ * the app does not have it. Components re-render when the language changes, so read
+ * strings through this hook while rendering and pass them to helpers that need them.
  */
-export const t: Strings = LANGUAGES[device.language];
+export function useT(): Strings {
+  return useSyncExternalStore(subscribe, () => LANGUAGES[current.language]);
+}
 
-/** The locale that matches `t`, for formatting dates and times. */
-export const locale = device.locale;
+/** The locale that matches `useT`, for formatting dates and times. */
+export function useLocale(): string {
+  return useSyncExternalStore(subscribe, () => current.locale);
+}
+
+/** The current strings, for code that runs on an event rather than while rendering. */
+export function strings(): Strings {
+  return LANGUAGES[current.language];
+}
+
+export function setLanguage(setting: LanguageSetting) {
+  languageSetting.set(setting);
+  current = resolve(setting);
+  listeners.forEach((listener) => listener());
+}

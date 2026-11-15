@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Alert } from 'react-native';
-import { t } from '@/i18n';
+import { useT } from '@/i18n';
 
 export type ConfirmDialogProps = {
   isPresented: boolean;
@@ -25,6 +25,7 @@ export function ConfirmDialog({
   onConfirm,
   onDismiss,
 }: ConfirmDialogProps) {
+  const t = useT();
   useEffect(() => {
     if (!isPresented) return;
     Alert.alert(title, message, [

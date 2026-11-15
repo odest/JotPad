@@ -1,9 +1,9 @@
 import { Stack } from 'expo-router';
 
 import { setNoteSort, type NoteSort } from '@/data/preferences';
+import { useT } from '@/i18n';
 
-import { SORT_OPTIONS } from './sort-notes';
-import { t } from '@/i18n';
+import { sortOptions } from './sort-notes';
 
 export type NotesHeaderProps = {
   sort: NoteSort;
@@ -12,10 +12,11 @@ export type NotesHeaderProps = {
 
 /** The notes list's header items on iOS: a sort menu and the compose button. */
 export function NotesHeader({ sort, onNewNote }: NotesHeaderProps) {
+  const t = useT();
   return (
     <Stack.Toolbar placement="right">
       <Stack.Toolbar.Menu icon="arrow.up.arrow.down" accessibilityLabel={t.notes.sortNotes}>
-        {SORT_OPTIONS.map((option) => (
+        {sortOptions(t).map((option) => (
           <Stack.Toolbar.MenuAction
             key={option.sort}
             isOn={sort === option.sort}

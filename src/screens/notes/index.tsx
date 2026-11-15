@@ -31,13 +31,14 @@ import {
 } from '@/data/notes-store';
 import { useNoteSort } from '@/data/preferences';
 import { usePalette } from '@/theme';
+import { useT } from '@/i18n';
 
 import { NoteRow } from './note-row';
 import { NotesHeader } from './notes-header';
 import { sortNotes } from './sort-notes';
-import { t } from '@/i18n';
 
 export function Notes() {
+  const t = useT();
   const notes = useNotes();
   const sort = useNoteSort();
   const palette = usePalette();

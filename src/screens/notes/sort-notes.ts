@@ -1,14 +1,17 @@
 import { type Note } from '@/data/notes-store';
 import { type NoteSort } from '@/data/preferences';
-import { t } from '@/i18n';
+import { type Strings } from '@/i18n';
 
-export const SORT_OPTIONS: { sort: NoteSort; label: string }[] = [
-  { sort: 'activity', label: t.notes.sortActivity },
-  { sort: 'newest', label: t.notes.sortNewest },
-  { sort: 'oldest', label: t.notes.sortOldest },
-  { sort: 'title-asc', label: t.notes.sortTitleAsc },
-  { sort: 'title-desc', label: t.notes.sortTitleDesc },
-];
+/** The sort menu's options; a function so the labels follow a language change. */
+export function sortOptions(t: Strings): { sort: NoteSort; label: string }[] {
+  return [
+    { sort: 'activity', label: t.notes.sortActivity },
+    { sort: 'newest', label: t.notes.sortNewest },
+    { sort: 'oldest', label: t.notes.sortOldest },
+    { sort: 'title-asc', label: t.notes.sortTitleAsc },
+    { sort: 'title-desc', label: t.notes.sortTitleDesc },
+  ];
+}
 
 const byTitle = (a: Note, b: Note) =>
   a.title.localeCompare(b.title, undefined, { sensitivity: 'base', numeric: true });

@@ -2,7 +2,7 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 
 import { type Entry, type Note, type Tag } from '@/data/notes-store';
-import { t } from '@/i18n';
+import { strings, type Strings } from '@/i18n';
 
 export type ExportFormat = 'markdown' | 'text' | 'json';
 
@@ -56,6 +56,7 @@ function escapeMarkdown(text: string): string {
 }
 
 function toMarkdown({ notes, entries, tags }: ExportData): string {
+  const t = strings();
   return notes
     .map((note) => {
       const lines = [`# ${escapeMarkdown(note.title)}`];
@@ -86,6 +87,7 @@ function toMarkdown({ notes, entries, tags }: ExportData): string {
 }
 
 function toText({ notes, entries, tags }: ExportData): string {
+  const t = strings();
   return notes
     .map((note) => {
       const lines = [note.title, '='.repeat(Math.max(note.title.length, 3))];
@@ -157,10 +159,14 @@ export async function shareExport(data: ExportData, format: ExportFormat, name: 
   const file = new File(Paths.cache, `${safeFileName(name)}.${extension}`);
   file.create({ overwrite: true });
   file.write(RENDERERS[format](data));
-  await Sharing.shareAsync(file.uri, { mimeType, UTI, dialogTitle: t.export.shareTitle(name) });
+  await Sharing.shareAsync(file.uri, {
+    mimeType,
+    UTI,
+    dialogTitle: strings().export.shareTitle(name),
+  });
 }
 
 /** File name for an export of every note, dated so repeated exports do not collide. */
-export function allNotesFileName(now = Date.now()): string {
+export function allNotesFileName(t: Strings, now = Date.now()): string {
   return `${t.export.allNotesFile} ${isoDay(now)}`;
 }

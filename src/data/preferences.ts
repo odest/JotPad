@@ -58,6 +58,15 @@ export function setThemeMode(mode: ThemeMode) {
   applyThemeMode(mode);
 }
 
+/** The UI language; `system` follows the device. Applied by `setLanguage` in `@/i18n`. */
+export type LanguageSetting = 'system' | 'en' | 'tr';
+
+export const languageSetting = createPreference<LanguageSetting>(
+  'language',
+  ['system', 'en', 'tr'],
+  'system',
+);
+
 /** Applies the saved theme. Call it before the first render so nothing flashes. */
 export function applySavedTheme() {
   applyThemeMode(themeMode.get());

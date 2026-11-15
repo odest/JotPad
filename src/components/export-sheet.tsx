@@ -4,10 +4,10 @@ import Notes from '@expo/material-symbols/notes.xml';
 import { useState } from 'react';
 
 import { type ExportData, type ExportFormat, shareExport } from '@/utils/export-notes';
+import { useT } from '@/i18n';
 
 import { ActionSheet } from './action-sheet';
 import { ErrorDialog } from './error-dialog';
-import { t } from '@/i18n';
 
 /**
  * Asks for a file format, then hands the export to the system share sheet. Used for one
@@ -26,6 +26,7 @@ export function ExportSheet({
   /** File name without extension. */
   name: string;
 }) {
+  const t = useT();
   // The format that failed, so the error dialog can try it again.
   const [failed, setFailed] = useState<ExportFormat | null>(null);
 

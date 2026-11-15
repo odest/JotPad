@@ -13,9 +13,9 @@ import { type ImageSourcePropType } from 'react-native';
 
 import { NativeHost } from '@/components/native-host';
 import { usePalette } from '@/theme';
+import { useT } from '@/i18n';
 
 import { type NoteMenuProps } from './note-menu';
-import { t } from '@/i18n';
 
 /** The note's actions behind a "more" button in the header: a Material 3 menu on Android. */
 export function NoteMenu(props: NoteMenuProps) {
@@ -31,6 +31,7 @@ function MoreMenu({
   onExport,
   onDelete,
 }: NoteMenuProps) {
+  const t = useT();
   const palette = usePalette();
   const [open, setOpen] = useState(false);
 

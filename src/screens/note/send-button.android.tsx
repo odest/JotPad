@@ -3,9 +3,9 @@ import Animated, { cubicBezier } from 'react-native-reanimated';
 
 import { Icon } from '@/components/icon';
 import { ShapedBadge } from '@/components/shaped-badge';
+import { useT } from '@/i18n';
 
 import { type SendButtonProps } from './send-button';
-import { t } from '@/i18n';
 
 const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
 const SIZE = 48;
@@ -15,6 +15,7 @@ const SIZE = 48;
  * cookie shape that turns into place once there is something to send.
  */
 export function SendButton({ isEditing, enabled, onPress }: SendButtonProps) {
+  const t = useT();
   return (
     <Pressable
       accessibilityRole="button"

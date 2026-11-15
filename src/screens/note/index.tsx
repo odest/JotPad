@@ -31,6 +31,7 @@ import {
 } from '@/data/notes-store';
 import { usePalette } from '@/theme';
 import { isSameDay } from '@/utils/format-time';
+import { useT } from '@/i18n';
 
 import { Composer } from './composer';
 import { EntryActions } from './entry-actions';
@@ -40,7 +41,6 @@ import { NoteSearchBar, searchHeaderOptions } from './note-search-bar';
 import { NoteTitle } from './note-title';
 import { PinnedBar } from './pinned-bar';
 import { SearchNav } from './search-nav';
-import { t } from '@/i18n';
 
 /** Entries sent within this window of each other are shown as one group. */
 const GROUP_WINDOW_MS = 2 * 60 * 1000;
@@ -83,6 +83,7 @@ function useKeyboardOpen(): boolean {
 }
 
 export function NoteChat({ noteId }: { noteId: string }) {
+  const t = useT();
   const note = useNote(noteId);
   const entries = useEntries(noteId);
   const router = useRouter();
@@ -159,7 +160,7 @@ export function NoteChat({ noteId }: { noteId: string }) {
   }, []);
 
   const searchProps = { query, onChangeQuery: changeQuery, onClose: closeSearch };
-  const searchOptions = searchHeaderOptions(searchProps);
+  const searchOptions = searchHeaderOptions(searchProps, t.note.searchInNote);
 
   // Keep the current match in view as it changes.
   const currentMatchId = currentMatch?.id;

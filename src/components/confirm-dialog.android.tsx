@@ -4,9 +4,9 @@ import { background, clip, Shapes, size } from '@expo/ui/jetpack-compose/modifie
 
 import { NativeHost } from '@/components/native-host';
 import { usePalette } from '@/theme';
+import { useT } from '@/i18n';
 
 import { type ConfirmDialogProps } from './confirm-dialog';
-import { t } from '@/i18n';
 
 /**
  * A Material 3 dialog. A destructive one leads with a trash icon on an Expressive shape,
@@ -21,6 +21,7 @@ export function ConfirmDialog({
   onConfirm,
   onDismiss,
 }: ConfirmDialogProps) {
+  const t = useT();
   const palette = usePalette();
   if (!isPresented) return null;
 

@@ -4,9 +4,9 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { typeRamp, usePalette } from '@/theme';
+import { useT } from '@/i18n';
 
 import { SendButton } from './send-button';
-import { t } from '@/i18n';
 
 /**
  * Message field. With `editingBody` set it edits that text instead of writing a new
@@ -21,6 +21,7 @@ export function Composer({
   editingBody?: string;
   onCancelEdit?: () => void;
 }) {
+  const t = useT();
   const palette = usePalette();
   const isEditing = editingBody !== undefined;
   const [draft, setDraft] = useState(editingBody ?? '');

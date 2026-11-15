@@ -1,5 +1,4 @@
 import { type NativeStackNavigationOptions } from 'expo-router';
-import { t } from '@/i18n';
 
 export type NoteSearchBarProps = {
   query: string;
@@ -11,13 +10,13 @@ export type NoteSearchBarProps = {
  * Header options for search mode. The screen merges them into its own `Stack.Screen`, so
  * leaving search restores the normal header. iOS uses the system search bar in the header.
  */
-export function searchHeaderOptions({
-  onChangeQuery,
-  onClose,
-}: NoteSearchBarProps): NativeStackNavigationOptions {
+export function searchHeaderOptions(
+  { onChangeQuery, onClose }: NoteSearchBarProps,
+  placeholder: string,
+): NativeStackNavigationOptions {
   return {
     headerSearchBarOptions: {
-      placeholder: t.note.searchInNote,
+      placeholder,
       autoCapitalize: 'none',
       autoFocus: true,
       hideWhenScrolling: false,
