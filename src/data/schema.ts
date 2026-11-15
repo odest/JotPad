@@ -28,6 +28,8 @@ export const tags = sqliteTable('tags', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   createdAt: integer('created_at').notNull(),
+  /** One of TAG_COLORS; null for tags made before colors existed. */
+  color: text('color'),
 });
 
 export const noteTags = sqliteTable(

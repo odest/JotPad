@@ -1,8 +1,7 @@
 import { type ReactNode } from 'react';
 import { View } from 'react-native';
 
-import { usePalette } from '@/theme';
-import { type ColorRole } from '@/theme/colors';
+import { resolveColor, usePalette, type ColorValue } from '@/theme';
 
 import { type BadgeShape } from './badge-shapes';
 
@@ -10,7 +9,7 @@ export type ShapedBadgeProps = {
   /** Used on Android only; iOS draws a circle. */
   shape: BadgeShape;
   size: number;
-  color: ColorRole;
+  color: ColorValue;
   /** Centered on top of the shape. */
   children?: ReactNode;
 };
@@ -23,7 +22,12 @@ export function ShapedBadge({ size, color, children }: ShapedBadgeProps) {
   const palette = usePalette();
   return (
     <View
-      style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: palette[color] }}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: resolveColor(palette, color),
+      }}
       className="items-center justify-center"
     >
       {children}

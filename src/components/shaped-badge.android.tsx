@@ -3,7 +3,7 @@ import { background, clip, Shapes, size as sizeModifier } from '@expo/ui/jetpack
 import { StyleSheet, View } from 'react-native';
 
 import { NativeHost } from '@/components/native-host';
-import { usePalette } from '@/theme';
+import { resolveColor, usePalette } from '@/theme';
 
 import { type BadgeShape } from './badge-shapes';
 import { type ShapedBadgeProps } from './shaped-badge';
@@ -31,7 +31,7 @@ export function ShapedBadge({ shape, size, color, children }: ShapedBadgeProps) 
           modifiers={[
             sizeModifier(size, size),
             clip(MATERIAL_SHAPES[shape]),
-            background(palette[color]),
+            background(resolveColor(palette, color)),
           ]}
         />
       </NativeHost>

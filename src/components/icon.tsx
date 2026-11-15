@@ -1,7 +1,7 @@
 import { SymbolView, type AndroidSymbol } from 'expo-symbols';
 import { type SFSymbol } from 'sf-symbols-typescript';
 
-import { usePalette, type ColorRole } from '@/theme';
+import { resolveColor, usePalette, type ColorValue } from '@/theme';
 
 export type IconName = { ios: SFSymbol; android: AndroidSymbol };
 
@@ -13,8 +13,8 @@ export function Icon({
 }: {
   name: IconName;
   size?: number;
-  color?: ColorRole;
+  color?: ColorValue;
 }) {
   const palette = usePalette();
-  return <SymbolView name={name} size={size} tintColor={palette[color]} />;
+  return <SymbolView name={name} size={size} tintColor={resolveColor(palette, color)} />;
 }

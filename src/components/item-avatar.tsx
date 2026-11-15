@@ -1,5 +1,7 @@
 import { Text } from 'react-native';
 
+import { type ColorValue, type TagTone } from '@/theme';
+
 import { BADGE_SHAPES } from './badge-shapes';
 import { Icon, type IconName } from './icon';
 import { ShapedBadge } from './shaped-badge';
@@ -45,22 +47,31 @@ export function ItemAvatar({
   size,
   name,
   icon,
+  tone: ownTone,
 }: {
   id: string;
   size: number;
   /** Its first letter is shown when there is no icon. */
   name?: string;
   icon?: IconName;
+  /** A color of its own (a tag's) in place of the tone picked from the id. */
+  tone?: TagTone;
 }) {
   const { shape, tone } = avatarFor(id);
+  const container: ColorValue = ownTone?.container ?? tone.container;
+  const content: ColorValue = ownTone?.content ?? tone.content;
   return (
-    <ShapedBadge shape={shape} size={size} color={tone.container}>
+    <ShapedBadge shape={shape} size={size} color={container}>
       {icon ? (
-        <Icon name={icon} size={size / 2} color={tone.content} />
+        <Icon name={icon} size={size / 2} color={content} />
       ) : (
         <Text
-          className={`font-medium ${tone.text}`}
-          style={{ fontSize: size * 0.4, lineHeight: size * 0.5 }}
+          className={`font-medium ${ownTone ? '' : tone.text}`}
+          style={[
+            { fontSize: size * 0.4, lineHeight: size * 0.5 },
+            // An undefined color would still override the class name's color.
+            ownTone && { color: ownTone.content },
+          ]}
         >
           {name?.charAt(0).toUpperCase()}
         </Text>

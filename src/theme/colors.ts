@@ -25,6 +25,13 @@ export type ColorRole =
 
 export type Palette = Record<ColorRole, string>;
 
+/** A palette role, or a literal color for the few colors outside the palette (tags). */
+export type ColorValue = ColorRole | `#${string}`;
+
+export function resolveColor(palette: Palette, color: ColorValue): string {
+  return color.startsWith('#') ? color : palette[color as ColorRole];
+}
+
 /**
  * iOS system colors (UIKit semantic colors), expressed in the shared role vocabulary.
  * `primary-container` is the tint itself: iOS fills prominent surfaces with the tint

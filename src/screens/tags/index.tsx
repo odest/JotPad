@@ -17,12 +17,21 @@ import { useFabExpanded } from '@/components/use-fab-expanded';
 import { Icon } from '@/components/icon';
 import { ItemAvatar } from '@/components/item-avatar';
 import { NameSheet } from '@/components/name-sheet';
-import { createTag, deleteTag, renameTag, useNotes, useTags, type Tag } from '@/data/notes-store';
-import { usePalette } from '@/theme';
+import {
+  createTag,
+  deleteTag,
+  nextTagColor,
+  updateTag,
+  useNotes,
+  useTags,
+  type Tag,
+} from '@/data/notes-store';
+import { usePalette, useTagTone, type TagColor } from '@/theme';
 import { longPressFeedback } from '@/utils/haptics';
 
 export function Tags() {
   const palette = usePalette();
+  const toneOf = useTagTone();
   const tags = useTags();
   const notes = useNotes();
 
@@ -31,15 +40,24 @@ export function Tags() {
   const [selected, setSelected] = useState<Tag | null>(null);
   const [renaming, setRenaming] = useState<Tag | null>(null);
   const [deleting, setDeleting] = useState<Tag | null>(null);
+  // The color picked in the create or edit sheet.
+  const [draftColor, setDraftColor] = useState<TagColor>('red');
 
-  const startNewTag = () => setIsCreating(true);
+  const startNewTag = () => {
+    setDraftColor(nextTagColor());
+    setIsCreating(true);
+  };
+  const startEditing = (tag: Tag) => {
+    setDraftColor(tag.color);
+    setRenaming(tag);
+  };
   const countFor = (tag: Tag) => notes.filter((note) => note.tagIds.includes(tag.id)).length;
 
   const fab = useFabExpanded();
 
   const actions: SheetAction[] = selected
     ? [
-        { label: 'Rename', icon: Edit, onPress: () => setRenaming(selected) },
+        { label: 'Edit', icon: Edit, onPress: () => startEditing(selected) },
         { label: 'Delete', icon: Delete, destructive: true, onPress: () => setDeleting(selected) },
       ]
     : [];
@@ -74,9 +92,17 @@ export function Tags() {
                   className="ios:active:bg-surface-container-high android:py-2 min-h-14 flex-row items-center gap-4 px-4"
                 >
                   {process.env.EXPO_OS === 'android' ? (
-                    <ItemAvatar id={item.id} size={40} icon={{ ios: 'tag', android: 'label' }} />
+                    <ItemAvatar
+                      id={item.id}
+                      size={40}
+                      icon={{ ios: 'tag', android: 'label' }}
+                      tone={toneOf(item.color)}
+                    />
                   ) : (
-                    <Icon name={{ ios: 'tag', android: 'label' }} color="on-surface-variant" />
+                    <Icon
+                      name={{ ios: 'tag.fill', android: 'label' }}
+                      color={toneOf(item.color).container}
+                    />
                   )}
                   <Text numberOfLines={1} className="flex-1 text-body text-on-surface">
                     {item.name}
@@ -110,9 +136,10 @@ export function Tags() {
         heading="New tag"
         placeholder="Name"
         submitLabel="Create"
+        color={{ value: draftColor, onChange: setDraftColor }}
         onDismiss={() => setIsCreating(false)}
         onSubmit={(name) => {
-          createTag(name);
+          createTag(name, draftColor);
           setIsCreating(false);
         }}
       />
@@ -120,13 +147,14 @@ export function Tags() {
         // Remounts per tag so the field starts from that tag's name.
         key={renaming?.id ?? 'rename'}
         isPresented={renaming !== null}
-        heading="Rename tag"
+        heading="Edit tag"
         placeholder="Name"
         submitLabel="Save"
         initialValue={renaming?.name}
+        color={{ value: draftColor, onChange: setDraftColor }}
         onDismiss={() => setRenaming(null)}
         onSubmit={(name) => {
-          if (renaming) renameTag(renaming.id, name);
+          if (renaming) updateTag(renaming.id, name, draftColor);
           setRenaming(null);
         }}
       />
