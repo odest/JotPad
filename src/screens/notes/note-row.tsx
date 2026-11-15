@@ -1,0 +1,43 @@
+import { Link } from 'expo-router';
+import { Pressable, Text, View } from 'react-native';
+
+import { useLastEntry, type Note } from '@/data/notes-store';
+import { usePalette } from '@/theme';
+import { formatListStamp } from '@/utils/format-time';
+
+/** A note in a list. `preview` replaces the last entry as the second line (search results). */
+export function NoteRow({ note, preview }: { note: Note; preview?: string }) {
+  const palette = usePalette();
+  const lastEntry = useLastEntry(note.id);
+
+  return (
+    <Link href={{ pathname: '/note/[id]', params: { id: note.id } }} asChild>
+      <Pressable
+        android_ripple={{ color: palette['surface-container-highest'] }}
+        className="flex-row items-center gap-4 pl-4 ios:active:bg-surface-container-high"
+      >
+        <View className="h-10 w-10 items-center justify-center rounded-full bg-primary-container">
+          <Text className="text-headline font-medium text-on-primary-container">
+            {note.title.charAt(0).toUpperCase()}
+          </Text>
+        </View>
+        <View className="min-h-16 flex-1 justify-center gap-0.5 border-outline-variant py-3 pr-4 ios:border-b-hairline">
+          <View className="flex-row items-baseline gap-2">
+            <Text
+              numberOfLines={1}
+              className="flex-1 text-headline text-on-surface ios:font-semibold"
+            >
+              {note.title}
+            </Text>
+            <Text className="text-footnote text-on-surface-variant">
+              {formatListStamp(lastEntry?.createdAt ?? note.createdAt)}
+            </Text>
+          </View>
+          <Text numberOfLines={1} className="text-subhead text-on-surface-variant">
+            {preview ?? lastEntry?.body ?? 'No messages yet'}
+          </Text>
+        </View>
+      </Pressable>
+    </Link>
+  );
+}

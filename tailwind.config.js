@@ -3,6 +3,8 @@
  * (src/theme/theme-provider.tsx) fills in per platform and color scheme, so one
  * class name resolves to Material 3 values on Android and to iOS system values on iOS.
  */
+const { hairlineWidth } = require('nativewind/theme');
+
 const colorRoles = [
   'surface',
   'surface-container-low',
@@ -55,6 +57,10 @@ module.exports = {
       12: '48px',
       14: '56px',
       16: '64px',
+    },
+    borderWidth: {
+      0: '0px',
+      hairline: hairlineWidth(),
     },
     borderRadius: {
       none: '0px',

@@ -1,5 +1,5 @@
-import { ScrollView } from 'react-native';
+import { Notes } from '@/screens/notes';
 
 export default function NotesScreen() {
-  return <ScrollView className="bg-surface" contentInsetAdjustmentBehavior="automatic" />;
+  return <Notes />;
 }
