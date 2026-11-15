@@ -6,6 +6,7 @@ import { Icon } from '@/components/icon';
 import { type Entry } from '@/data/notes-store';
 import { usePalette } from '@/theme';
 import { formatDay, formatTime } from '@/utils/format-time';
+import { longPressFeedback } from '@/utils/haptics';
 
 export type EntryItem = {
   entry: Entry;
@@ -108,7 +109,10 @@ export function EntryBubble({
             <Pressable
               onPressIn={() => setPressed(true)}
               onPressOut={() => setPressed(false)}
-              onLongPress={() => onLongPress(entry)}
+              onLongPress={() => {
+                longPressFeedback();
+                onLongPress(entry);
+              }}
               className={`rounded-xl bg-primary-container px-4 py-2 ${corners}`}
             >
               <Text className="text-body text-on-primary-container">

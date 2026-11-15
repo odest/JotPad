@@ -6,6 +6,7 @@ import { ItemAvatar } from '@/components/item-avatar';
 import { useLastEntry, type Note } from '@/data/notes-store';
 import { usePalette } from '@/theme';
 import { formatListStamp } from '@/utils/format-time';
+import { longPressFeedback } from '@/utils/haptics';
 
 /** A note in a list. `preview` replaces the last entry as the second line (search results). */
 export function NoteRow({
@@ -23,7 +24,13 @@ export function NoteRow({
   return (
     <Link href={{ pathname: '/note/[id]', params: { id: note.id } }} asChild>
       <Pressable
-        onLongPress={onLongPress && (() => onLongPress(note))}
+        onLongPress={
+          onLongPress &&
+          (() => {
+            longPressFeedback();
+            onLongPress(note);
+          })
+        }
         android_ripple={{ color: palette['surface-container-highest'] }}
         className="ios:active:bg-surface-container-high flex-row items-center gap-4 pl-4"
       >

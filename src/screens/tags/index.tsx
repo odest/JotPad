@@ -15,6 +15,7 @@ import { ItemAvatar } from '@/components/item-avatar';
 import { NameSheet } from '@/components/name-sheet';
 import { createTag, deleteTag, renameTag, useNotes, useTags, type Tag } from '@/data/notes-store';
 import { usePalette } from '@/theme';
+import { longPressFeedback } from '@/utils/haptics';
 
 export function Tags() {
   const palette = usePalette();
@@ -55,7 +56,10 @@ export function Tags() {
           return (
             <Link href={{ pathname: '/tags/[id]', params: { id: item.id } }} asChild>
               <Pressable
-                onLongPress={() => setSelected(item)}
+                onLongPress={() => {
+                  longPressFeedback();
+                  setSelected(item);
+                }}
                 android_ripple={{ color: palette['surface-container-highest'] }}
                 className="ios:active:bg-surface-container-high min-h-14 flex-row items-center gap-4 px-4"
               >
