@@ -4,6 +4,7 @@ import { type ReactNode } from 'react';
 import { useColorScheme, View } from 'react-native';
 
 import { getPalette, type ColorScheme, type Palette } from './colors';
+import { getTagTone, type TagColor, type TagTone } from './tag-colors';
 import { typeRamp } from './typography';
 
 function toCssVariables(palette: Palette) {
@@ -46,8 +47,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 
+function useScheme(): ColorScheme {
+  return useColorScheme() === 'dark' ? 'dark' : 'light';
+}
+
 /** Raw palette for the few places that cannot take a class name (native props). */
 export function usePalette(): Palette {
-  const scheme: ColorScheme = useColorScheme() === 'dark' ? 'dark' : 'light';
-  return getPalette(scheme);
+  return getPalette(useScheme());
+}
+
+/** Resolves tag colors for the current color scheme. */
+export function useTagTone(): (color: TagColor) => TagTone {
+  const scheme = useScheme();
+  return (color) => getTagTone(color, scheme);
 }

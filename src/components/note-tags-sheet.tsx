@@ -3,7 +3,7 @@ import { BottomSheet, Column, Icon, ListItem, Text } from '@expo/ui';
 
 import { NativeHost } from './native-host';
 import { setNoteTags, useNote, useTags } from '@/data/notes-store';
-import { typeRamp, usePalette } from '@/theme';
+import { typeRamp, usePalette, useTagTone } from '@/theme';
 
 /** Sheet that toggles which tags a note has. Pass the note's id to present it. */
 export function NoteTagsSheet({
@@ -14,6 +14,7 @@ export function NoteTagsSheet({
   onDismiss: () => void;
 }) {
   const palette = usePalette();
+  const toneOf = useTagTone();
   const tags = useTags();
   const note = useNote(noteId ?? '');
   const selected = note?.tagIds ?? [];
@@ -49,6 +50,16 @@ export function NoteTagsSheet({
                 key={tag.id}
                 onPress={() => toggle(tag.id)}
                 colors={{ containerColor: 'transparent' }}
+                leading={
+                  <Column
+                    style={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: 8,
+                      backgroundColor: toneOf(tag.color).container,
+                    }}
+                  />
+                }
                 trailing={
                   selected.includes(tag.id) ? (
                     <Icon name={{ ios: 'checkmark', android: Check }} color={palette.primary} />

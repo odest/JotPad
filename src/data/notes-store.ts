@@ -1,6 +1,8 @@
 import { asc, desc, eq } from 'drizzle-orm';
 import { useSyncExternalStore } from 'react';
 
+import { TAG_COLORS, type TagColor } from '@/theme/tag-colors';
+
 import { db } from './db';
 import * as schema from './schema';
 
@@ -15,6 +17,7 @@ export type Note = {
 export type Tag = {
   id: string;
   name: string;
+  color: TagColor;
 };
 
 export type Entry = {
@@ -40,6 +43,15 @@ type State = {
  */
 let state: State = { notes: [], entries: {}, tags: [] };
 let loaded = false;
+
+/** A stored color, or for tags without one, a color that stays the same for the tag. */
+function tagColor(id: string, stored: string | null): TagColor {
+  const known = TAG_COLORS.find((color) => color === stored);
+  if (known) return known;
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  return TAG_COLORS[hash % TAG_COLORS.length];
+}
 
 function newId(): string {
   return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
@@ -67,7 +79,7 @@ export function loadStore() {
       tagIds: links.filter((link) => link.noteId === id).map((link) => link.tagId),
     })),
     entries,
-    tags: tagRows.map(({ id, name }) => ({ id, name })),
+    tags: tagRows.map(({ id, name, color }) => ({ id, name, color: tagColor(id, color) })),
   });
 }
 
@@ -201,8 +213,17 @@ export function setNoteTags(id: string, tagIds: string[]) {
   });
 }
 
-export function createTag(name: string): Tag {
-  const tag: Tag = { id: newId(), name: name.trim() };
+/** The color offered for a new tag: the first one no tag uses yet. */
+export function nextTagColor(): TagColor {
+  const used = new Set(state.tags.map((tag) => tag.color));
+  return (
+    TAG_COLORS.find((color) => !used.has(color)) ??
+    TAG_COLORS[state.tags.length % TAG_COLORS.length]
+  );
+}
+
+export function createTag(name: string, color: TagColor): Tag {
+  const tag: Tag = { id: newId(), name: name.trim(), color };
   db.insert(schema.tags)
     .values({ ...tag, createdAt: Date.now() })
     .run();
@@ -210,11 +231,12 @@ export function createTag(name: string): Tag {
   return tag;
 }
 
-export function renameTag(id: string, name: string) {
-  db.update(schema.tags).set({ name: name.trim() }).where(eq(schema.tags.id, id)).run();
+/** Changes a tag's name and color. */
+export function updateTag(id: string, name: string, color: TagColor) {
+  db.update(schema.tags).set({ name: name.trim(), color }).where(eq(schema.tags.id, id)).run();
   setState({
     ...state,
-    tags: state.tags.map((tag) => (tag.id === id ? { ...tag, name: name.trim() } : tag)),
+    tags: state.tags.map((tag) => (tag.id === id ? { ...tag, name: name.trim(), color } : tag)),
   });
 }
 

@@ -27,7 +27,7 @@ npx expo lint               # lint
 npx tsc --noEmit            # typecheck
 npx prettier --write src    # format (sorts Tailwind classes)
 npx expo-doctor             # diagnose dependency and config issues
-npx drizzle-kit generate    # create a migration after changing src/data/schema.ts
+npx drizzle-kit generate --name <what_changed>  # create a migration after changing src/data/schema.ts
 ```
 
 Run typecheck and lint before calling a task done.
@@ -66,6 +66,7 @@ src/
 - Style with NativeWind class names. Use `ios:` and `android:` variants for small platform differences.
 - Colors and text sizes are design tokens, not literals. `tailwind.config.js` maps them to CSS variables that `ThemeProvider` fills per platform and color scheme: Material 3 dynamic colors on Android, system colors on iOS. Use the role names (`bg-surface`, `text-on-surface-variant`, `bg-primary-container`) and the text styles (`text-title`, `text-body`, `text-subhead`, `text-caption`).
 - Where a class name cannot be used (native props such as `placeholderTextColor`, or `@expo/ui` props), read the color from `usePalette()`.
+- Tag colors are not palette roles. Resolve a tag's color with `useTagTone()` (`src/theme/tag-colors.ts`); components that take a color (`Icon`, `ShapedBadge`) accept a role or a literal `#hex`.
 - Do not put a text-size class on a `TextInput`; set `fontSize` from `typeRamp` in `style`. A fixed line height misaligns native inputs.
 - Icons go through `src/components/icon.tsx`, which draws SF Symbols on iOS and Material Symbols on Android. Give every icon both names.
 
@@ -78,7 +79,7 @@ src/
 
 ## Known pitfalls
 
-- Change the database only through `src/data/schema.ts` and a generated migration (`npx drizzle-kit generate`). Never edit files in `src/data/migrations/` by hand. Migrations run at startup before the first screen renders. After generating one, restart Metro with `npx expo start --go --clear`: a running Metro can keep serving the old `migrations.js`, and the app then fails with errors such as "no column named …".
+- Change the database only through `src/data/schema.ts` and a generated migration (`npx drizzle-kit generate`). Never edit files in `src/data/migrations/` by hand. Migrations run at startup before the first screen renders. Generate a migration once: a running Metro hot-reloads it and applies it to the phone's database at once, so deleting and regenerating it under another name makes it run twice there ("duplicate column"). After generating one, restart Metro with `npx expo start --go --clear`: a running Metro can keep serving the old `migrations.js`, and the app then fails with errors such as "no column named …".
 
 - **Do not use Expo Router's `presentation: 'formSheet'`.** On Android it rendered nothing and broke the window's edge-to-edge insets (opaque status bar, doubled header padding). Use the `@expo/ui` `BottomSheet` inside the screen instead.
 - **Do not add `react-native-keyboard-controller`.** Its `KeyboardProvider` inset the whole app below the status bar here. The conversation screen follows the keyboard with React Native's `KeyboardAvoidingView`.

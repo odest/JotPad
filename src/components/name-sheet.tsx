@@ -3,7 +3,8 @@ import { useRef, useState } from 'react';
 
 import { NativeHost } from './native-host';
 import { SheetButton } from './sheet-button';
-import { typeRamp, usePalette } from '@/theme';
+import { TagColorPicker } from './tag-color-picker';
+import { typeRamp, usePalette, type TagColor } from '@/theme';
 
 /**
  * Sheet with a single name field, used to create and to rename notes and tags. Built from
@@ -11,6 +12,7 @@ import { typeRamp, usePalette } from '@/theme';
  * Android, SwiftUI on iOS.
  *
  * The field starts from `initialValue`; give the sheet a `key` per item when renaming.
+ * Pass `color` to also offer tag colors below the field.
  */
 export function NameSheet({
   isPresented,
@@ -18,6 +20,7 @@ export function NameSheet({
   submitLabel,
   initialValue = '',
   placeholder,
+  color,
   onDismiss,
   onSubmit,
 }: {
@@ -27,6 +30,7 @@ export function NameSheet({
   initialValue?: string;
   onDismiss: () => void;
   placeholder: string;
+  color?: { value: TagColor; onChange: (color: TagColor) => void };
   onSubmit: (name: string) => void;
 }) {
   const title = useRef(initialValue);
@@ -80,6 +84,7 @@ export function NameSheet({
             }}
             onSubmitEditing={submit}
           />
+          {color && <TagColorPicker value={color.value} onChange={color.onChange} />}
           <SheetButton label={submitLabel} disabled={!canSubmit} onPress={submit} />
         </Column>
       </BottomSheet>
