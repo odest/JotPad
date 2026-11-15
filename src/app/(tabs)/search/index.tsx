@@ -1,5 +1,5 @@
-import { ScrollView } from 'react-native';
+import { Search } from '@/screens/search';
 
 export default function SearchScreen() {
-  return <ScrollView className="bg-surface" contentInsetAdjustmentBehavior="automatic" />;
+  return <Search />;
 }
