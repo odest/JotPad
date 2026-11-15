@@ -1,0 +1,55 @@
+import { Pressable, Text, View } from 'react-native';
+
+import { Icon } from '@/components/icon';
+import { type Entry } from '@/data/notes-store';
+import { usePalette } from '@/theme';
+
+/**
+ * The pinned messages of a note, one at a time, below the header. Tapping it jumps to
+ * the message shown and moves on to the next one, as in messaging apps.
+ */
+export function PinnedBar({
+  pinned,
+  index,
+  onPress,
+}: {
+  /** Most recently pinned first. */
+  pinned: Entry[];
+  index: number;
+  onPress: (entry: Entry) => void;
+}) {
+  const palette = usePalette();
+  const entry = pinned[index];
+  if (!entry) return null;
+
+  const label =
+    pinned.length > 1 ? `Pinned message ${index + 1} of ${pinned.length}` : 'Pinned message';
+
+  return (
+    <Pressable
+      onPress={() => onPress(entry)}
+      android_ripple={{ color: palette['surface-container-highest'] }}
+      accessibilityRole="button"
+      accessibilityLabel={`${label}: ${entry.body}`}
+      accessibilityHint="Shows the message in the conversation"
+      className="ios:active:bg-surface-container-high ios:border-b ios:border-outline-variant min-h-14 flex-row items-center gap-3 bg-surface-container px-4 py-2"
+    >
+      {/* One segment per pinned message; the one shown is filled. */}
+      <View className="gap-0.5 self-stretch py-1">
+        {pinned.map((p, i) => (
+          <View
+            key={p.id}
+            className={`w-0.5 flex-1 rounded-full ${i === index ? 'bg-primary' : 'bg-outline-variant'}`}
+          />
+        ))}
+      </View>
+      <View className="flex-1">
+        <Text className="text-footnote font-medium text-primary">{label}</Text>
+        <Text numberOfLines={1} className="text-subhead text-on-surface">
+          {entry.body}
+        </Text>
+      </View>
+      <Icon name={{ ios: 'pin.fill', android: 'keep' }} size={20} color="on-surface-variant" />
+    </Pressable>
+  );
+}

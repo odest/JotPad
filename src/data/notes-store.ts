@@ -22,6 +22,8 @@ export type Entry = {
   noteId: string;
   body: string;
   createdAt: number;
+  /** When the entry was pinned to the top of its note; null when it is not pinned. */
+  pinnedAt: number | null;
 };
 
 type State = {
@@ -51,8 +53,8 @@ export function loadStore() {
   const links = db.select().from(schema.noteTags).all();
 
   const entries: Record<string, Entry[]> = {};
-  for (const { id, noteId, body, createdAt } of entryRows) {
-    (entries[noteId] ??= []).push({ id, noteId, body, createdAt });
+  for (const { id, noteId, body, createdAt, pinnedAt } of entryRows) {
+    (entries[noteId] ??= []).push({ id, noteId, body, createdAt, pinnedAt });
   }
 
   loaded = true;
@@ -137,7 +139,13 @@ export function createNote(title: string): Note {
 }
 
 export function addEntry(noteId: string, body: string): Entry {
-  const entry: Entry = { id: newId(), noteId, body: body.trim(), createdAt: Date.now() };
+  const entry: Entry = {
+    id: newId(),
+    noteId,
+    body: body.trim(),
+    createdAt: Date.now(),
+    pinnedAt: null,
+  };
   db.transaction((tx) => {
     tx.insert(schema.entries).values(entry).run();
     tx.update(schema.notes)
@@ -233,6 +241,19 @@ export function updateEntry(entry: Entry, body: string) {
     entries: {
       ...state.entries,
       [entry.noteId]: list.map((e) => (e.id === entry.id ? { ...e, body: body.trim() } : e)),
+    },
+  });
+}
+
+export function setEntryPinned(entry: Entry, pinned: boolean) {
+  const pinnedAt = pinned ? Date.now() : null;
+  db.update(schema.entries).set({ pinnedAt }).where(eq(schema.entries.id, entry.id)).run();
+  const list = state.entries[entry.noteId] ?? NO_ENTRIES;
+  setState({
+    ...state,
+    entries: {
+      ...state.entries,
+      [entry.noteId]: list.map((e) => (e.id === entry.id ? { ...e, pinnedAt } : e)),
     },
   });
 }

@@ -18,6 +18,8 @@ export const entries = sqliteTable(
       .references(() => notes.id, { onDelete: 'cascade' }),
     body: text('body').notNull(),
     createdAt: integer('created_at').notNull(),
+    /** When the entry was pinned to the top of its note; null when it is not pinned. */
+    pinnedAt: integer('pinned_at'),
   },
   (table) => [index('entries_note_id_idx').on(table.noteId, table.createdAt)],
 );
