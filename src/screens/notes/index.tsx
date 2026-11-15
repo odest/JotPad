@@ -1,5 +1,6 @@
 import Delete from '@expo/material-symbols/delete.xml';
 import Edit from '@expo/material-symbols/edit.xml';
+import IosShare from '@expo/material-symbols/ios_share.xml';
 import Keep from '@expo/material-symbols/keep.xml';
 import KeepOff from '@expo/material-symbols/keep_off.xml';
 import Label from '@expo/material-symbols/label.xml';
@@ -10,6 +11,7 @@ import { FlatList } from 'react-native';
 import { ActionSheet, type SheetAction } from '@/components/action-sheet';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { EmptyState } from '@/components/empty-state';
+import { ExportSheet } from '@/components/export-sheet';
 import { Fab } from '@/components/fab';
 import { NameSheet } from '@/components/name-sheet';
 import { NoteTagsSheet } from '@/components/note-tags-sheet';
@@ -18,7 +20,9 @@ import {
   deleteNote,
   renameNote,
   setNotePinned,
+  useAllEntries,
   useNotes,
+  useTags,
   type Note,
 } from '@/data/notes-store';
 
@@ -34,6 +38,9 @@ export function Notes() {
   const [renaming, setRenaming] = useState<Note | null>(null);
   const [deleting, setDeleting] = useState<Note | null>(null);
   const [tagging, setTagging] = useState<string | null>(null);
+  const [exporting, setExporting] = useState<Note | null>(null);
+  const entries = useAllEntries();
+  const tags = useTags();
 
   const startNewNote = () => setIsCreating(true);
 
@@ -53,6 +60,7 @@ export function Notes() {
           : { label: 'Pin', icon: Keep, onPress: () => setNotePinned(selected.id, true) },
         { label: 'Tags', icon: Label, onPress: () => setTagging(selected.id) },
         { label: 'Rename', icon: Edit, onPress: () => setRenaming(selected) },
+        { label: 'Export', icon: IosShare, onPress: () => setExporting(selected) },
         { label: 'Delete', icon: Delete, destructive: true, onPress: () => setDeleting(selected) },
       ]
     : [];
@@ -104,6 +112,16 @@ export function Notes() {
         }}
       />
       <NoteTagsSheet noteId={tagging} onDismiss={() => setTagging(null)} />
+      <ExportSheet
+        isPresented={exporting !== null}
+        onDismiss={() => setExporting(null)}
+        name={exporting?.title ?? ''}
+        data={() => ({
+          notes: exporting ? [exporting] : [],
+          entries: exporting ? { [exporting.id]: entries[exporting.id] ?? [] } : {},
+          tags,
+        })}
+      />
       <ActionSheet
         isPresented={selected !== null}
         onDismiss={() => setSelected(null)}

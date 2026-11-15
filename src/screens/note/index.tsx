@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActionSheet, type SheetAction } from '@/components/action-sheet';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { EmptyState } from '@/components/empty-state';
+import { ExportSheet } from '@/components/export-sheet';
 import { NameSheet } from '@/components/name-sheet';
 import { NoteTagsSheet } from '@/components/note-tags-sheet';
 import {
@@ -25,6 +26,7 @@ import {
   updateEntry,
   useEntries,
   useNote,
+  useTags,
   type Entry,
 } from '@/data/notes-store';
 import { usePalette } from '@/theme';
@@ -86,6 +88,8 @@ export function NoteChat({ noteId }: { noteId: string }) {
   const [renamingNote, setRenamingNote] = useState(false);
   const [taggingNote, setTaggingNote] = useState(false);
   const [deletingNote, setDeletingNote] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const tags = useTags();
   const palette = usePalette();
   const insets = useSafeAreaInsets();
 
@@ -205,6 +209,7 @@ export function NoteChat({ noteId }: { noteId: string }) {
           onTogglePin={() => setNotePinned(note.id, !note.pinned)}
           onTags={() => setTaggingNote(true)}
           onRename={() => setRenamingNote(true)}
+          onExport={() => setExporting(true)}
           onDelete={() => setDeletingNote(true)}
         />
       )}
@@ -310,6 +315,14 @@ export function NoteChat({ noteId }: { noteId: string }) {
           setRenamingNote(false);
         }}
       />
+      {note && (
+        <ExportSheet
+          isPresented={exporting}
+          onDismiss={() => setExporting(false)}
+          name={note.title}
+          data={() => ({ notes: [note], entries: { [note.id]: entries }, tags })}
+        />
+      )}
       <NoteTagsSheet noteId={taggingNote ? noteId : null} onDismiss={() => setTaggingNote(false)} />
       <ConfirmDialog
         isPresented={deletingNote}

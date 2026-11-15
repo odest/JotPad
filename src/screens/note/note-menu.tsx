@@ -8,6 +8,7 @@ export type NoteMenuProps = {
   onTogglePin: () => void;
   onTags: () => void;
   onRename: () => void;
+  onExport: () => void;
   onDelete: () => void;
 };
 
@@ -18,6 +19,7 @@ export function NoteMenu({
   onTogglePin,
   onTags,
   onRename,
+  onExport,
   onDelete,
 }: NoteMenuProps) {
   return (
@@ -34,6 +36,9 @@ export function NoteMenu({
         </Stack.Toolbar.MenuAction>
         <Stack.Toolbar.MenuAction icon="pencil" onPress={onRename}>
           Rename
+        </Stack.Toolbar.MenuAction>
+        <Stack.Toolbar.MenuAction icon="square.and.arrow.up" onPress={onExport}>
+          Export
         </Stack.Toolbar.MenuAction>
         <Stack.Toolbar.MenuAction icon="trash" destructive onPress={onDelete}>
           Delete note

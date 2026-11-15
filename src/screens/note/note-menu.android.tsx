@@ -1,5 +1,6 @@
 import Delete from '@expo/material-symbols/delete.xml';
 import Edit from '@expo/material-symbols/edit.xml';
+import IosShare from '@expo/material-symbols/ios_share.xml';
 import Keep from '@expo/material-symbols/keep.xml';
 import KeepOff from '@expo/material-symbols/keep_off.xml';
 import Label from '@expo/material-symbols/label.xml';
@@ -20,7 +21,15 @@ export function NoteMenu(props: NoteMenuProps) {
   return <Stack.Screen options={{ headerRight: () => <MoreMenu {...props} /> }} />;
 }
 
-function MoreMenu({ note, onSearch, onTogglePin, onTags, onRename, onDelete }: NoteMenuProps) {
+function MoreMenu({
+  note,
+  onSearch,
+  onTogglePin,
+  onTags,
+  onRename,
+  onExport,
+  onDelete,
+}: NoteMenuProps) {
   const palette = usePalette();
   const [open, setOpen] = useState(false);
 
@@ -36,6 +45,7 @@ function MoreMenu({ note, onSearch, onTogglePin, onTags, onRename, onDelete }: N
       : { label: 'Pin note', icon: Keep, onPress: onTogglePin },
     { label: 'Tags', icon: Label, onPress: onTags },
     { label: 'Rename', icon: Edit, onPress: onRename },
+    { label: 'Export', icon: IosShare, onPress: onExport },
     { label: 'Delete note', icon: Delete, destructive: true, onPress: onDelete },
   ];
 
