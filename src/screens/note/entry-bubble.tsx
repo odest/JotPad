@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { cubicBezier } from 'react-native-reanimated';
 
@@ -48,6 +49,7 @@ export function EntryBubble({
 }) {
   const { entry, startsDay, joinsPrevious, joinsNext } = item;
   const palette = usePalette();
+  const [pressed, setPressed] = useState(false);
 
   // Android shapes a group like Google Messages: the corners between grouped bubbles
   // tighten. iOS keeps every bubble fully rounded and only closes the gap.
@@ -84,25 +86,38 @@ export function EntryBubble({
         {entry.pinnedAt !== null && (
           <Icon name={{ ios: 'pin.fill', android: 'keep' }} size={14} color="on-surface-variant" />
         )}
-        <Pressable
-          onLongPress={() => onLongPress(entry)}
-          className={`max-w-[80%] rounded-xl bg-primary-container px-4 py-2 active:opacity-80 ${corners}`}
+        {/* Sinks a little under the finger, so a long press feels like holding the bubble. */}
+        <Animated.View
+          style={{
+            maxWidth: '80%',
+            transform: [{ scale: pressed ? 0.96 : 1 }],
+            transitionProperty: 'transform',
+            transitionDuration: pressed ? 120 : 250,
+            transitionTimingFunction: EASE_OUT,
+          }}
         >
-          <Text className="text-body text-on-primary-container">
-            {splitMatches(entry.body, query).map((part, i) =>
-              part.match ? (
-                <Text
-                  key={i}
-                  style={{ backgroundColor: palette.primary, color: palette['on-primary'] }}
-                >
-                  {part.text}
-                </Text>
-              ) : (
-                part.text
-              ),
-            )}
-          </Text>
-        </Pressable>
+          <Pressable
+            onPressIn={() => setPressed(true)}
+            onPressOut={() => setPressed(false)}
+            onLongPress={() => onLongPress(entry)}
+            className={`rounded-xl bg-primary-container px-4 py-2 ${corners}`}
+          >
+            <Text className="text-body text-on-primary-container">
+              {splitMatches(entry.body, query).map((part, i) =>
+                part.match ? (
+                  <Text
+                    key={i}
+                    style={{ backgroundColor: palette.primary, color: palette['on-primary'] }}
+                  >
+                    {part.text}
+                  </Text>
+                ) : (
+                  part.text
+                ),
+              )}
+            </Text>
+          </Pressable>
+        </Animated.View>
       </View>
       {!joinsNext && (
         <Text className="self-end pr-1 pt-1 text-caption text-on-surface-variant">
