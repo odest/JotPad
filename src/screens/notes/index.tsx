@@ -12,6 +12,7 @@ import { ConfirmDialog } from '@/components/confirm-dialog';
 import { EmptyState } from '@/components/empty-state';
 import { Fab } from '@/components/fab';
 import { NameSheet } from '@/components/name-sheet';
+import { NoteTagsSheet } from '@/components/note-tags-sheet';
 import {
   createNote,
   deleteNote,
@@ -22,7 +23,6 @@ import {
 } from '@/data/notes-store';
 
 import { NoteRow } from './note-row';
-import { NoteTagsSheet } from './note-tags-sheet';
 
 export function Notes() {
   const notes = useNotes();

@@ -1,7 +1,7 @@
 import Check from '@expo/material-symbols/check.xml';
 import { BottomSheet, Column, Icon, ListItem, Text } from '@expo/ui';
 
-import { NativeHost } from '@/components/native-host';
+import { NativeHost } from './native-host';
 import { setNoteTags, useNote, useTags } from '@/data/notes-store';
 import { typeRamp, usePalette } from '@/theme';
 

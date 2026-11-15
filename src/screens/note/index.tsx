@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useHeaderHeight } from 'expo-router/react-navigation';
 import Copy from '@expo/material-symbols/content_copy.xml';
 import Delete from '@expo/material-symbols/delete.xml';
@@ -13,10 +13,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActionSheet, type SheetAction } from '@/components/action-sheet';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { EmptyState } from '@/components/empty-state';
+import { NameSheet } from '@/components/name-sheet';
+import { NoteTagsSheet } from '@/components/note-tags-sheet';
 import {
   addEntry,
   deleteEntry,
+  deleteNote,
+  renameNote,
   setEntryPinned,
+  setNotePinned,
   updateEntry,
   useEntries,
   useNote,
@@ -27,6 +32,7 @@ import { isSameDay } from '@/utils/format-time';
 
 import { Composer } from './composer';
 import { EntryBubble, type EntryItem } from './entry-bubble';
+import { NoteMenu } from './note-menu';
 import { PinnedBar } from './pinned-bar';
 
 /** Entries sent within this window of each other are shown as one group. */
@@ -72,6 +78,12 @@ function useKeyboardOpen(): boolean {
 export function NoteChat({ noteId }: { noteId: string }) {
   const note = useNote(noteId);
   const entries = useEntries(noteId);
+  const router = useRouter();
+
+  // Sheets and dialog opened from the header menu.
+  const [renamingNote, setRenamingNote] = useState(false);
+  const [taggingNote, setTaggingNote] = useState(false);
+  const [deletingNote, setDeletingNote] = useState(false);
   const palette = usePalette();
   const insets = useSafeAreaInsets();
 
@@ -136,6 +148,15 @@ export function NoteChat({ noteId }: { noteId: string }) {
   return (
     <>
       <Stack.Screen options={{ title: note?.title ?? '' }} />
+      {note && (
+        <NoteMenu
+          note={note}
+          onTogglePin={() => setNotePinned(note.id, !note.pinned)}
+          onTags={() => setTaggingNote(true)}
+          onRename={() => setRenamingNote(true)}
+          onDelete={() => setDeletingNote(true)}
+        />
+      )}
       <KeyboardAvoidingView
         behavior="padding"
         keyboardVerticalOffset={headerHeight}
@@ -205,6 +226,34 @@ export function NoteChat({ noteId }: { noteId: string }) {
         destructive
         onConfirm={() => deleting && deleteEntry(deleting)}
         onDismiss={() => setDeleting(null)}
+      />
+      <NameSheet
+        // Remounts after a rename so the field starts from the current title.
+        key={note?.title}
+        isPresented={renamingNote}
+        heading="Rename note"
+        placeholder="Title"
+        submitLabel="Save"
+        initialValue={note?.title}
+        onDismiss={() => setRenamingNote(false)}
+        onSubmit={(title) => {
+          renameNote(noteId, title);
+          setRenamingNote(false);
+        }}
+      />
+      <NoteTagsSheet noteId={taggingNote ? noteId : null} onDismiss={() => setTaggingNote(false)} />
+      <ConfirmDialog
+        isPresented={deletingNote}
+        title="Delete note?"
+        message={`"${note?.title ?? ''}" and all of its messages will be deleted.`}
+        confirmLabel="Delete"
+        destructive
+        onConfirm={() => {
+          // Leave first, so the screen never renders a note that no longer exists.
+          router.back();
+          deleteNote(noteId);
+        }}
+        onDismiss={() => setDeletingNote(false)}
       />
     </>
   );
