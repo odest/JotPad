@@ -3,6 +3,7 @@ import * as Sharing from 'expo-sharing';
 
 import { type Entry, type Note, type Tag } from '@/data/notes-store';
 import { strings, type Strings } from '@/i18n';
+import { withLineBreaks } from '@/utils/markdown';
 
 export type ExportFormat = 'markdown' | 'text' | 'json';
 
@@ -46,11 +47,7 @@ function tagNames(note: Note, tags: Tag[]): string[] {
   return note.tagIds.flatMap((id) => tags.find((tag) => tag.id === id)?.name ?? []);
 }
 
-/**
- * Keeps characters in a message from being read as Markdown syntax. Only the inline
- * markers are escaped: each message sits after a list marker and a time, so line-start
- * syntax (#, -, 1.) cannot take effect, and the raw file stays readable.
- */
+/** Keeps a note title or tag name from being read as Markdown syntax. */
 function escapeMarkdown(text: string): string {
   return text.replace(/([\\`*_[\]<>])/g, '\\$1');
 }
@@ -67,17 +64,9 @@ function toMarkdown({ notes, entries, tags }: ExportData): string {
         lines.push('', `## ${day}`, '');
         for (const entry of list) {
           const pin = entry.pinnedAt !== null ? ' 📌' : '';
-          // Later lines of a multi-line message stay inside its list item, and a line
-          // that starts like a heading, list or quote is kept as plain text.
-          const body = escapeMarkdown(entry.body)
-            .split('\n')
-            .map((line, i) =>
-              i === 0
-                ? line
-                : line.replace(/^(\s*)([#>+-])/, '$1\\$2').replace(/^(\s*\d+)\./, '$1\\.'),
-            )
-            .join('  \n  ');
-          lines.push(`- **${clock(entry.createdAt)}**${pin} ${body}`);
+          // Messages are Markdown already: each one follows its time as written, with its
+          // line breaks kept, and a blank line separates it from the next.
+          lines.push(`**${clock(entry.createdAt)}**${pin}  `, withLineBreaks(entry.body), '');
         }
       }
       return lines.join('\n');

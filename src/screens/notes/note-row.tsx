@@ -6,6 +6,7 @@ import { ItemAvatar } from '@/components/item-avatar';
 import { useLastEntry, useTags, type Note } from '@/data/notes-store';
 import { usePalette, useTagTone } from '@/theme';
 import { formatListStamp } from '@/utils/format-time';
+import { stripMarkdown } from '@/utils/markdown';
 import { longPressFeedback } from '@/utils/haptics';
 import { useLocale, useT } from '@/i18n';
 
@@ -62,7 +63,7 @@ export function NoteRow({
           </View>
           <View className="flex-row items-center gap-2">
             <Text numberOfLines={1} className="flex-1 text-subhead text-on-surface-variant">
-              {preview ?? lastEntry?.body ?? t.notes.noMessages}
+              {stripMarkdown(preview ?? lastEntry?.body ?? '') || t.notes.noMessages}
             </Text>
             {/* The first tag sits beside the preview, so a tagged note is no taller. */}
             {first && (

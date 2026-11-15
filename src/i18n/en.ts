@@ -51,6 +51,7 @@ export const en = {
     editingMessage: 'Editing message',
     cancelEditing: 'Cancel editing',
     send: 'Send',
+    openLink: 'Opens the link',
     emptyTitle: 'Nothing here yet',
     emptyMessage: 'Write your first message below.',
     deleteMessageTitle: 'Delete message?',
