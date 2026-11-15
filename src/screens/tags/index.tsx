@@ -3,7 +3,8 @@ import Delete from '@expo/material-symbols/delete.xml';
 import Edit from '@expo/material-symbols/edit.xml';
 import { Link, Stack } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { ActionSheet, type SheetAction } from '@/components/action-sheet';
 import { ConfirmDialog } from '@/components/confirm-dialog';
@@ -11,6 +12,7 @@ import { EmptyState } from '@/components/empty-state';
 import { Fab } from '@/components/fab';
 import { groupPosition } from '@/components/group-position';
 import { GroupedRow } from '@/components/grouped-row';
+import { listItemLayout } from '@/components/list-motion';
 import { useFabExpanded } from '@/components/use-fab-expanded';
 import { Icon } from '@/components/icon';
 import { ItemAvatar } from '@/components/item-avatar';
@@ -44,10 +46,15 @@ export function Tags() {
 
   return (
     <>
-      <FlatList
-        className="bg-surface"
+      <Animated.FlatList
+        style={{ flex: 1, backgroundColor: palette.surface }}
         // Leaves room for the FAB below the last row on Android.
-        contentContainerClassName="grow android:pt-2 android:pb-16"
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: process.env.EXPO_OS === 'android' ? 8 : 0,
+          paddingBottom: process.env.EXPO_OS === 'android' ? 64 : 0,
+        }}
+        itemLayoutAnimation={listItemLayout}
         contentInsetAdjustmentBehavior="automatic"
         data={tags}
         onScroll={fab.onScroll}

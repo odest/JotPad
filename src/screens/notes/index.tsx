@@ -6,7 +6,7 @@ import KeepOff from '@expo/material-symbols/keep_off.xml';
 import Label from '@expo/material-symbols/label.xml';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { FlatList } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { ActionSheet, type SheetAction } from '@/components/action-sheet';
 import { ConfirmDialog } from '@/components/confirm-dialog';
@@ -15,6 +15,7 @@ import { ExportSheet } from '@/components/export-sheet';
 import { Fab } from '@/components/fab';
 import { groupPosition } from '@/components/group-position';
 import { GroupedRow } from '@/components/grouped-row';
+import { listItemLayout } from '@/components/list-motion';
 import { useFabExpanded } from '@/components/use-fab-expanded';
 import { NameSheet } from '@/components/name-sheet';
 import { NoteTagsSheet } from '@/components/note-tags-sheet';
@@ -29,6 +30,7 @@ import {
   type Note,
 } from '@/data/notes-store';
 import { useNoteSort } from '@/data/preferences';
+import { usePalette } from '@/theme';
 
 import { NoteRow } from './note-row';
 import { NotesHeader } from './notes-header';
@@ -37,6 +39,7 @@ import { sortNotes } from './sort-notes';
 export function Notes() {
   const notes = useNotes();
   const sort = useNoteSort();
+  const palette = usePalette();
   const fab = useFabExpanded();
   const router = useRouter();
 
@@ -75,10 +78,15 @@ export function Notes() {
 
   return (
     <>
-      <FlatList
-        className="bg-surface"
+      <Animated.FlatList
+        style={{ flex: 1, backgroundColor: palette.surface }}
         // Leaves room for the FAB below the last row on Android.
-        contentContainerClassName="grow android:pt-2 android:pb-16"
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: process.env.EXPO_OS === 'android' ? 8 : 0,
+          paddingBottom: process.env.EXPO_OS === 'android' ? 64 : 0,
+        }}
+        itemLayoutAnimation={listItemLayout}
         contentInsetAdjustmentBehavior="automatic"
         data={ordered}
         onScroll={fab.onScroll}
