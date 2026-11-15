@@ -1,16 +1,25 @@
 import { Stack, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { FlatList } from 'react-native';
 
 import { EmptyState } from '@/components/empty-state';
 import { Fab } from '@/components/fab';
-import { useNotes } from '@/data/notes-store';
+import { createNote, useNotes } from '@/data/notes-store';
 
+import { NewNoteSheet } from './new-note-sheet';
 import { NoteRow } from './note-row';
 
 export function Notes() {
   const notes = useNotes();
   const router = useRouter();
-  const startNewNote = () => router.push('/new-note');
+  const [isCreating, setIsCreating] = useState(false);
+  const startNewNote = () => setIsCreating(true);
+
+  const openNewNote = (title: string) => {
+    const note = createNote(title);
+    setIsCreating(false);
+    router.push({ pathname: '/note/[id]', params: { id: note.id } });
+  };
 
   return (
     <>
@@ -36,6 +45,11 @@ export function Notes() {
         </Stack.Toolbar>
       )}
       <Fab label="New note" onPress={startNewNote} />
+      <NewNoteSheet
+        isPresented={isCreating}
+        onDismiss={() => setIsCreating(false)}
+        onCreate={openNewNote}
+      />
     </>
   );
 }

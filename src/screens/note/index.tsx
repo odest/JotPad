@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
-import { FlatList } from 'react-native';
-import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import { useHeaderHeight } from 'expo-router/react-navigation';
+import { useEffect, useState } from 'react';
+import { FlatList, Keyboard, KeyboardAvoidingView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/empty-state';
@@ -36,24 +36,41 @@ function toItems(entries: Entry[]): EntryItem[] {
     .reverse();
 }
 
+function useKeyboardOpen(): boolean {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () => setOpen(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setOpen(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+  return open;
+}
+
 export function NoteChat({ noteId }: { noteId: string }) {
   const note = useNote(noteId);
   const entries = useEntries(noteId);
   const palette = usePalette();
   const insets = useSafeAreaInsets();
 
-  // The keyboard's real height, frame by frame on the UI thread, so the composer rides
-  // on top of it. Closed, the content clears the system navigation bar instead.
-  const keyboard = useReanimatedKeyboardAnimation();
-  const bottomInset = insets.bottom;
-  const keyboardSpace = useAnimatedStyle(() => ({
-    paddingBottom: Math.max(-keyboard.height.get(), bottomInset),
-  }));
+  const headerHeight = useHeaderHeight();
+  const keyboardOpen = useKeyboardOpen();
 
   return (
     <>
       <Stack.Screen options={{ title: note?.title ?? '' }} />
-      <Animated.View style={[{ flex: 1, backgroundColor: palette.surface }, keyboardSpace]}>
+      <KeyboardAvoidingView
+        behavior="padding"
+        keyboardVerticalOffset={headerHeight}
+        // Closed, the composer clears the system navigation bar; open, the keyboard covers it.
+        style={{
+          flex: 1,
+          backgroundColor: palette.surface,
+          paddingBottom: keyboardOpen ? 0 : insets.bottom,
+        }}
+      >
         {entries.length === 0 ? (
           <EmptyState
             icon={{ ios: 'text.bubble', android: 'chat_bubble' }}
@@ -72,7 +89,7 @@ export function NoteChat({ noteId }: { noteId: string }) {
           />
         )}
         <Composer onSend={(body) => addEntry(noteId, body)} />
-      </Animated.View>
+      </KeyboardAvoidingView>
     </>
   );
 }
