@@ -58,6 +58,7 @@ src/
 - File names are kebab-case. Import with the `@/` alias (`@/components/icon`).
 - Route files only read params and render a screen from `src/screens/`.
 - For platform differences use platform files (`fab.tsx` + `fab.android.tsx`, `action-sheet.tsx` + `action-sheet.ios.tsx`) with identical props. Platform files are not allowed inside `src/app/`.
+- A platform file replaces the base file completely, so export only the component and its props type from it. Anything else the base file exports (constants, helpers) is `undefined` on the platform that has its own file, and TypeScript does not catch it. Put shared values in a separate file (see `badge-shapes.ts`).
 
 ## Styling and theme
 
@@ -72,7 +73,7 @@ src/
 - Wrap every `@expo/ui` tree in `NativeHost` (`src/components/native-host.tsx`), not in `Host` directly. It passes the app's color scheme on, so native components follow the theme chosen in Settings.
 - `@expo/ui/jetpack-compose` is Android-only and `@expo/ui/swift-ui` is iOS-only. Import them only from a platform file.
 - Material Symbols for Compose come from `@expo/material-symbols/<name>.xml`. In development they download on first use, so an icon can be blank the first time it is shown.
-- Reusable pieces that already exist: `ActionSheet` (actions for one item), `ConfirmDialog` (confirm a destructive action), `NameSheet` (one text field, for create and rename), `Fab`, `EmptyState`.
+- Reusable pieces that already exist: `ActionSheet` (actions for one item), `ConfirmDialog` (confirm a destructive action), `NameSheet` (one text field, for create and rename), `Fab` (extended; pair it with `useFabExpanded` on the list), `EmptyState`, `ShapedBadge` (a Material 3 Expressive shape on Android, a circle on iOS).
 
 ## Known pitfalls
 
