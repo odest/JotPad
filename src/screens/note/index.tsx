@@ -37,6 +37,7 @@ import { EntryActions } from './entry-actions';
 import { EntryBubble, type EntryItem } from './entry-bubble';
 import { NoteMenu } from './note-menu';
 import { NoteSearchBar, searchHeaderOptions } from './note-search-bar';
+import { NoteTitle } from './note-title';
 import { PinnedBar } from './pinned-bar';
 import { SearchNav } from './search-nav';
 
@@ -198,6 +199,8 @@ export function NoteChat({ noteId }: { noteId: string }) {
       <Stack.Screen
         options={{
           title: note?.title ?? '',
+          ...(process.env.EXPO_OS === 'android' &&
+            note && { headerTitle: () => <NoteTitle note={note} /> }),
           // Set every time, so leaving search mode restores the normal header.
           headerShown: true,
           headerSearchBarOptions: undefined,

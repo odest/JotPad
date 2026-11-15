@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/empty-state';
 import { Fab } from '@/components/fab';
 import { useFabExpanded } from '@/components/use-fab-expanded';
 import { Icon } from '@/components/icon';
+import { ItemAvatar } from '@/components/item-avatar';
 import { NameSheet } from '@/components/name-sheet';
 import { createTag, deleteTag, renameTag, useNotes, useTags, type Tag } from '@/data/notes-store';
 import { usePalette } from '@/theme';
@@ -58,7 +59,11 @@ export function Tags() {
                 android_ripple={{ color: palette['surface-container-highest'] }}
                 className="ios:active:bg-surface-container-high min-h-14 flex-row items-center gap-4 px-4"
               >
-                <Icon name={{ ios: 'tag', android: 'label' }} color="on-surface-variant" />
+                {process.env.EXPO_OS === 'android' ? (
+                  <ItemAvatar id={item.id} size={40} icon={{ ios: 'tag', android: 'label' }} />
+                ) : (
+                  <Icon name={{ ios: 'tag', android: 'label' }} color="on-surface-variant" />
+                )}
                 <Text numberOfLines={1} className="flex-1 text-body text-on-surface">
                   {item.name}
                 </Text>
