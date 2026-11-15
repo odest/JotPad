@@ -1,18 +1,37 @@
+import Delete from '@expo/material-symbols/delete.xml';
+import Edit from '@expo/material-symbols/edit.xml';
+import Keep from '@expo/material-symbols/keep.xml';
+import KeepOff from '@expo/material-symbols/keep_off.xml';
 import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { FlatList } from 'react-native';
 
+import { ActionSheet, type SheetAction } from '@/components/action-sheet';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { EmptyState } from '@/components/empty-state';
 import { Fab } from '@/components/fab';
-import { createNote, useNotes } from '@/data/notes-store';
+import {
+  createNote,
+  deleteNote,
+  renameNote,
+  setNotePinned,
+  useNotes,
+  type Note,
+} from '@/data/notes-store';
 
-import { NewNoteSheet } from './new-note-sheet';
 import { NoteRow } from './note-row';
+import { NoteTitleSheet } from './note-title-sheet';
 
 export function Notes() {
   const notes = useNotes();
   const router = useRouter();
+
   const [isCreating, setIsCreating] = useState(false);
+  // The note whose actions are showing, and the notes being renamed or deleted.
+  const [selected, setSelected] = useState<Note | null>(null);
+  const [renaming, setRenaming] = useState<Note | null>(null);
+  const [deleting, setDeleting] = useState<Note | null>(null);
+
   const startNewNote = () => setIsCreating(true);
 
   const openNewNote = (title: string) => {
@@ -21,6 +40,19 @@ export function Notes() {
     router.push({ pathname: '/note/[id]', params: { id: note.id } });
   };
 
+  // Pinned notes stay on top; within each group the store's recency order holds.
+  const ordered = [...notes.filter((note) => note.pinned), ...notes.filter((note) => !note.pinned)];
+
+  const actions: SheetAction[] = selected
+    ? [
+        selected.pinned
+          ? { label: 'Unpin', icon: KeepOff, onPress: () => setNotePinned(selected.id, false) }
+          : { label: 'Pin', icon: Keep, onPress: () => setNotePinned(selected.id, true) },
+        { label: 'Rename', icon: Edit, onPress: () => setRenaming(selected) },
+        { label: 'Delete', icon: Delete, destructive: true, onPress: () => setDeleting(selected) },
+      ]
+    : [];
+
   return (
     <>
       <FlatList
@@ -28,9 +60,9 @@ export function Notes() {
         // Leaves room for the FAB below the last row on Android.
         contentContainerClassName="grow android:pb-16"
         contentInsetAdjustmentBehavior="automatic"
-        data={notes}
+        data={ordered}
         keyExtractor={(note) => note.id}
-        renderItem={({ item }) => <NoteRow note={item} />}
+        renderItem={({ item }) => <NoteRow note={item} onLongPress={setSelected} />}
         ListEmptyComponent={
           <EmptyState
             icon={{ ios: 'bubble.left.and.bubble.right', android: 'forum' }}
@@ -45,10 +77,39 @@ export function Notes() {
         </Stack.Toolbar>
       )}
       <Fab label="New note" onPress={startNewNote} />
-      <NewNoteSheet
+      <NoteTitleSheet
         isPresented={isCreating}
+        heading="New note"
+        submitLabel="Create"
         onDismiss={() => setIsCreating(false)}
-        onCreate={openNewNote}
+        onSubmit={openNewNote}
+      />
+      <NoteTitleSheet
+        // Remounts per note so the field starts from that note's title.
+        key={renaming?.id ?? 'rename'}
+        isPresented={renaming !== null}
+        heading="Rename note"
+        submitLabel="Save"
+        initialTitle={renaming?.title}
+        onDismiss={() => setRenaming(null)}
+        onSubmit={(title) => {
+          if (renaming) renameNote(renaming.id, title);
+          setRenaming(null);
+        }}
+      />
+      <ActionSheet
+        isPresented={selected !== null}
+        onDismiss={() => setSelected(null)}
+        actions={actions}
+      />
+      <ConfirmDialog
+        isPresented={deleting !== null}
+        title="Delete note?"
+        message={`"${deleting?.title ?? ''}" and all of its messages will be deleted.`}
+        confirmLabel="Delete"
+        destructive
+        onConfirm={() => deleting && deleteNote(deleting.id)}
+        onDismiss={() => setDeleting(null)}
       />
     </>
   );

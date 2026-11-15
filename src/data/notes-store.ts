@@ -4,6 +4,7 @@ export type Note = {
   id: string;
   title: string;
   createdAt: number;
+  pinned: boolean;
 };
 
 export type Entry = {
@@ -66,7 +67,12 @@ export function useLastEntry(noteId: string): Entry | undefined {
 }
 
 export function createNote(title: string): Note {
-  const note: Note = { id: String(nextId++), title: title.trim(), createdAt: Date.now() };
+  const note: Note = {
+    id: String(nextId++),
+    title: title.trim(),
+    createdAt: Date.now(),
+    pinned: false,
+  };
   setState({ ...state, notes: [note, ...state.notes] });
   return note;
 }
@@ -80,6 +86,26 @@ export function addEntry(noteId: string, body: string): Entry {
     entries: { ...state.entries, [noteId]: [...(state.entries[noteId] ?? NO_ENTRIES), entry] },
   });
   return entry;
+}
+
+function updateNote(id: string, change: Partial<Note>) {
+  setState({
+    ...state,
+    notes: state.notes.map((note) => (note.id === id ? { ...note, ...change } : note)),
+  });
+}
+
+export function renameNote(id: string, title: string) {
+  updateNote(id, { title: title.trim() });
+}
+
+export function setNotePinned(id: string, pinned: boolean) {
+  updateNote(id, { pinned });
+}
+
+export function deleteNote(id: string) {
+  const { [id]: _removed, ...entries } = state.entries;
+  setState({ notes: state.notes.filter((note) => note.id !== id), entries });
 }
 
 export function updateEntry(entry: Entry, body: string) {

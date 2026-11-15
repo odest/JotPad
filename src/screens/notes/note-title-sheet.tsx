@@ -4,32 +4,41 @@ import { useRef, useState } from 'react';
 import { typeRamp, usePalette } from '@/theme';
 
 /**
- * Sheet for naming a new note. Built from @expo/ui so it is the platform's own sheet,
- * text field and button: Material 3 on Android, SwiftUI on iOS.
+ * Sheet with a single title field, used to create and to rename a note. Built from
+ * @expo/ui so it is the platform's own sheet, text field and button: Material 3 on
+ * Android, SwiftUI on iOS.
+ *
+ * The field starts from `initialTitle`; give the sheet a `key` per note when renaming.
  */
-export function NewNoteSheet({
+export function NoteTitleSheet({
   isPresented,
+  heading,
+  submitLabel,
+  initialTitle = '',
   onDismiss,
-  onCreate,
+  onSubmit,
 }: {
   isPresented: boolean;
+  heading: string;
+  submitLabel: string;
+  initialTitle?: string;
   onDismiss: () => void;
-  onCreate: (title: string) => void;
+  onSubmit: (title: string) => void;
 }) {
-  const title = useRef('');
-  const [canCreate, setCanCreate] = useState(false);
+  const title = useRef(initialTitle);
+  const [canSubmit, setCanSubmit] = useState(initialTitle.trim().length > 0);
   const palette = usePalette();
 
   const reset = () => {
-    title.current = '';
-    setCanCreate(false);
+    title.current = initialTitle;
+    setCanSubmit(initialTitle.trim().length > 0);
   };
 
-  const create = () => {
+  const submit = () => {
     const value = title.current.trim();
     if (!value) return;
     reset();
-    onCreate(value);
+    onSubmit(value);
   };
 
   return (
@@ -43,10 +52,13 @@ export function NewNoteSheet({
       >
         <Column spacing={16} style={{ paddingHorizontal: 8, paddingBottom: 24 }}>
           <Text textStyle={{ fontSize: typeRamp.title.size, lineHeight: typeRamp.title.leading }}>
-            New note
+            {heading}
           </Text>
           <TextInput
             autoFocus
+            defaultValue={initialTitle}
+            // Renaming usually replaces the whole title.
+            selectTextOnFocus={initialTitle.length > 0}
             placeholder="Title"
             maxLength={80}
             returnKeyType="done"
@@ -60,17 +72,11 @@ export function NewNoteSheet({
             }}
             onChangeText={(text) => {
               title.current = text;
-              setCanCreate(text.trim().length > 0);
+              setCanSubmit(text.trim().length > 0);
             }}
-            onSubmitEditing={create}
+            onSubmitEditing={submit}
           />
-          <Button
-            label="Create"
-            variant="filled"
-            disabled={!canCreate}
-            onPress={create}
-            style={{ width: '100%' }}
-          />
+          <Button label={submitLabel} variant="filled" disabled={!canSubmit} onPress={submit} />
         </Column>
       </BottomSheet>
     </Host>
