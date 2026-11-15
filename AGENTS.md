@@ -59,6 +59,7 @@ src/
 - Route files only read params and render a screen from `src/screens/`.
 - For platform differences use platform files (`fab.tsx` + `fab.android.tsx`, `action-sheet.tsx` + `action-sheet.ios.tsx`) with identical props. Platform files are not allowed inside `src/app/`.
 - A platform file replaces the base file completely, so export only the component and its props type from it. Anything else the base file exports (constants, helpers) is `undefined` on the platform that has its own file, and TypeScript does not catch it. Put shared values in a separate file (see `badge-shapes.ts`).
+- A running Metro does not notice a new platform file next to a module it has already resolved (adding `search-field.android.tsx` beside `search-field.tsx`): the app keeps loading the old file with no error. Restart Metro with `npx expo start --go --clear` after adding or removing one.
 
 ## Styling and theme
 
