@@ -1,7 +1,8 @@
-import { BottomSheet, Button, Column, Text, TextInput } from '@expo/ui';
+import { BottomSheet, Column, Text, TextInput } from '@expo/ui';
 import { useRef, useState } from 'react';
 
 import { NativeHost } from './native-host';
+import { SheetButton } from './sheet-button';
 import { typeRamp, usePalette } from '@/theme';
 
 /**
@@ -79,7 +80,7 @@ export function NameSheet({
             }}
             onSubmitEditing={submit}
           />
-          <Button label={submitLabel} variant="filled" disabled={!canSubmit} onPress={submit} />
+          <SheetButton label={submitLabel} disabled={!canSubmit} onPress={submit} />
         </Column>
       </BottomSheet>
     </NativeHost>
