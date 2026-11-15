@@ -1,12 +1,14 @@
 import { Pressable, Text, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
+import { ShapedBadge } from '@/components/shaped-badge';
 import { type Entry } from '@/data/notes-store';
 import { usePalette } from '@/theme';
 
 /**
  * The pinned messages of a note, one at a time, below the header. Tapping it jumps to
- * the message shown and moves on to the next one, as in messaging apps.
+ * the message shown and moves on to the next one, as in messaging apps. Android shows it
+ * as a rounded tonal card with an Expressive pin badge; iOS as a full-width bar.
  */
 export function PinnedBar({
   pinned,
@@ -32,7 +34,7 @@ export function PinnedBar({
       accessibilityRole="button"
       accessibilityLabel={`${label}: ${entry.body}`}
       accessibilityHint="Shows the message in the conversation"
-      className="ios:active:bg-surface-container-high ios:border-b ios:border-outline-variant min-h-14 flex-row items-center gap-3 bg-surface-container px-4 py-2"
+      className="ios:active:bg-surface-container-high ios:border-b ios:border-outline-variant android:mx-3 android:mb-1 android:overflow-hidden android:rounded-xl android:bg-surface-container-high android:pr-2 min-h-14 flex-row items-center gap-3 bg-surface-container px-4 py-2"
     >
       {/* One segment per pinned message; the one shown is filled. */}
       <View className="gap-0.5 self-stretch py-1">
@@ -49,7 +51,17 @@ export function PinnedBar({
           {entry.body}
         </Text>
       </View>
-      <Icon name={{ ios: 'pin.fill', android: 'keep' }} size={20} color="on-surface-variant" />
+      {process.env.EXPO_OS === 'android' ? (
+        <ShapedBadge shape="cookie4" size={40} color="secondary-container">
+          <Icon
+            name={{ ios: 'pin.fill', android: 'keep' }}
+            size={20}
+            color="on-secondary-container"
+          />
+        </ShapedBadge>
+      ) : (
+        <Icon name={{ ios: 'pin.fill', android: 'keep' }} size={20} color="on-surface-variant" />
+      )}
     </Pressable>
   );
 }
