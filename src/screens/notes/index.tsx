@@ -4,7 +4,7 @@ import IosShare from '@expo/material-symbols/ios_share.xml';
 import Keep from '@expo/material-symbols/keep.xml';
 import KeepOff from '@expo/material-symbols/keep_off.xml';
 import Label from '@expo/material-symbols/label.xml';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { FlatList } from 'react-native';
 
@@ -25,11 +25,15 @@ import {
   useTags,
   type Note,
 } from '@/data/notes-store';
+import { useNoteSort } from '@/data/preferences';
 
 import { NoteRow } from './note-row';
+import { NotesHeader } from './notes-header';
+import { sortNotes } from './sort-notes';
 
 export function Notes() {
   const notes = useNotes();
+  const sort = useNoteSort();
   const router = useRouter();
 
   const [isCreating, setIsCreating] = useState(false);
@@ -50,8 +54,7 @@ export function Notes() {
     router.push({ pathname: '/note/[id]', params: { id: note.id } });
   };
 
-  // Pinned notes stay on top; within each group the store's recency order holds.
-  const ordered = [...notes.filter((note) => note.pinned), ...notes.filter((note) => !note.pinned)];
+  const ordered = sortNotes(notes, sort);
 
   const actions: SheetAction[] = selected
     ? [
@@ -83,11 +86,7 @@ export function Notes() {
           />
         }
       />
-      {process.env.EXPO_OS === 'ios' && (
-        <Stack.Toolbar placement="right">
-          <Stack.Toolbar.Button icon="square.and.pencil" onPress={startNewNote} />
-        </Stack.Toolbar>
-      )}
+      <NotesHeader sort={sort} onNewNote={startNewNote} />
       <Fab label="New note" icon={Edit} onPress={startNewNote} />
       <NameSheet
         isPresented={isCreating}
