@@ -1,4 +1,3 @@
-import Check from '@expo/material-symbols/check.xml';
 import IosShare from '@expo/material-symbols/ios_share.xml';
 import { FieldGroup, Icon, ListItem } from '@expo/ui';
 import { useState } from 'react';
@@ -10,13 +9,8 @@ import { useAllEntries, useNotes, useTags } from '@/data/notes-store';
 import { usePalette } from '@/theme';
 import { allNotesFileName } from '@/utils/export-notes';
 
-type ThemeMode = 'system' | 'light' | 'dark';
-
-const THEMES: { mode: ThemeMode; label: string }[] = [
-  { mode: 'system', label: 'System default' },
-  { mode: 'light', label: 'Light' },
-  { mode: 'dark', label: 'Dark' },
-];
+import { ThemePicker } from './theme-picker';
+import { type ThemeMode } from './themes';
 
 /**
  * Settings are the platform's own grouped form (@expo/ui): Material list items on
@@ -42,19 +36,7 @@ export function Settings() {
       <NativeHost style={{ flex: 1 }}>
         <FieldGroup>
           <FieldGroup.Section title="Theme">
-            {THEMES.map(({ mode, label }) => (
-              <ListItem
-                key={mode}
-                onPress={() => applyTheme(mode)}
-                trailing={
-                  theme === mode ? (
-                    <Icon name={{ ios: 'checkmark', android: Check }} color={palette.primary} />
-                  ) : undefined
-                }
-              >
-                {label}
-              </ListItem>
-            ))}
+            <ThemePicker theme={theme} onChange={applyTheme} />
           </FieldGroup.Section>
           <FieldGroup.Section title="Data">
             <ListItem
