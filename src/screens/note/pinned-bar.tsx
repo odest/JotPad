@@ -5,6 +5,7 @@ import { ShapedBadge } from '@/components/shaped-badge';
 import { type Entry } from '@/data/notes-store';
 import { usePalette } from '@/theme';
 import { useT } from '@/i18n';
+import { stripMarkdown } from '@/utils/markdown';
 
 /**
  * The pinned messages of a note, one at a time, below the header. Tapping it jumps to
@@ -36,7 +37,7 @@ export function PinnedBar({
       onPress={() => onPress(entry)}
       android_ripple={{ color: palette['surface-container-highest'] }}
       accessibilityRole="button"
-      accessibilityLabel={`${label}: ${entry.body}`}
+      accessibilityLabel={`${label}: ${stripMarkdown(entry.body)}`}
       accessibilityHint={t.note.pinnedMessageHint}
       className="ios:active:bg-surface-container-high ios:border-b ios:border-outline-variant android:mx-3 android:mb-1 android:overflow-hidden android:rounded-xl android:bg-surface-container-high android:pr-2 min-h-14 flex-row items-center gap-3 bg-surface-container px-4 py-2"
     >
@@ -52,7 +53,7 @@ export function PinnedBar({
       <View className="flex-1">
         <Text className="text-footnote font-medium text-primary">{label}</Text>
         <Text numberOfLines={1} className="text-subhead text-on-surface">
-          {entry.body}
+          {stripMarkdown(entry.body)}
         </Text>
       </View>
       {process.env.EXPO_OS === 'android' ? (

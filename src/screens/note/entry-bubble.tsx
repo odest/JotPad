@@ -9,6 +9,8 @@ import { useLocale, useT } from '@/i18n';
 import { formatDay, formatTime } from '@/utils/format-time';
 import { longPressFeedback } from '@/utils/haptics';
 
+import { MessageBody } from './message-body';
+
 export type EntryItem = {
   entry: Entry;
   /** First entry of its calendar day: a day heading is shown above it. */
@@ -19,22 +21,6 @@ export type EntryItem = {
 };
 
 const EASE_OUT = cubicBezier(0.23, 1, 0.32, 1);
-
-/** Splits `body` around each case-insensitive occurrence of `query`. */
-function splitMatches(body: string, query: string): { text: string; match: boolean }[] {
-  const needle = query.trim().toLocaleLowerCase();
-  if (!needle) return [{ text: body, match: false }];
-  const haystack = body.toLocaleLowerCase();
-  const parts: { text: string; match: boolean }[] = [];
-  let from = 0;
-  for (let at = haystack.indexOf(needle); at !== -1; at = haystack.indexOf(needle, from)) {
-    if (at > from) parts.push({ text: body.slice(from, at), match: false });
-    parts.push({ text: body.slice(at, at + needle.length), match: true });
-    from = at + needle.length;
-  }
-  if (from < body.length) parts.push({ text: body.slice(from), match: false });
-  return parts;
-}
 
 export function EntryBubble({
   item,
@@ -50,6 +36,10 @@ export function EntryBubble({
   onLongPress: (entry: Entry) => void;
 }) {
   const t = useT();
+  const openActions = () => {
+    longPressFeedback();
+    onLongPress(entry);
+  };
   const locale = useLocale();
   const { entry, startsDay, joinsPrevious, joinsNext } = item;
   const palette = usePalette();
@@ -112,26 +102,10 @@ export function EntryBubble({
             <Pressable
               onPressIn={() => setPressed(true)}
               onPressOut={() => setPressed(false)}
-              onLongPress={() => {
-                longPressFeedback();
-                onLongPress(entry);
-              }}
+              onLongPress={openActions}
               className={`rounded-xl bg-primary-container px-4 py-2 ${corners}`}
             >
-              <Text className="text-body text-on-primary-container">
-                {splitMatches(entry.body, query).map((part, i) =>
-                  part.match ? (
-                    <Text
-                      key={i}
-                      style={{ backgroundColor: palette.primary, color: palette['on-primary'] }}
-                    >
-                      {part.text}
-                    </Text>
-                  ) : (
-                    part.text
-                  ),
-                )}
-              </Text>
+              <MessageBody body={entry.body} query={query} onLongPress={openActions} />
             </Pressable>
           </Animated.View>
         </View>

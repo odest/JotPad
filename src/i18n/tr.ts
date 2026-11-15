@@ -52,6 +52,7 @@ export const tr: Strings = {
     editingMessage: 'Mesaj düzenleniyor',
     cancelEditing: 'Düzenlemeyi iptal et',
     send: 'Gönder',
+    openLink: 'Bağlantıyı açar',
     emptyTitle: 'Burası henüz boş',
     emptyMessage: 'İlk mesajını aşağıya yaz.',
     deleteMessageTitle: 'Mesaj silinsin mi?',
