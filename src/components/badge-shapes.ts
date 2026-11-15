@@ -1,5 +1,6 @@
 /** Material 3 Expressive shapes used for badges. */
 export type BadgeShape =
+  | 'circle'
   | 'cookie4'
   | 'cookie6'
   | 'cookie9'

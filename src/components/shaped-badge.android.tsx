@@ -9,6 +9,7 @@ import { type BadgeShape } from './badge-shapes';
 import { type ShapedBadgeProps } from './shaped-badge';
 
 const MATERIAL_SHAPES = {
+  circle: Shapes.Circle,
   cookie4: Shapes.Material.Cookie4Sided,
   cookie6: Shapes.Material.Cookie6Sided,
   cookie9: Shapes.Material.Cookie9Sided,
