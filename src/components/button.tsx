@@ -21,9 +21,9 @@ export function Button({
       disabled={disabled}
       onPress={onPress}
       android_ripple={{ color: palette['on-primary'], foreground: true }}
-      className={`h-12 items-center justify-center overflow-hidden rounded-full bg-primary px-6 ios:active:opacity-70 ${disabled ? 'opacity-40' : ''}`}
+      className={`ios:active:opacity-70 h-12 items-center justify-center overflow-hidden rounded-full bg-primary px-6 ${disabled ? 'opacity-40' : ''}`}
     >
-      <Text className="text-headline font-medium text-on-primary ios:font-semibold">{title}</Text>
+      <Text className="ios:font-semibold text-headline font-medium text-on-primary">{title}</Text>
     </Pressable>
   );
 }

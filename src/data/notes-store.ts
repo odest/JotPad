@@ -81,3 +81,22 @@ export function addEntry(noteId: string, body: string): Entry {
   });
   return entry;
 }
+
+export function updateEntry(entry: Entry, body: string) {
+  const list = state.entries[entry.noteId] ?? NO_ENTRIES;
+  setState({
+    ...state,
+    entries: {
+      ...state.entries,
+      [entry.noteId]: list.map((e) => (e.id === entry.id ? { ...e, body: body.trim() } : e)),
+    },
+  });
+}
+
+export function deleteEntry(entry: Entry) {
+  const list = state.entries[entry.noteId] ?? NO_ENTRIES;
+  setState({
+    ...state,
+    entries: { ...state.entries, [entry.noteId]: list.filter((e) => e.id !== entry.id) },
+  });
+}

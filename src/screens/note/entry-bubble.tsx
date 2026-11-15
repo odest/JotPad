@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { type Entry } from '@/data/notes-store';
 import { formatDay, formatTime } from '@/utils/format-time';
@@ -12,7 +12,13 @@ export type EntryItem = {
   joinsNext: boolean;
 };
 
-export function EntryBubble({ item }: { item: EntryItem }) {
+export function EntryBubble({
+  item,
+  onLongPress,
+}: {
+  item: EntryItem;
+  onLongPress: (entry: Entry) => void;
+}) {
   const { entry, startsDay, joinsPrevious, joinsNext } = item;
 
   // Android shapes a group like Google Messages: the corners between grouped bubbles
@@ -29,11 +35,12 @@ export function EntryBubble({ item }: { item: EntryItem }) {
           {formatDay(entry.createdAt)}
         </Text>
       )}
-      <View
-        className={`max-w-[80%] self-end rounded-xl bg-primary-container px-4 py-2 ${corners}`}
+      <Pressable
+        onLongPress={() => onLongPress(entry)}
+        className={`max-w-[80%] self-end rounded-xl bg-primary-container px-4 py-2 active:opacity-80 ${corners}`}
       >
         <Text className="text-body text-on-primary-container">{entry.body}</Text>
-      </View>
+      </Pressable>
       {!joinsNext && (
         <Text className="self-end pr-1 pt-1 text-caption text-on-surface-variant">
           {formatTime(entry.createdAt)}

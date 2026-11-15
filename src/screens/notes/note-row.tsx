@@ -14,18 +14,18 @@ export function NoteRow({ note, preview }: { note: Note; preview?: string }) {
     <Link href={{ pathname: '/note/[id]', params: { id: note.id } }} asChild>
       <Pressable
         android_ripple={{ color: palette['surface-container-highest'] }}
-        className="flex-row items-center gap-4 pl-4 ios:active:bg-surface-container-high"
+        className="ios:active:bg-surface-container-high flex-row items-center gap-4 pl-4"
       >
         <View className="h-10 w-10 items-center justify-center rounded-full bg-primary-container">
           <Text className="text-headline font-medium text-on-primary-container">
             {note.title.charAt(0).toUpperCase()}
           </Text>
         </View>
-        <View className="min-h-16 flex-1 justify-center gap-0.5 border-outline-variant py-3 pr-4 ios:border-b-hairline">
+        <View className="ios:border-b-hairline min-h-16 flex-1 justify-center gap-0.5 border-outline-variant py-3 pr-4">
           <View className="flex-row items-baseline gap-2">
             <Text
               numberOfLines={1}
-              className="flex-1 text-headline text-on-surface ios:font-semibold"
+              className="ios:font-semibold flex-1 text-headline text-on-surface"
             >
               {note.title}
             </Text>

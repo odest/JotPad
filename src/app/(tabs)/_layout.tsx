@@ -34,7 +34,10 @@ export default function TabsLayout() {
     >
       <NativeTabs.Trigger name="(notes)">
         <NativeTabs.Trigger.Icon
-          sf={{ default: 'bubble.left.and.bubble.right', selected: 'bubble.left.and.bubble.right.fill' }}
+          sf={{
+            default: 'bubble.left.and.bubble.right',
+            selected: 'bubble.left.and.bubble.right.fill',
+          }}
           md="chat"
         />
         <NativeTabs.Trigger.Label>Notes</NativeTabs.Trigger.Label>

@@ -14,6 +14,7 @@
     "@expo/material-symbols": "^0.1.1",
     "@expo/ui": "~58.0.28",
     "expo": "~58.0.25",
+    "expo-clipboard": "~58.0.4",
     "expo-constants": "~58.0.16",
     "expo-font": "~58.0.12",
     "expo-glass-effect": "~58.0.5",

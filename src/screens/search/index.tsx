@@ -18,7 +18,9 @@ export function Search() {
   if (needle) {
     for (const note of notes) {
       // Newest matching entry wins as the preview line.
-      const match = entries[note.id]?.findLast((entry) => entry.body.toLowerCase().includes(needle));
+      const match = entries[note.id]?.findLast((entry) =>
+        entry.body.toLowerCase().includes(needle),
+      );
       if (match || note.title.toLowerCase().includes(needle)) {
         results.push({ note, preview: match?.body });
       }
