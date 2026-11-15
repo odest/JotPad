@@ -1,16 +1,16 @@
 import IosShare from '@expo/material-symbols/ios_share.xml';
 import { FieldGroup, Icon, ListItem } from '@expo/ui';
 import { useState } from 'react';
-import { Appearance, View } from 'react-native';
+import { View } from 'react-native';
 
 import { ExportSheet } from '@/components/export-sheet';
 import { NativeHost } from '@/components/native-host';
 import { useAllEntries, useNotes, useTags } from '@/data/notes-store';
+import { setThemeMode, useThemeMode } from '@/data/preferences';
 import { usePalette } from '@/theme';
 import { allNotesFileName } from '@/utils/export-notes';
 
 import { ThemePicker } from './theme-picker';
-import { type ThemeMode } from './themes';
 
 /**
  * Settings are the platform's own grouped form (@expo/ui): Material list items on
@@ -18,25 +18,19 @@ import { type ThemeMode } from './themes';
  */
 export function Settings() {
   const palette = usePalette();
-  const [theme, setTheme] = useState<ThemeMode>('system');
+  const theme = useThemeMode();
   const [exporting, setExporting] = useState(false);
 
   const notes = useNotes();
   const entries = useAllEntries();
   const tags = useTags();
 
-  const applyTheme = (mode: ThemeMode) => {
-    setTheme(mode);
-    // "unspecified" hands the choice back to the system setting.
-    Appearance.setColorScheme(mode === 'system' ? 'unspecified' : mode);
-  };
-
   return (
     <View style={{ flex: 1, backgroundColor: palette.surface }}>
       <NativeHost style={{ flex: 1 }}>
         <FieldGroup>
           <FieldGroup.Section title="Theme">
-            <ThemePicker theme={theme} onChange={applyTheme} />
+            <ThemePicker theme={theme} onChange={setThemeMode} />
           </FieldGroup.Section>
           <FieldGroup.Section title="Data">
             <ListItem

@@ -4,9 +4,12 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { applySavedTheme } from '@/data/preferences';
 import { useDatabase } from '@/data/use-database';
 import { useStackOptions } from '@/navigation/use-stack-options';
 import { ThemeProvider } from '@/theme';
+
+applySavedTheme();
 
 export default function RootLayout() {
   // The splash screen stays up until the first render with content.

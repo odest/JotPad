@@ -1,4 +1,6 @@
-export type ThemeMode = 'system' | 'light' | 'dark';
+import { type ThemeMode } from '@/data/preferences';
+
+export type { ThemeMode };
 
 export const THEMES: { mode: ThemeMode; label: string; short: string }[] = [
   { mode: 'system', label: 'System default', short: 'System' },
