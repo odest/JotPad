@@ -2,7 +2,7 @@ import { Pressable, TextInput, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { typeRamp, usePalette } from '@/theme';
-import { t } from '@/i18n';
+import { useT } from '@/i18n';
 
 /**
  * Always-visible search bar in the Material 3 shape. Used on Android, where the stack
@@ -17,6 +17,7 @@ export function SearchField({
   onChangeText: (text: string) => void;
   placeholder: string;
 }) {
+  const t = useT();
   const palette = usePalette();
 
   return (

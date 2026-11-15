@@ -5,12 +5,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/icon';
 import { typeRamp, usePalette } from '@/theme';
+import { useT } from '@/i18n';
 
 import { type NoteSearchBarProps } from './note-search-bar';
-import { t } from '@/i18n';
 
 /** Header options for search mode: the stack header steps aside for the search bar. */
-export function searchHeaderOptions(_props: NoteSearchBarProps): NativeStackNavigationOptions {
+export function searchHeaderOptions(
+  _props: NoteSearchBarProps,
+  _placeholder: string,
+): NativeStackNavigationOptions {
   return { headerShown: false };
 }
 
@@ -19,6 +22,7 @@ export function searchHeaderOptions(_props: NoteSearchBarProps): NativeStackNavi
  * and clear. Back, on screen or the system gesture, leaves search.
  */
 export function NoteSearchBar({ query, onChangeQuery, onClose }: NoteSearchBarProps) {
+  const t = useT();
   const palette = usePalette();
   const insets = useSafeAreaInsets();
 

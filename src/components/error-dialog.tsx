@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Alert } from 'react-native';
-import { t } from '@/i18n';
+import { useT } from '@/i18n';
 
 export type ErrorDialogProps = {
   isPresented: boolean;
@@ -16,6 +16,7 @@ export type ErrorDialogProps = {
  * alert; Android (error-dialog.android.tsx) uses a Material 3 dialog.
  */
 export function ErrorDialog({ isPresented, title, message, onRetry, onDismiss }: ErrorDialogProps) {
+  const t = useT();
   useEffect(() => {
     if (!isPresented) return;
     Alert.alert(title, message, [

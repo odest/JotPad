@@ -1,10 +1,11 @@
 import { NativeTabs } from 'expo-router/native-tabs';
 
 import { usePalette } from '@/theme';
-import { t } from '@/i18n';
+import { useT } from '@/i18n';
 
 /** The system tab bar, untouched so it keeps Liquid Glass on iOS 26. */
 export function AppTabs() {
+  const t = useT();
   const palette = usePalette();
 
   return (

@@ -14,7 +14,8 @@ The app is local-first. There is no backend and no sync.
 ## Current state
 
 - Data is stored in SQLite (`expo-sqlite`) through Drizzle. `src/data/notes-store.ts` keeps an in-memory copy so screens read synchronously: it loads once at startup, and every action writes to the database first, then updates the copy. Screens use only the store's hooks and actions, never `db` directly.
-- The UI is in English and Turkish and follows the device language (English otherwise). Every UI string, accessibility labels included, lives in `src/i18n/en.ts` and `tr.ts` and is read as `t.section.key`; strings with a number or name are functions. Never write a UI string as a literal. Format dates with the `locale` from `@/i18n`.
+- The UI is in English and Turkish. It follows the device language (English otherwise) unless a language is chosen in Settings, and a change applies at once. Every UI string, accessibility labels included, lives in `src/i18n/en.ts` and `tr.ts`; strings with a number or name are functions. Never write a UI string as a literal.
+- Components read strings with `const t = useT()` (and `useLocale()` for dates), so they re-render when the language changes. Helpers that run while rendering take the strings as a parameter (`formatDay(ts, { t, locale })`, `sortOptions(t)`); never keep strings in module-level constants. Code that runs on a tap, such as an export, may call `strings()`.
 - Only Android has been run. The iOS code paths exist but are untested.
 - There are no automated tests yet.
 
@@ -86,6 +87,7 @@ src/
 - **Do not add `react-native-keyboard-controller`.** Its `KeyboardProvider` inset the whole app below the status bar here. The conversation screen follows the keyboard with React Native's `KeyboardAvoidingView`.
 - On Android, `Stack.Toolbar.Menu` needs a native view (`DropdownMenuGroupView`) that Expo Go 58.0.5 does not include, and the screen crashes with "Can't find ViewManager". Header menus use it on iOS only; Android uses the Compose `DropdownMenu` in `headerRight` (see `src/screens/note/note-menu.android.tsx`).
 - React Native's `Alert` shows an old-style light dialog on Android. Use `ConfirmDialog`.
+- Do not remount the app tree with a `key` to apply a setting. On Android the Compose tab pager kept showing the old tree's pages; make the affected components re-render instead.
 - Focusing a text input while a sheet or menu is still closing leaves the keyboard hidden on Android, and `autoFocus` has the same problem. Focus after it has closed (see `src/screens/note/composer.tsx`); after a Compose dropdown menu, retry until `Keyboard.isVisible()` (see `src/screens/note/note-search-bar.android.tsx`).
 - Tabs differ per platform (`src/navigation/app-tabs.tsx`). iOS uses the system `NativeTabs`. Android uses a custom navigator: a Compose pager whose pages follow the finger, with a Material 3 `NavigationBar`. Expo Router's `TabRouter` only holds visited tabs, so the Android navigator adds placeholder routes for the others and preloads them, as `NativeTabs` does internally.
 

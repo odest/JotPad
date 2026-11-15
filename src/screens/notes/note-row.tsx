@@ -7,7 +7,7 @@ import { useLastEntry, useTags, type Note } from '@/data/notes-store';
 import { usePalette, useTagTone } from '@/theme';
 import { formatListStamp } from '@/utils/format-time';
 import { longPressFeedback } from '@/utils/haptics';
-import { t } from '@/i18n';
+import { useLocale, useT } from '@/i18n';
 
 /** A note in a list. `preview` replaces the last entry as the second line (search results). */
 export function NoteRow({
@@ -19,6 +19,8 @@ export function NoteRow({
   preview?: string;
   onLongPress?: (note: Note) => void;
 }) {
+  const t = useT();
+  const locale = useLocale();
   const palette = usePalette();
   const lastEntry = useLastEntry(note.id);
   const toneOf = useTagTone();
@@ -56,7 +58,7 @@ export function NoteRow({
               />
             )}
             <Text className="text-footnote text-on-surface-variant">
-              {formatListStamp(lastEntry?.createdAt ?? note.createdAt)}
+              {formatListStamp(lastEntry?.createdAt ?? note.createdAt, { t, locale })}
             </Text>
           </View>
           <Text numberOfLines={1} className="text-subhead text-on-surface-variant">

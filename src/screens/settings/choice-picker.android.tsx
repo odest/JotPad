@@ -3,25 +3,24 @@ import { fillMaxWidth, padding, weight } from '@expo/ui/jetpack-compose/modifier
 
 import { usePalette } from '@/theme';
 
-import { type ThemePickerProps } from './theme-picker';
-import { THEMES } from './themes';
+import { type ChoicePickerProps } from './choice-picker';
 
 /**
  * A Material 3 Expressive button group: the chosen button changes shape, and the
  * buttons sit close together so they read as one control.
  */
-export function ThemePicker({ theme, onChange }: ThemePickerProps) {
+export function ChoicePicker<T extends string>({ choices, value, onChange }: ChoicePickerProps<T>) {
   const palette = usePalette();
   return (
     <Row
       horizontalArrangement={{ spacedBy: 2 }}
       modifiers={[fillMaxWidth(), padding(16, 8, 16, 8)]}
     >
-      {THEMES.map(({ mode, short }) => (
+      {choices.map((choice) => (
         <ToggleButton
-          key={mode}
-          checked={theme === mode}
-          onCheckedChange={() => onChange(mode)}
+          key={choice.value}
+          checked={value === choice.value}
+          onCheckedChange={() => onChange(choice.value)}
           modifiers={[weight(1)]}
           colors={{
             containerColor: palette['surface-container-highest'],
@@ -30,7 +29,7 @@ export function ThemePicker({ theme, onChange }: ThemePickerProps) {
             checkedContentColor: palette['on-primary'],
           }}
         >
-          <Text>{short}</Text>
+          <Text>{choice.short}</Text>
         </ToggleButton>
       ))}
     </Row>

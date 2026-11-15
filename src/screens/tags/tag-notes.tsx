@@ -6,10 +6,11 @@ import { groupPosition } from '@/components/group-position';
 import { GroupedRow } from '@/components/grouped-row';
 import { useNotes, useTag } from '@/data/notes-store';
 import { NoteRow } from '@/screens/notes/note-row';
-import { t } from '@/i18n';
+import { useT } from '@/i18n';
 
 /** The notes that carry one tag. */
 export function TagNotes({ tagId }: { tagId: string }) {
+  const t = useT();
   const tag = useTag(tagId);
   const notes = useNotes().filter((note) => note.tagIds.includes(tagId));
 

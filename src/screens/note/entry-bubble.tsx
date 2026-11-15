@@ -5,6 +5,7 @@ import Animated, { cubicBezier } from 'react-native-reanimated';
 import { Icon } from '@/components/icon';
 import { type Entry } from '@/data/notes-store';
 import { usePalette } from '@/theme';
+import { useLocale, useT } from '@/i18n';
 import { formatDay, formatTime } from '@/utils/format-time';
 import { longPressFeedback } from '@/utils/haptics';
 
@@ -48,6 +49,8 @@ export function EntryBubble({
   query?: string;
   onLongPress: (entry: Entry) => void;
 }) {
+  const t = useT();
+  const locale = useLocale();
   const { entry, startsDay, joinsPrevious, joinsNext } = item;
   const palette = usePalette();
   const [pressed, setPressed] = useState(false);
@@ -65,7 +68,7 @@ export function EntryBubble({
         <View className="items-center pb-3">
           {/* Android sets the day on a tonal pill, as Material chat apps do. */}
           <Text className="android:rounded-full android:bg-surface-container-high android:px-3 android:py-1 text-center text-footnote font-medium text-on-surface-variant">
-            {formatDay(entry.createdAt)}
+            {formatDay(entry.createdAt, { t, locale })}
           </Text>
         </View>
       )}
@@ -134,7 +137,7 @@ export function EntryBubble({
         </View>
         {!joinsNext && (
           <Text className="self-end pr-1 pt-1 text-caption text-on-surface-variant">
-            {formatTime(entry.createdAt)}
+            {formatTime(entry.createdAt, locale)}
           </Text>
         )}
       </View>

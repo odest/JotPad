@@ -2,7 +2,7 @@ import { Pressable } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { usePalette } from '@/theme';
-import { t } from '@/i18n';
+import { useT } from '@/i18n';
 
 export type SendButtonProps = {
   /** Shows a check mark instead of the send icon. */
@@ -16,6 +16,7 @@ export type SendButtonProps = {
  * Expressive shape once there is something to send (send-button.android.tsx).
  */
 export function SendButton({ isEditing, enabled, onPress }: SendButtonProps) {
+  const t = useT();
   const palette = usePalette();
   return (
     <Pressable

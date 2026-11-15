@@ -4,7 +4,7 @@ import { BottomSheet, Column, Icon, ListItem, Text } from '@expo/ui';
 import { NativeHost } from './native-host';
 import { setNoteTags, useNote, useTags } from '@/data/notes-store';
 import { typeRamp, usePalette, useTagTone } from '@/theme';
-import { t } from '@/i18n';
+import { useT } from '@/i18n';
 
 /** Sheet that toggles which tags a note has. Pass the note's id to present it. */
 export function NoteTagsSheet({
@@ -14,6 +14,7 @@ export function NoteTagsSheet({
   noteId: string | null;
   onDismiss: () => void;
 }) {
+  const t = useT();
   const palette = usePalette();
   const toneOf = useTagTone();
   const tags = useTags();

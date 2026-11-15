@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 
 import { type Note } from '@/data/notes-store';
-import { t } from '@/i18n';
+import { useT } from '@/i18n';
 
 export type NoteMenuProps = {
   note: Note;
@@ -23,6 +23,7 @@ export function NoteMenu({
   onExport,
   onDelete,
 }: NoteMenuProps) {
+  const t = useT();
   return (
     <Stack.Toolbar placement="right">
       <Stack.Toolbar.Menu icon="ellipsis" accessibilityLabel={t.common.moreOptions}>

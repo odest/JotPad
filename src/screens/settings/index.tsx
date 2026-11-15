@@ -6,20 +6,23 @@ import { View } from 'react-native';
 import { ExportSheet } from '@/components/export-sheet';
 import { NativeHost } from '@/components/native-host';
 import { useAllEntries, useNotes, useTags } from '@/data/notes-store';
-import { setThemeMode, useThemeMode } from '@/data/preferences';
+import { languageSetting, setThemeMode, useThemeMode } from '@/data/preferences';
+import { setLanguage, useT } from '@/i18n';
 import { usePalette } from '@/theme';
 import { allNotesFileName } from '@/utils/export-notes';
 
-import { ThemePicker } from './theme-picker';
-import { t } from '@/i18n';
+import { ChoicePicker } from './choice-picker';
+import { languageChoices, themeChoices } from './options';
 
 /**
  * Settings are the platform's own grouped form (@expo/ui): Material list items on
  * Android, an inset grouped list on iOS.
  */
 export function Settings() {
+  const t = useT();
   const palette = usePalette();
   const theme = useThemeMode();
+  const language = languageSetting.useValue();
   const [exporting, setExporting] = useState(false);
 
   const notes = useNotes();
@@ -31,7 +34,10 @@ export function Settings() {
       <NativeHost style={{ flex: 1 }}>
         <FieldGroup>
           <FieldGroup.Section title={t.settings.theme}>
-            <ThemePicker theme={theme} onChange={setThemeMode} />
+            <ChoicePicker choices={themeChoices(t)} value={theme} onChange={setThemeMode} />
+          </FieldGroup.Section>
+          <FieldGroup.Section title={t.settings.language}>
+            <ChoicePicker choices={languageChoices(t)} value={language} onChange={setLanguage} />
           </FieldGroup.Section>
           <FieldGroup.Section title={t.settings.data}>
             <ListItem
@@ -54,7 +60,7 @@ export function Settings() {
       <ExportSheet
         isPresented={exporting}
         onDismiss={() => setExporting(false)}
-        name={allNotesFileName()}
+        name={allNotesFileName(t)}
         data={() => ({ notes, entries, tags })}
       />
     </View>

@@ -28,9 +28,10 @@ import {
 } from '@/data/notes-store';
 import { usePalette, useTagTone, type TagColor } from '@/theme';
 import { longPressFeedback } from '@/utils/haptics';
-import { t } from '@/i18n';
+import { useT } from '@/i18n';
 
 export function Tags() {
+  const t = useT();
   const palette = usePalette();
   const toneOf = useTagTone();
   const tags = useTags();

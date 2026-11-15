@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import { ActionSheetIOS } from 'react-native';
 
+import { useT } from '@/i18n';
+
 import { type ActionSheetProps } from './action-sheet';
-import { t } from '@/i18n';
 
 export function ActionSheet({ isPresented, onDismiss, actions }: ActionSheetProps) {
+  const t = useT();
   useEffect(() => {
     if (!isPresented) return;
     const destructive = actions.flatMap((action, index) => (action.destructive ? [index] : []));

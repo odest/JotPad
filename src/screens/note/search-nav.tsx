@@ -2,7 +2,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { Icon, type IconName } from '@/components/icon';
 import { usePalette } from '@/theme';
-import { t } from '@/i18n';
+import { useT } from '@/i18n';
 
 /**
  * Takes the composer's place while searching: how many messages match, and arrows that
@@ -22,6 +22,7 @@ export function SearchNav({
   onOlder: () => void;
   onNewer: () => void;
 }) {
+  const t = useT();
   const label = !query.trim()
     ? t.note.typeToSearch
     : count === 0

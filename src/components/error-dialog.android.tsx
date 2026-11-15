@@ -4,12 +4,13 @@ import { background, clip, Shapes, size } from '@expo/ui/jetpack-compose/modifie
 
 import { NativeHost } from '@/components/native-host';
 import { usePalette } from '@/theme';
+import { useT } from '@/i18n';
 
 import { type ErrorDialogProps } from './error-dialog';
-import { t } from '@/i18n';
 
 /** A Material 3 dialog led by an error icon on the same Expressive shape as delete. */
 export function ErrorDialog({ isPresented, title, message, onRetry, onDismiss }: ErrorDialogProps) {
+  const t = useT();
   const palette = usePalette();
   if (!isPresented) return null;
 

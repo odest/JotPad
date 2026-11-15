@@ -4,7 +4,7 @@ import { Icon } from '@/components/icon';
 import { ShapedBadge } from '@/components/shaped-badge';
 import { type Entry } from '@/data/notes-store';
 import { usePalette } from '@/theme';
-import { t } from '@/i18n';
+import { useT } from '@/i18n';
 
 /**
  * The pinned messages of a note, one at a time, below the header. Tapping it jumps to
@@ -21,6 +21,7 @@ export function PinnedBar({
   index: number;
   onPress: (entry: Entry) => void;
 }) {
+  const t = useT();
   const palette = usePalette();
   const entry = pinned[index];
   if (!entry) return null;

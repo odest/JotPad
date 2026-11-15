@@ -8,13 +8,14 @@ import { groupPosition } from '@/components/group-position';
 import { GroupedRow } from '@/components/grouped-row';
 import { useAllEntries, useNotes, type Note } from '@/data/notes-store';
 import { NoteRow } from '@/screens/notes/note-row';
+import { useT } from '@/i18n';
 
 import { SearchField } from './search-field';
-import { t } from '@/i18n';
 
 type Result = { note: Note; preview?: string };
 
 export function Search() {
+  const t = useT();
   const [query, setQuery] = useState('');
   const insets = useSafeAreaInsets();
   const isAndroid = process.env.EXPO_OS === 'android';
