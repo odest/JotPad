@@ -44,7 +44,7 @@ The app is developed in **Expo Go**. Start the dev server and open `exp://<compu
 ```
 src/
   app/          Expo Router routes only. Each file is a screen; keep them thin.
-    (tabs)/     Four tabs: (notes), tags, settings, search. Each tab owns a stack.
+    (tabs)/     Four tabs: (notes), search, tags, settings. Each tab owns a stack.
     note/[id]   The conversation screen, pushed above the tabs.
   screens/      Screen bodies and their private components, one folder per screen.
   components/   UI shared by more than one screen.

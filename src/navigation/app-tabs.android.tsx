@@ -160,9 +160,9 @@ export function AppTabs() {
   return (
     <Tabs>
       <Tabs.Screen name="(notes)" options={{ title: 'Notes', icon: Chat }} />
+      <Tabs.Screen name="search" options={{ title: 'Search', icon: Search }} />
       <Tabs.Screen name="tags" options={{ title: 'Tags', icon: Sell }} />
       <Tabs.Screen name="settings" options={{ title: 'Settings', icon: Settings }} />
-      <Tabs.Screen name="search" options={{ title: 'Search', icon: Search }} />
     </Tabs>
   );
 }
