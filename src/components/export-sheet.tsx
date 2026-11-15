@@ -1,17 +1,16 @@
 import DataObject from '@expo/material-symbols/data_object.xml';
 import Description from '@expo/material-symbols/description.xml';
 import Notes from '@expo/material-symbols/notes.xml';
-import { useState } from 'react';
 
-import { type ExportData, type ExportFormat, shareExport } from '@/utils/export-notes';
 import { useT } from '@/i18n';
+import { type ExportData } from '@/utils/export-notes';
 
 import { ActionSheet } from './action-sheet';
-import { ErrorDialog } from './error-dialog';
+import { useShareExport } from './use-share-export';
 
 /**
- * Asks for a file format, then hands the export to the system share sheet. Used for one
- * note (from its menu) and for every note (from Settings).
+ * Asks for a file format, then hands the export to the system share sheet. Settings
+ * shows the formats as buttons instead (see `useShareExport`).
  */
 export function ExportSheet({
   isPresented,
@@ -27,15 +26,7 @@ export function ExportSheet({
   name: string;
 }) {
   const t = useT();
-  // The format that failed, so the error dialog can try it again.
-  const [failed, setFailed] = useState<ExportFormat | null>(null);
-
-  const share = (format: ExportFormat) => {
-    shareExport(data(), format, name).catch((error: unknown) => {
-      console.warn('Export failed', error);
-      setFailed(format);
-    });
-  };
+  const { share, errorDialog } = useShareExport(data, name);
 
   return (
     <>
@@ -48,13 +39,7 @@ export function ExportSheet({
           { label: t.export.json, icon: DataObject, onPress: () => share('json') },
         ]}
       />
-      <ErrorDialog
-        isPresented={failed !== null}
-        title={t.export.failedTitle}
-        message={t.export.failedMessage}
-        onRetry={() => failed && share(failed)}
-        onDismiss={() => setFailed(null)}
-      />
+      {errorDialog}
     </>
   );
 }

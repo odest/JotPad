@@ -91,7 +91,7 @@ export const en = {
   },
   settings: {
     theme: 'Theme',
-    data: 'Data',
+    export: 'Export',
     themeSystem: 'System default',
     themeSystemShort: 'System',
     themeLight: 'Light',
@@ -99,14 +99,14 @@ export const en = {
     language: 'Language',
     languageSystem: 'System default',
     languageSystemShort: 'System',
-    exportAll: 'Export all notes',
-    exportAllHint: 'Save or send every note as Markdown, plain text or JSON.',
-    nothingToExport: 'There are no notes to export yet.',
   },
   export: {
     markdown: 'Markdown (.md)',
     text: 'Plain text (.txt)',
     json: 'JSON (.json)',
+    markdownShort: 'Markdown',
+    textShort: 'Text',
+    jsonShort: 'JSON',
     failedTitle: "Couldn't export",
     failedMessage:
       'The file could not be created or shared. Check that there is free space on the device and try again.',

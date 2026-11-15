@@ -91,7 +91,7 @@ export const tr: Strings = {
   },
   settings: {
     theme: 'Tema',
-    data: 'Veri',
+    export: 'Dışa Aktar',
     themeSystem: 'Sistem varsayılanı',
     themeSystemShort: 'Sistem',
     themeLight: 'Açık',
@@ -99,14 +99,14 @@ export const tr: Strings = {
     language: 'Dil',
     languageSystem: 'Sistem varsayılanı',
     languageSystemShort: 'Sistem',
-    exportAll: 'Tüm notları dışa aktar',
-    exportAllHint: 'Tüm notları Markdown, düz metin ya da JSON olarak kaydet veya gönder.',
-    nothingToExport: 'Henüz dışa aktarılacak not yok.',
   },
   export: {
     markdown: 'Markdown (.md)',
     text: 'Düz metin (.txt)',
     json: 'JSON (.json)',
+    markdownShort: 'Markdown',
+    textShort: 'Metin',
+    jsonShort: 'JSON',
     failedTitle: 'Dışa aktarılamadı',
     failedMessage:
       'Dosya oluşturulamadı ya da paylaşılamadı. Cihazda boş alan olduğundan emin ol ve tekrar dene.',
