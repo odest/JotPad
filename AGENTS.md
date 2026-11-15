@@ -44,11 +44,11 @@ The app is developed in **Expo Go**. Start the dev server and open `exp://<compu
 ```
 src/
   app/          Expo Router routes only. Each file is a screen; keep them thin.
-    (tabs)/     Four native tabs: (notes), tags, settings, search. Each tab owns a stack.
+    (tabs)/     Four tabs: (notes), tags, settings, search. Each tab owns a stack.
     note/[id]   The conversation screen, pushed above the tabs.
   screens/      Screen bodies and their private components, one folder per screen.
   components/   UI shared by more than one screen.
-  navigation/   Stack options and the tab swipe gesture.
+  navigation/   Stack options and the tab navigators (`app-tabs`).
   data/         The store: types, hooks and actions.
   theme/        Design tokens and the theme provider.
   utils/        Small standalone helpers.
@@ -79,7 +79,7 @@ src/
 - **Do not add `react-native-keyboard-controller`.** Its `KeyboardProvider` inset the whole app below the status bar here. The conversation screen follows the keyboard with React Native's `KeyboardAvoidingView`.
 - React Native's `Alert` shows an old-style light dialog on Android. Use `ConfirmDialog`.
 - Focusing a text input while a sheet is still closing leaves the keyboard hidden on Android. Focus after the sheet has closed (see `src/screens/note/composer.tsx`).
-- The tab bar is the system's own (`NativeTabs`). It cannot be measured, and it does not support content that tracks a swipe; the swipe gesture in `src/navigation/tab-swipe.tsx` only switches tabs when the swipe ends.
+- Tabs differ per platform (`src/navigation/app-tabs.tsx`). iOS uses the system `NativeTabs`. Android uses a custom navigator: a Compose pager whose pages follow the finger, with a Material 3 `NavigationBar`. Expo Router's `TabRouter` only holds visited tabs, so the Android navigator adds placeholder routes for the others and preloads them, as `NativeTabs` does internally.
 
 ## Expo APIs change between SDKs
 
