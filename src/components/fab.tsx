@@ -4,6 +4,8 @@ export type FabProps = {
   label: string;
   /** Material Symbols drawable. */
   icon: ImageSourcePropType;
+  /** False shows only the icon (see `useFabExpanded`). */
+  expanded?: boolean;
   onPress: () => void;
 };
 

@@ -13,6 +13,7 @@ import { ConfirmDialog } from '@/components/confirm-dialog';
 import { EmptyState } from '@/components/empty-state';
 import { ExportSheet } from '@/components/export-sheet';
 import { Fab } from '@/components/fab';
+import { useFabExpanded } from '@/components/use-fab-expanded';
 import { NameSheet } from '@/components/name-sheet';
 import { NoteTagsSheet } from '@/components/note-tags-sheet';
 import {
@@ -34,6 +35,7 @@ import { sortNotes } from './sort-notes';
 export function Notes() {
   const notes = useNotes();
   const sort = useNoteSort();
+  const fab = useFabExpanded();
   const router = useRouter();
 
   const [isCreating, setIsCreating] = useState(false);
@@ -76,6 +78,8 @@ export function Notes() {
         contentContainerClassName="grow android:pb-16"
         contentInsetAdjustmentBehavior="automatic"
         data={ordered}
+        onScroll={fab.onScroll}
+        scrollEventThrottle={16}
         keyExtractor={(note) => note.id}
         renderItem={({ item }) => <NoteRow note={item} onLongPress={setSelected} />}
         ListEmptyComponent={
@@ -87,7 +91,7 @@ export function Notes() {
         }
       />
       <NotesHeader sort={sort} onNewNote={startNewNote} />
-      <Fab label="New note" icon={Edit} onPress={startNewNote} />
+      <Fab label="New note" icon={Edit} expanded={fab.expanded} onPress={startNewNote} />
       <NameSheet
         isPresented={isCreating}
         heading="New note"

@@ -9,6 +9,7 @@ import { ActionSheet, type SheetAction } from '@/components/action-sheet';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { EmptyState } from '@/components/empty-state';
 import { Fab } from '@/components/fab';
+import { useFabExpanded } from '@/components/use-fab-expanded';
 import { Icon } from '@/components/icon';
 import { NameSheet } from '@/components/name-sheet';
 import { createTag, deleteTag, renameTag, useNotes, useTags, type Tag } from '@/data/notes-store';
@@ -28,6 +29,8 @@ export function Tags() {
   const startNewTag = () => setIsCreating(true);
   const countFor = (tag: Tag) => notes.filter((note) => note.tagIds.includes(tag.id)).length;
 
+  const fab = useFabExpanded();
+
   const actions: SheetAction[] = selected
     ? [
         { label: 'Rename', icon: Edit, onPress: () => setRenaming(selected) },
@@ -43,6 +46,8 @@ export function Tags() {
         contentContainerClassName="grow android:pb-16"
         contentInsetAdjustmentBehavior="automatic"
         data={tags}
+        onScroll={fab.onScroll}
+        scrollEventThrottle={16}
         keyExtractor={(tag) => tag.id}
         renderItem={({ item }) => {
           const count = countFor(item);
@@ -79,7 +84,7 @@ export function Tags() {
           <Stack.Toolbar.Button icon="plus" onPress={startNewTag} />
         </Stack.Toolbar>
       )}
-      <Fab label="New tag" icon={Add} onPress={startNewTag} />
+      <Fab label="New tag" icon={Add} expanded={fab.expanded} onPress={startNewTag} />
       <NameSheet
         isPresented={isCreating}
         heading="New tag"
